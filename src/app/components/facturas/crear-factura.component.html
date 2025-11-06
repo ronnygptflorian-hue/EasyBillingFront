@@ -1,0 +1,337 @@
+<app-loading [show]="loading" [fullscreen]="true" message="Cargando Configuraciones de la factura..."></app-loading>
+<div class="page-wrapper">
+  <div class="page-header">
+    <h1>{{ isNotaCredito ? 'Nueva Nota de Crédito' : 'Nueva Factura' }}</h1>
+    <p>{{ isNotaCredito ? 'Crea una nueva nota de crédito electrónica' : 'Crea una nueva factura electrónica' }}</p>
+  </div>
+
+  <main class="main-content">
+    <div class="streamlined-invoice-container">
+      <form class="streamlined-invoice-form" [formGroup]="form" (ngSubmit)="guardarFactura()">
+
+        <!-- Información Básica -->
+        <div class="quick-info-row">
+          <div class="form-group">
+            <label for="idTipoEcf">📄 Tipo de Comprobante *</label>
+            <select id="idTipoEcf" class="modern-input" formControlName="idTipoEcf" required>
+              <option [ngValue]="null" disabled>Selecciona tipo de comprobante</option>
+              <option *ngFor="let t of tiposEcf" [ngValue]="t.id">
+                {{ t.descripcion }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="fechaEmisionEcf">📅 Fecha de Emisión *</label>
+            <input type="date" id="fechaEmisionEcf" class="modern-input" required />
+          </div>
+
+          <div class="form-group">
+            <label for="referencia">🔖 Referencia</label>
+            <input type="text" id="referencia" class="modern-input" placeholder="FCT-001" />
+          </div>
+        </div>
+
+        <!-- Configuraciones Rápidas -->
+        <div class="quick-settings">
+          <div class="settings-row">
+            <div class="form-group">
+              <label for="idMoneda">💰 Moneda</label>
+              <select id="idMoneda" formControlName="idMoneda" class="modern-input">
+                <option [ngValue]="null" disabled>Selecciona tipo de Moneda</option>
+                <option *ngFor="let m of monedas" [ngValue]="m.id">
+                  {{ m.descripcion }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="idCondicionPago">💳 Condición de Pago</label>
+              <select id="idCondicionPago" formControlName="idCondicionPago" class="modern-input">
+                <option [ngValue]="null" disabled>Selecciona Condición de Pago</option>
+                <option *ngFor="let c of condicionesPago" [ngValue]="c.id">
+                  {{ c.descripcion }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="idTipoIngreso">📊 Tipo de Ingreso</label>
+              <select id="idTipoIngreso" formControlName="idTipoIngreso" class="modern-input">
+                <option [ngValue]="null" disabled>Selecciona Tipo de Ingreso</option>
+                <option *ngFor="let i of tiposIngreso" [ngValue]="i.id">
+                  {{ i.descripcion }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="quick-toggles">
+            <div class="toggle-item">
+              <label class="toggle-label">
+                <input type="checkbox" id="PrecioIncluyeImpuestos" checked />
+                <span class="toggle-slider"></span>
+                <span class="toggle-text">💰 Precios incluyen ITBIS</span>
+              </label>
+            </div>
+
+            <div class="toggle-item">
+              <label class="toggle-label">
+                <input type="checkbox" id="AplicaDescuento" [checked]="aplicaDescuento"
+                  (change)="onToggleDescuento($event)" />
+                <span class="toggle-slider"></span>
+                <span class="toggle-text">🏷️ Aplicar descuentos</span>
+              </label>
+            </div>
+
+            <div class="toggle-item">
+              <label class="toggle-label">
+                <input type="checkbox" id="tieneRetencion" [checked]="tieneRetencion"
+                  (change)="onToggleRetencion($event)" />
+                <span class="toggle-slider"></span>
+                <span class="toggle-text">📊 Tiene retención</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cliente - Búsqueda -->
+        <div class="client-quick-section">
+          <div class="client-search-container">
+            <label>👤 Cliente *</label>
+            <div class="search-with-add">
+              <div class="search-input-wrapper">
+                <input type="text" id="clientSearch" class="modern-search"
+                  placeholder="Buscar cliente por nombre, RNC o cédula..." formControlName="clientSearch"
+                  (focus)="onClientInputFocus()" (input)="onClientTyping()" (keydown.enter)="$event.preventDefault()"
+                  [readOnly]="clientLocked" autocomplete="off" required />
+
+                <div class="search-results" *ngIf="!clientLocked" [class.show]="showClientDropdown">
+                  <div class="search-result-item" *ngIf="isSearchingClient">Buscando…</div>
+                  <div class="search-result-item" *ngIf="clientError">{{ clientError }}</div>
+                  <div class="search-result-item" *ngIf="hasNoResults">Sin resultados</div>
+
+                  <div class="search-result-item" *ngFor="let c of clientResults" (click)="selectClient(c)">
+                    <h4>{{ c.razonSocial }}</h4>
+                    <p>RNC: {{ c.rnc }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <button type="button" class="btn btn-success" routerLink="/clientes">
+                <span>➕</span>
+                Nuevo
+              </button>
+            </div>
+          </div>
+
+          <div class="selected-client-info" *ngIf="form.value.selectedClient as sc">
+            <div class="client-badge">
+              <div class="client-avatar">
+                {{ sc.razonSocial.slice(0, 2) }}
+              </div>
+              <div class="client-details">
+                <h4>{{ sc.razonSocial }}</h4>
+                <span>{{ sc.rnc }}</span>
+              </div>
+              <button type="button" class="change-client-btn" (click)="changeClient()">🔄</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Productos -->
+        <div class="products-section">
+          <div class="products-header">
+            <label>📦 Productos y Servicios</label>
+
+            <div class="product-search-add">
+              <div class="search-input-wrapper">
+                <input type="text" id="productSearch" class="modern-search"
+                  placeholder="Buscar productos por descripción o código…" formControlName="productSearch"
+                  (focus)="onProductInputFocus()" (input)="onProductTyping()" (keydown.enter)="$event.preventDefault()"
+                  autocomplete="off" />
+
+                <div class="search-results" [class.show]="showProductDropdown">
+                  <div class="search-result-item" *ngIf="isSearchingProduct">Buscando…</div>
+                  <div class="search-result-item" *ngIf="productError">{{ productError }}</div>
+                  <div class="search-result-item" *ngIf="hasNoProductResults">Sin resultados</div>
+
+                  <div class="search-result-item" *ngFor="let p of productResults" (click)="selectProduct(p)"
+                    title="Agregar a la tabla">
+                    <h4>{{ p.descripcion }}</h4>
+                    <p>Código: {{ p.codigo }} • Precio: {{ p.precio | number:'1.2-2' }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <button type="button" class="btn btn-primary" (click)="focusProductSearch()">
+                <span>➕</span>
+                Agregar
+              </button>
+            </div>
+          </div>
+
+          <div class="products-table-container">
+            <table class="products-table">
+              <thead>
+                <tr>
+                  <th style="width: auto; min-width: 180px;">Producto/Servicio</th>
+                  <th style="width: 50px;">Cant.</th>
+                  <th style="width: 80px;">Precio</th>
+                  <th style="width: 70px;" *ngIf="aplicaDescuento">Desc. %</th>
+                  <th style="width: 70px;">ITBIS</th>
+                  <th style="width: 90px;" *ngIf="tieneRetencion">Tipo Ret.</th>
+                  <th style="width: 90px;" *ngIf="tieneRetencion">ITBIS ret.</th>
+                  <th style="width: 90px;" *ngIf="tieneRetencion">ISR ret.</th>
+                  <th style="width: 90px;">Total</th>
+                  <th style="width: 40px;"></th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr class="empty-products-row" *ngIf="items.length === 0">
+                  <td [attr.colspan]="visibleColumnsCount" class="empty-state">
+                    <div class="empty-icon">📦</div>
+                    <p>No hay productos agregados</p>
+                    <small>Busca y agrega productos para comenzar</small>
+                  </td>
+                </tr>
+
+                <ng-container *ngFor="let it of items; let i = index">
+                  <tr class="product-row">
+                    <td>
+                      <div class="prod-main">
+                        <div class="prod-title">{{ it.product.descripcion }}</div>
+                        <small class="muted">Código: {{ it.product.codigo }}</small>
+
+                        <button type="button" class="product-taxes-toggle" (click)="toggleTaxDropdown(i, $event)">
+                          <span>🏷️ Impuestos adicionales</span>
+                          <span class="muted-size" *ngIf="(it.additionalTaxesSelected?.size || 0) > 0">
+                            ({{ it.additionalTaxesSelected?.size || 0 }} seleccionados)
+                          </span>
+                        </button>
+                      </div>
+                    </td>
+
+                    <td>{{ it.quantity }}</td>
+                    <td>{{ it.price | number:'1.2-2' }}</td>
+
+                    <td *ngIf="aplicaDescuento">
+                      <input type="text" class="modern-input small-input" [(ngModel)]="items[i].discountStr"
+                        [ngModelOptions]="{standalone: true}" (ngModelChange)="onDiscountModelChange(i)"
+                        placeholder="0" />
+                    </td>
+
+                    <td>{{ it.itbisPct | number:'1.0-2' }}%</td>
+
+                    <td *ngIf="tieneRetencion">
+                      <select class="modern-input small-input" [(ngModel)]="items[i].tipoRetencion"
+                        [ngModelOptions]="{standalone: true}">
+                        <option [ngValue]="1">Retención</option>
+                        <option [ngValue]="2">Percepción</option>
+                      </select>
+                    </td>
+
+                    <td *ngIf="tieneRetencion">
+                      <input type="number" class="modern-input small-input" min="0" step="0.01" placeholder="0.00"
+                        [(ngModel)]="items[i].valorItbisRetencion" [ngModelOptions]="{standalone: true}"
+                        (ngModelChange)="calculateItem(i)" />
+                    </td>
+
+                    <td *ngIf="tieneRetencion">
+                      <input type="number" class="modern-input small-input" min="0" step="0.01" placeholder="0.00"
+                        [(ngModel)]="items[i].valorIsrRetencion" [ngModelOptions]="{standalone: true}"
+                        (ngModelChange)="calculateItem(i)" />
+                    </td>
+
+                    <td>{{ it.total | number:'1.2-2' }}</td>
+                    <td class="text-center">
+                      <button type="button" class="btn-link danger" (click)="removeItem(i)">✖</button>
+                    </td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Floating Tax Dropdown -->
+          <div class="tax-dropdown-overlay" *ngIf="activeTaxDropdownIndex !== null" (click)="closeTaxDropdown()">
+            <div class="tax-dropdown-panel" (click)="$event.stopPropagation()">
+              <div class="tax-dropdown-header">
+                <div class="tax-dropdown-title">
+                  Impuestos disponibles
+                  <small class="muted" style="margin-left:.5rem;">(Solo visual; no altera cálculos)</small>
+                </div>
+                <button type="button" class="taxes-close-btn" (click)="closeTaxDropdown()">✕</button>
+              </div>
+
+              <div class="tax-dropdown-content">
+                <div class="empty-note" *ngIf="additionalTaxes.length === 0">
+                  No hay impuestos adicionales configurados.
+                </div>
+
+                <label class="tax-option-card" *ngFor="let tax of additionalTaxes"
+                  [class.selected]="items[activeTaxDropdownIndex!].additionalTaxesSelected?.has(tax.id)">
+                  <input class="tax-input" type="checkbox"
+                    [checked]="items[activeTaxDropdownIndex!].additionalTaxesSelected?.has(tax.id)"
+                    (change)="onToggleTax(activeTaxDropdownIndex!, tax.id, $any($event.target).checked)" />
+                  <div class="tax-info">
+                    <span class="tax-name">{{ tax.descripcion }}</span>
+                    <span class="tax-details">{{ tax.codigo }} - {{ tax.impuestoP | number:'1.0-2' }}%</span>
+                  </div>
+                  <div class="tax-check-icon">✓</div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Totales y Comentarios -->
+        <div class="bottom-section">
+          <div class="comments-section">
+            <label for="comentario">💬 Observaciones</label>
+            <textarea formControlName="comentario" id="comentario" class="modern-textarea" rows="4"
+              placeholder="Comentarios adicionales sobre la factura..."></textarea>
+          </div>
+
+          <div class="totals-section">
+            <div class="totals-card">
+              <div class="total-row">
+                <span>Subtotal:</span>
+                <span>{{ formatCurrency(subtotal) }}</span>
+              </div>
+              <div class="total-row discount" *ngIf="aplicaDescuento">
+                <span>Descuentos:</span>
+                <span>-{{ formatCurrency(totalDescuentos) }}</span>
+              </div>
+              <div class="total-row">
+                <span>ITBIS:</span>
+                <span>{{ formatCurrency(totalItbis) }}</span>
+              </div>
+              <div class="total-row final">
+                <span>Total a Pagar:</span>
+                <span>{{ formatCurrency(montoTotal) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline btn-large" routerLink="/facturas">
+            <span>❌</span>
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-secondary btn-large">
+            <span>💾</span>
+            Guardar Borrador
+          </button>
+          <button type="submit" class="btn btn-primary btn-large">
+            <span>🚀</span>
+            Generar Factura
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>

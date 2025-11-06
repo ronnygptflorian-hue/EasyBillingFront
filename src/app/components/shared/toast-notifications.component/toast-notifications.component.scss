@@ -1,0 +1,128 @@
+.toast-container {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 400px;
+  width: 100%;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  border-left: 4px solid;
+  animation: slideInRight 0.3s ease-out;
+  min-height: 60px;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.toast-success {
+  border-left-color: #10b981;
+
+  .toast-icon {
+    background: #d1fae5;
+    color: #065f46;
+  }
+}
+
+.toast-error {
+  border-left-color: #ef4444;
+
+  .toast-icon {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+}
+
+.toast-info {
+  border-left-color: #3b82f6;
+
+  .toast-icon {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+}
+
+.toast-warning {
+  border-left-color: #f59e0b;
+
+  .toast-icon {
+    background: #fef3c7;
+    color: #92400e;
+  }
+}
+
+.toast-icon {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.toast-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.toast-message {
+  margin: 0;
+  color: var(--gray-800);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.toast-close {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border: none;
+  background: transparent;
+  color: var(--gray-400);
+  cursor: pointer;
+  border-radius: 0.375rem;
+  font-size: 1.125rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--gray-100);
+    color: var(--gray-600);
+  }
+}
+
+@media (max-width: 768px) {
+  .toast-container {
+    top: 1rem;
+    right: 1rem;
+    left: 1rem;
+    max-width: none;
+  }
+}

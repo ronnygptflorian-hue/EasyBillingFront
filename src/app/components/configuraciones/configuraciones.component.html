@@ -1,0 +1,48 @@
+<main class="main-content">
+  <header class="top-header">
+    <button class="mobile-menu-toggle" type="button" (click)="toggleMobileMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <div class="content-wrapper">
+    <div class="config-navigation">
+      <div class="config-tabs">
+        <button class="tab-button" [class.active]="activeTab==='certificado'" (click)="setTab('certificado')">
+          <span class="tab-icon">🔐</span>
+          <span class="tab-text">Certificado Digital</span>
+        </button>
+        <button class="tab-button" [class.active]="activeTab==='comprobantes'" (click)="setTab('comprobantes')">
+          <span class="tab-icon">📋</span>
+          <span class="tab-text">Comprobantes</span>
+        </button>
+        <button class="tab-button" [class.active]="activeTab==='facturacion'" (click)="setTab('facturacion')">
+          <span class="tab-icon">💰</span>
+          <span class="tab-text">Facturación</span>
+        </button>
+        <button class="tab-button" [class.active]="activeTab==='correo'" (click)="setTab('correo')">
+          <span class="tab-icon">📧</span>
+          <span class="tab-text">Correo Electrónico</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- <div class="tab-content" [class.active]="activeTab==='certificado'">
+      <app-certificate-tab></app-certificate-tab>
+    </div> -->
+
+    <div class="tab-content" [class.active]="activeTab==='comprobantes'">
+      <app-invoices-tab></app-invoices-tab>
+    </div>
+
+    <!-- <div class="tab-content" [class.active]="activeTab==='facturacion'">
+      <app-billing-tab></app-billing-tab>
+    </div> -->
+
+    <!-- <div class="tab-content" [class.active]="activeTab==='correo'">
+      <app-email-tab></app-email-tab>
+    </div>-->
+  </div>
+</main>

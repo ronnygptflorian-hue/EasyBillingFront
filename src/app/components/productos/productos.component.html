@@ -1,0 +1,262 @@
+<app-loading [show]="loading" [fullscreen]="true" message="Cargando Productos"></app-loading>
+
+<div class="page-wrapper" *ngIf="!loading">
+  <header class="page-header">
+    <div>
+      <h1>Productos y Servicios</h1>
+      <p>Gestiona tu catálogo de productos</p>
+    </div>
+    <button (click)="openModal()" class="btn btn-primary btn-new">
+      <span class="btn-icon">➕</span>
+      <span>Nuevo Producto</span>
+    </button>
+  </header>
+
+  <div class="toolbar" >
+    <div class="search-box-container">
+      <div class="search-icon">🔍</div>
+      <input type="text" class="search-input" placeholder="Buscar por código o descripción..."
+        [(ngModel)]="searchQuery" />
+    </div>
+    <div class="page-size-selector">
+        <label>Mostrar:</label>
+        <select [(ngModel)]="pageSize" (ngModelChange)="changePageSize()" class="page-size-select">
+          <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+        </select>
+        <span>por página</span>
+      </div>
+    <div class="results-count">
+      {{ totalRecords }} producto{{ totalRecords !== 1 ? 's' : '' }}
+    </div>
+  </div>
+
+  <div class="table-container" *ngIf="!loading">
+    <div class="empty-state" *ngIf="productos.length === 0">
+      <div class="empty-icon">📦</div>
+      <h3>No se encontraron productos</h3>
+      <p>{{ searchQuery ? 'Intenta con otro término de búsqueda' : 'Comienza agregando tu primer producto' }}</p>
+      <button (click)="openModal()" class="btn btn-primary" *ngIf="!searchQuery">
+        <span>➕</span>
+        Crear Primer Producto
+      </button>
+    </div>
+
+    <table class="clients-table" *ngIf="productos.length > 0">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Descripción</th>
+          <th>Tipo</th>
+          <th>Precio</th>
+          <th>Unidad</th>
+          <th>Impuesto</th>
+          <th>Estado</th>
+          <th class="text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let producto of productos" [class.blocked]="producto.bloqueado">
+          <td>
+            <span class="rnc-badge">{{ producto.codigo }}</span>
+          </td>
+          <td>
+            <div class="product-name">{{ producto.descripcion }}</div>
+          </td>
+          <td>
+            <span class="type-badge" [class.type-service]="producto.tipoProducto === 2">
+              {{ getTipoProductoLabel(producto.tipoProducto) }}
+            </span>
+          </td>
+          <td>
+            <div class="price-cell">
+              RD$ {{ producto.precio.toFixed(2) }}
+              <span class="price-note" *ngIf="producto.itbisIncluido">(Inc. ITBIS)</span>
+            </div>
+          </td>
+          <td>{{ producto.descripcionUnidad }}</td>
+          <td>
+            <span class="tax-badge">{{ producto.descripcionTipoImpuesto }}</span>
+          </td>
+          <td>
+            <span class="status-badge" [class.status-blocked]="producto.bloqueado"
+              [class.status-active]="!producto.bloqueado">
+              {{ producto.bloqueado ? 'Bloqueado' : 'Activo' }}
+            </span>
+          </td>
+          <td class="actions-cell">
+            <button (click)="openModal(producto)" class="btn-table-action edit" title="Editar">
+              ✏️
+            </button>
+            <button  class="btn-table-action delete" title="Eliminar">
+              🗑️
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="pagination-container" *ngIf="productos.length > 0">
+      <div class="pagination-info">
+        Mostrando {{ ((currentPage - 1) * pageSize) + 1 }} - {{ Math.min(currentPage * pageSize, totalRecords) }} de {{ totalRecords }}
+      </div>
+
+      <div class="pagination-controls">
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(1)"
+          title="Primera página"
+        >
+          ⏮
+        </button>
+
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)"
+          title="Página anterior"
+        >
+          ◀
+        </button>
+
+        <button
+          *ngFor="let page of getPageNumbers()"
+          class="pagination-btn"
+          [class.active]="page === currentPage"
+          (click)="goToPage(page)"
+        >
+          {{ page }}
+        </button>
+
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === totalPages"
+          (click)="goToPage(currentPage + 1)"
+          title="Página siguiente"
+        >
+          ▶
+        </button>
+
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === totalPages"
+          (click)="goToPage(totalPages)"
+          title="Última página"
+        >
+          ⏭
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Hermoso -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-beautiful" (click)="$event.stopPropagation()">
+    <div class="modal-header-beautiful">
+      <div class="modal-title-section">
+        <div class="modal-icon">📦</div>
+        <div>
+          <h2>{{ isEditing ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
+          <p>{{ isEditing ? 'Actualiza la información del producto' : 'Agrega un nuevo producto a tu catálogo' }}</p>
+        </div>
+      </div>
+      <button (click)="closeModal()" class="btn-close-beautiful">✕</button>
+    </div>
+
+    <form (ngSubmit)="saveProduct()"  class="modal-body-beautiful">
+      <div class="form-section">
+        <h3 class="section-title">Información General</h3>
+
+        <div class="form-grid-2">
+          <div class="form-group-beautiful">
+            <label>Código <span class="required">*</span></label>
+            <input type="text" class="input-beautiful" [(ngModel)]="currentProducto.codigo" name="codigo"
+              placeholder="Ej: PROD-001" required />
+          </div>
+
+          <div class="form-group-beautiful">
+            <label>Tipo de Producto <span class="required">*</span></label>
+            <select class="input-beautiful" [(ngModel)]="currentProducto.tipoProducto" name="tipoProducto" required>
+              <option *ngFor="let tipo of tiposProducto" [value]="tipo.id">
+                {{ tipo.descripcion }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group-beautiful">
+          <label>Descripción <span class="required">*</span></label>
+          <textarea class="input-beautiful" [(ngModel)]="currentProducto.descripcion" name="descripcion" rows="3"
+            placeholder="Descripción detallada del producto o servicio" required></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3 class="section-title">Precios e Impuestos</h3>
+        <div class="form-grid-2">
+          <div class="form-group-beautiful">
+            <label>Precio <span class="required">*</span></label>
+            <div class="input-with-icon">
+              <span class="input-icon">💰</span>
+              <input type="number" class="input-beautiful" [(ngModel)]="currentProducto.precio" name="precio"
+                step="0.01" placeholder="0.00" required />
+            </div>
+          </div>
+
+          <div class="form-group-beautiful">
+            <label>Unidad de Medida <span class="required">*</span></label>
+            <select class="input-beautiful" [(ngModel)]="currentProducto.idMedida" name="idMedida" required>
+              <option *ngFor="let unidad of unidadesMedida" [value]="unidad.id">
+                {{ unidad.descripcion }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group-beautiful">
+            <label>Tipo de Impuesto <span class="required">*</span></label>
+            <select class="input-beautiful" [(ngModel)]="currentProducto.idTipoImpuesto" name="idTipoImpuesto" required>
+              <option *ngFor="let impuesto of tiposImpuesto" [value]="impuesto.id">
+                {{ impuesto.descripcion }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group-beautiful checkbox-group">
+            <label class="checkbox-beautiful">
+              <input type="checkbox" [(ngModel)]="currentProducto.itbisIncluido" name="itbisIncluido" />
+              <span class="checkbox-label">ITBIS incluido en el precio</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3 class="section-title">Configuraciones Adicionales</h3>
+
+        <div class="checkbox-group-container">
+          <label class="checkbox-beautiful">
+            <input type="checkbox" [(ngModel)]="currentProducto.aplicaDescuento" name="aplicaDescuento" />
+            <span class="checkbox-label">Permite aplicar descuentos</span>
+          </label>
+
+          <label class="checkbox-beautiful">
+            <input type="checkbox" [(ngModel)]="currentProducto.bloqueado" name="bloqueado" />
+            <span class="checkbox-label">Producto bloqueado (no permitir uso)</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-footer-beautiful">
+        <button type="button" (click)="closeModal()" class="btn btn-secondary btn-large">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary btn-large">
+          <span>💾</span>
+          {{ isEditing ? 'Actualizar' : 'Guardar' }} Producto
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

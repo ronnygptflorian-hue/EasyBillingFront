@@ -1,0 +1,48 @@
+<app-toast-notifications></app-toast-notifications>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>FacturaRD</h2>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+        <span class="icon">📊</span>
+        <span>Dashboard</span>
+      </a>
+      <a routerLink="/facturas" routerLinkActive="active" class="nav-item">
+        <span class="icon">📄</span>
+        <span>Facturas</span>
+      </a>
+      <a routerLink="/facturas/crear" routerLinkActive="active" class="nav-item">
+        <span class="icon">➕</span>
+        <span>Nueva Factura</span>
+      </a>
+      <a routerLink="/clientes" routerLinkActive="active" class="nav-item">
+        <span class="icon">👥</span>
+        <span>Clientes</span>
+      </a>
+      <a routerLink="/productos" routerLinkActive="active" class="nav-item">
+        <span class="icon">📦</span>
+        <span>Productos</span>
+      </a>
+      <a routerLink="/configuraciones" routerLinkActive="active" class="nav-item">
+        <span class="icon">⚙️</span>
+        <span>Configuración</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <span class="user-email">{{ user?.email }}</span>
+      </div>
+      <button (click)="logout()" class="btn btn-secondary btn-block">
+        Cerrar Sesión
+      </button>
+    </div>
+  </aside>
+
+  <div class="main-wrapper">
+    <router-outlet></router-outlet>
+  </div>
+</div>

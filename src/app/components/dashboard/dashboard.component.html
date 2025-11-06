@@ -1,0 +1,129 @@
+<app-loading [show]="loading" [fullscreen]="true" message="Cargando Datos del Board"></app-loading>
+<div class="page-wrapper" *ngIf="!loading">
+  <header class="page-header">
+    <h1>Dashboard</h1>
+    <p>Resumen general de tu negocio</p>
+  </header>
+
+  <div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue">📊</div>
+        <div class="stat-content">
+          <h3>Total Facturas</h3>
+          <p class="stat-value">{{ dashboardInformation.totalFacturas }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon green">💰</div>
+        <div class="stat-content">
+          <h3>Ingresos del Mes</h3>
+          <p class="stat-value">{{ formatCurrency(dashboardInformation.ingresosMes) }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon orange">⏳</div>
+        <div class="stat-content">
+          <h3>Facturas Pendientes</h3>
+          <p class="stat-value">{{ dashboardInformation.facturasPendientes }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon purple">👥</div>
+        <div class="stat-content">
+          <h3>Clientes Activos</h3>
+          <p class="stat-value">{{ dashboardInformation.clientesActivos }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-actions-grid">
+      <button routerLink="/facturas/crear" class="action-card blue">
+        <span class="action-icon">➕</span>
+        <span class="action-label">Nueva Factura</span>
+      </button>
+      <button routerLink="/clientes" class="action-card green">
+        <span class="action-icon">👥</span>
+        <span class="action-label">Gestionar Clientes</span>
+      </button>
+      <button routerLink="/productos" class="action-card orange">
+        <span class="action-icon">📦</span>
+        <span class="action-label">Gestionar Productos</span>
+      </button>
+      <button routerLink="/facturas" class="action-card purple">
+        <span class="action-icon">📊</span>
+        <span class="action-label">Ver Reportes</span>
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3>Facturas Recientes</h3>
+        <a routerLink="/facturas" class="btn btn-primary btn-sm">Ver todas</a>
+      </div>
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>NCF</th>
+              <th>Cliente</th>
+              <th>Fecha</th>
+              <th>Total</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let factura of facturasRecientes">
+              <td>{{ factura.ncf }}</td>
+              <td>{{ factura.cliente?.nombre || 'N/A' }}</td>
+              <td>{{ formatDate(factura.fecha) }}</td>
+              <td>{{ formatCurrency(factura.total) }}</td>
+              <td>
+                <span [class]="'badge ' + getEstadoBadgeClass(factura.estado)">
+                  {{ factura.estado }}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="facturasRecientes.length === 0">
+              <td colspan="5" style="text-align: center; color: var(--gray-500);">
+                No hay facturas registradas
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="alerts-card card">
+      <div class="card-header">
+        <h3>Alertas y Recordatorios</h3>
+      </div>
+      <div class="alerts-list">
+        <div *ngIf="stats.facturasVencidas > 0" class="alert alert-danger">
+          <span class="alert-icon">⚠️</span>
+          <div class="alert-content">
+            <strong>Facturas Vencidas</strong>
+            <p>Tienes {{ stats.facturasVencidas }} facturas vencidas que requieren atención.</p>
+          </div>
+        </div>
+        <div *ngIf="stats.facturasPendientes > 5" class="alert alert-warning">
+          <span class="alert-icon">📋</span>
+          <div class="alert-content">
+            <strong>Facturas Pendientes</strong>
+            <p>Hay {{ stats.facturasPendientes }} facturas pendientes de pago.</p>
+          </div>
+        </div>
+        <div class="alert alert-info">
+          <span class="alert-icon">💡</span>
+          <div class="alert-content">
+            <strong>Tip del día</strong>
+            <p>Recuerda mantener actualizados los datos de tus clientes para una mejor gestión.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
