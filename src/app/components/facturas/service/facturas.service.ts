@@ -13,7 +13,7 @@ export class FacturaService extends BaseService<FacturaResponse> {
 
     }
     getById( id: number): Observable<FacturaByIdResponse> {
-        return this._http.get<FacturaByIdResponse>(`${this.baseUrl}invoice/GetInvoiceById?IdEmpresa=${this.EMPRESA?.id}&Id=${id}`);
+        return this._http.get<FacturaByIdResponse>(`${this.baseUrl}invoice/GetInvoiceById?IdEmpresa=${this.EMPRESA?.userCompanies[0].id}&Id=${id}`);
     }
 
 }

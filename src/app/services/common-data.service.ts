@@ -10,13 +10,13 @@ export class CommonService extends BaseService<CommonData> {
 
   getAllListDocument(): Observable<ApiResponse<CommonData>> {
     return this._http.get<ApiResponse<CommonData>>(
-      `${this.baseUrl}common/GetAllListDocument?idEmpresa=${this.EMPRESA?.id}`
+      `${this.baseUrl}common/GetAllListDocument?idEmpresa=${this.EMPRESA?.userCompanies[0].id}`
     );
   }
 
   getDashboardInformation(): Observable<DashboardModel> {
     return this._http.get<DashboardModel>(
-      `${this.baseUrl}Common/DashboardEasyBilling?idEmpresa=${this.EMPRESA?.id}`
+      `${this.baseUrl}Common/DashboardEasyBilling?idEmpresa=${this.EMPRESA?.userCompanies[0].id}`
     );
   }
 

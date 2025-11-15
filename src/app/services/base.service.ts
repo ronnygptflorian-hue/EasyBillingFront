@@ -19,7 +19,7 @@ export class BaseService<T> {
 
     getAll(path: string, query?: QueryParams): Observable<T[]> {
         const params = this.toParams({
-            IdEmpresa: this.EMPRESA?.id,
+            IdEmpresa: this.EMPRESA?.userCompanies[0].id,
             ...query
         });
 
@@ -34,7 +34,7 @@ export class BaseService<T> {
 
     getAllPagination(path: string, query?: QueryParams): Observable<ApiResponse<T[]>> {
         const params = this.toParams({
-            IdEmpresa: this.EMPRESA?.id,
+            IdEmpresa: this.EMPRESA?.userCompanies[0].id,
             ...query
         });
 

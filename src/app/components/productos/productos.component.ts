@@ -114,7 +114,7 @@ export class ProductosComponent implements OnInit {
       this.isEditing = false;
       this.currentProducto = {
         id: 0,
-        idEmpresa: this.productosService.EMPRESA?.id || 0,
+        idEmpresa: this.productosService.EMPRESA?.userCompanies[0].id || 0,
         descripcion: '',
         codigo: '',
         precio: 0,

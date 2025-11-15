@@ -549,7 +549,7 @@ export class CrearFacturaComponent implements OnInit {
     }));
 
     const request: FacturaRequest = {
-      idEmpresa: this.facturasService.EMPRESA?.id || 0,
+      idEmpresa: this.facturasService.EMPRESA?.userCompanies[0].id || 0,
       idCliente: selectedClient.id,
       comentario: formValue.comentario || '',
       tipoVenta: 'CO',
