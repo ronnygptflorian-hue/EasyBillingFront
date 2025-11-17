@@ -34,7 +34,7 @@ export class InvoicesTabComponent implements OnInit {
     finSecuencia: 10000,
     fechaExpiracion: '',
     bloqueado: false,
-    idEmpresa: this.configutionService.EMPRESA?.id || 0
+    idEmpresa: this.configutionService.EMPRESA?.userCompanies[0]?.id || 0
   };
 
   tiposEcf: TipoEcf[] = [];
@@ -142,7 +142,7 @@ export class InvoicesTabComponent implements OnInit {
       finSecuencia: 10000,
       fechaExpiracion: '',
       bloqueado: false,
-      idEmpresa: this.configutionService.EMPRESA?.id || 0
+      idEmpresa: this.configutionService.EMPRESA?.userCompanies[0]?.id || 0
     };
     this.showModal = true;
   }
