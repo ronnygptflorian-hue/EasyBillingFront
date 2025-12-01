@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FacturaService } from './service/facturas.service';
-import { FacturaResponse, PaginationInfo } from './model/factura-request.model';
+import { Factura, FacturaResponse, PaginationInfo } from './model/factura-request.model';
 import { LoadingComponent } from '../shared/loading.component/loading.component'
 
 
@@ -21,7 +21,7 @@ export class FacturasListComponent implements OnInit {
   searchTerm = '';
   selectedEstado = '';
   showDetailModal = false;
-  selectedFactura: FacturaResponse | null = null;
+  selectedFactura: Factura | null = null;
   Math = Math;
   notaCredito = 34;
   pagination: PaginationInfo = {
@@ -87,8 +87,18 @@ export class FacturasListComponent implements OnInit {
   }
 
   viewFactura(factura: FacturaResponse) {
-    this.selectedFactura = factura;
-    this.showDetailModal = true;
+    this.loading = true;
+    this.facturasService.getById(factura.id).subscribe({
+      next: (resp) => {
+        this.selectedFactura = resp;
+        this.showDetailModal = true;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar factura:', error);
+        this.loading = false;
+      }
+    });
   }
 
   closeDetailModal() {
@@ -152,6 +162,31 @@ export class FacturasListComponent implements OnInit {
       queryParams: {
         tipo: this.notaCredito,
         facturaOriginal: factura.id
+      }
+    });
+  }
+
+  getQrCodeUrl(qrUrl: string): string {
+    return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrUrl)}`;
+  }
+
+  onQrImageError(event: any) {
+    event.target.style.display = 'none';
+  }
+  printFactura(factura: FacturaResponse) {
+    this.facturasService.printFactura(factura.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${factura.rnc}${factura.ecf || factura.id}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        console.error('Error al imprimir factura:', error);
       }
     });
   }

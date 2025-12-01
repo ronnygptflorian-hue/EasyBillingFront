@@ -15,8 +15,9 @@
             <label for="idTipoEcf">📄 Tipo de Comprobante *</label>
             <select id="idTipoEcf" class="modern-input" formControlName="idTipoEcf" required>
               <option [ngValue]="null" disabled>Selecciona tipo de comprobante</option>
-              <option *ngFor="let t of tiposEcf" [ngValue]="t.id">
-                {{ t.descripcion }}
+              <option *ngFor="let t of tiposEcf" [ngValue]="t.idTipoEcf">
+                <!-- {{t.codigo}} - -->
+                 {{ t.descripcionTipoEcf }}
               </option>
             </select>
           </div>

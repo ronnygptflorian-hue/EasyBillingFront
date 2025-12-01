@@ -200,3 +200,88 @@ export interface FacturaByIdResponse {
   fechaEmisionEcf: string | null;
   impuestoIncluido: boolean | null;
 }
+
+export interface Factura {
+  detalles: Detalle[];
+  messages: Mensaje[];
+  id: number;
+  idEmpresa: number;
+  idNumFactura: number;
+  idCliente: number;
+  nombreCliente: string;
+  comentario: string;
+  tipoVenta: string;
+  diasCredito: number;
+  fechaVencimiento: string;
+  porcientoDescuento: number | null;
+  referencia: string;
+  idTipoEcf: number;
+  ecf: string;
+  idMoneda: number;
+  tasaCambio: number;
+  fechaAdd: string;
+  bloqueado: boolean;
+  idDocumento: number | null;
+  descripcionMoneda: string;
+  rnc: string;
+  tipoId: string;
+  direccion: string;
+  telefonos: string;
+  codigoISO: string;
+  descripcionTipoEcf: string;
+  totalGeneral: number;
+  totalItbis: number;
+  totalImpuesto: number;
+  totalDescuento: number;
+  totalRecargo: number;
+  idMotivoModificacion: number | null;
+  motivoModificacion: string | null;
+  idTipoIngreso: number | null;
+  idCondicionPago: number | null;
+  fechaEmisionEcf: string | null;
+  impuestoIncluido: number | null;
+  estadoFactura: string | null;
+  qrDgii: string;
+  codigoSeguridad: string;
+  fechaFirmaDgii: string;
+  motivoRechazo: string | null;
+}
+
+export interface Detalle {
+  id: number;
+  idEmpresa: number;
+  idFactura: number;
+  idNumFactura: number | null;
+  idProducto: number;
+  cantidad: number;
+  precio: number;
+  idTipoImpuesto: number;
+  porcientoImpuesto: number | null;
+  idImpuestoAdicional: number | null;
+  porcientoImpuestoAdic: number | null;
+  porcientoDescuento: number;
+  porcientoRecargo: number;
+  valorItbis: number;
+  porcientoRetencion: number | null;
+  valorImpuesto: number;
+  valorDescuento: number;
+  valorRecargo: number;
+  refundAmount: number | null;
+  totalDetalle: number;
+  fechaAdd: string;
+  bloqueado: boolean;
+  descripcionProducto: string;
+  descripcionMedida: string;
+  codigoUnidad: string;
+  simboloUnidad: string;
+  descripcionItbi: string;
+  descripcionImpuesto: string | null;
+}
+
+export interface Mensaje {
+  code: number;
+  msg: string;
+  stop: boolean;
+  type: string;
+}
+

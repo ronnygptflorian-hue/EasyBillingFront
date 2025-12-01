@@ -6,6 +6,7 @@ import { ApiResponse } from "../../../models/api-response.model";
 import { SecuenciaEcf } from "../model/secuencia-ecf.model";
 import { LocalStorageService } from "../../../services/storage.service";
 import { BaseService } from "../../../services/base.service";
+import { CertificateData, EmpresaCertificadoResponse } from "../model/configuration.model";
 @Injectable({ providedIn: 'root' })
 export class ConfigutionService extends BaseService<any> {
     constructor(
@@ -34,4 +35,15 @@ export class ConfigutionService extends BaseService<any> {
             }))
         );
     }
+
+    updateCertificate(formData: FormData) {
+        return this._http.put(`${this.baseUrl}company/UpdateCertificate`, formData);
+    }
+
+    getCompanyInfo() {
+        return this._http.get<EmpresaCertificadoResponse>(
+            `${this.baseUrl}company/GetCompanyByid?IdEmpresa=${this.EMPRESA?.userCompanies[0].id}`
+        );
+    }
+
 }

@@ -12,6 +12,9 @@ import { CommonService } from '../../services/common-data.service';
 import { FacturaService } from './service/facturas.service';
 import { NotificationService } from '../../services/notification.service';
 import { LoadingComponent } from '../shared/loading.component/loading.component'
+import { ConfigutionService } from '../configuraciones/service/configuracion.service';
+import { SecuenciaEcf } from '../configuraciones/model/secuencia-ecf.model';
+
 
 interface InvoiceItem extends Product {
   product: Product;
@@ -44,7 +47,7 @@ interface InvoiceItem extends Product {
 export class CrearFacturaComponent implements OnInit {
   form!: FormGroup;
 
-  tiposEcf: TipoEcf[] = [];
+  tiposEcf: SecuenciaEcf[] = [];
   monedas: Moneda[] = [];
   tiposIngreso: TipoIngreso[] = [];
   condicionesPago: CondicionPago[] = [];
@@ -86,7 +89,8 @@ export class CrearFacturaComponent implements OnInit {
     private productService: ProductService,
     private commonService: CommonService,
     private facturasService: FacturaService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private configutionService:ConfigutionService
   ) {}
 
   ngOnInit() {
@@ -113,6 +117,7 @@ export class CrearFacturaComponent implements OnInit {
     });
 
     this.loadCommonData();
+    this.loadSecuencias();
   }
 
   loadCommonData() {
@@ -120,7 +125,6 @@ export class CrearFacturaComponent implements OnInit {
     this.commonService.getAllListDocument().subscribe({
       next: (resp) => {
         this.additionalTaxes = (resp.data.tiposImpuestos || []).filter(t => t.adicional === true);
-        this.tiposEcf = resp.data.tiposEcf.filter(t => t.descripcion !== 'Todos...');
         this.monedas = resp.data.moneda;
         this.condicionesPago = resp.data.condicionesPago;
         this.tiposIngreso = resp.data.tiposIngreso;
@@ -128,7 +132,7 @@ export class CrearFacturaComponent implements OnInit {
         this.impuestosAdicionales = resp.data.tiposImpuestos || [];
 
         if (this.isNotaCredito) {
-          const tipoNotaCredito = this.tiposEcf.find(t => t.id === 34 || (t.descripcion.toLowerCase().includes('nota') && t.descripcion.toLowerCase().includes('crédito')));
+          const tipoNotaCredito = this.tiposEcf.find(t => t.id === 34 || (t.descripcionTipoEcf.toLowerCase().includes('nota') && t.descripcionTipoEcf.toLowerCase().includes('crédito')));
           if (tipoNotaCredito) {
             this.form.patchValue({ idTipoEcf: tipoNotaCredito.id });
           }
@@ -142,6 +146,24 @@ export class CrearFacturaComponent implements OnInit {
       complete: () => this.loading = false
     });
   }
+  loadSecuencias() {
+    try {
+      this.loading = true;
+      this.configutionService.getSecuencia({ pageIndex: 1, pageSize: 100 }).subscribe({
+        next: (result) => {
+          this.tiposEcf = result.data;
+          this.loading = false;
+
+        }
+      });
+
+    } catch (error) {
+      console.error('Error cargando secuencias:', error);
+    } finally {
+      this.loading = false;
+    }
+  }
+
 
   loadFacturaOriginal(id: number) {
     this.loading = true;

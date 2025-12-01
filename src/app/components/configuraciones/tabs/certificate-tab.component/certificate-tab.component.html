@@ -1,0 +1,267 @@
+<div class="certificate-container">
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-icon-wrapper">
+        <div class="header-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L4 7V12C4 16.42 7.03 20.34 11 21.44C14.97 20.34 18 16.42 18 12V7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="icon-glow"></div>
+      </div>
+      <div class="header-text">
+        <h1>Certificado Digital</h1>
+        <p>Administra el certificado digital para la firma electrónica de comprobantes fiscales</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-layout">
+    <div class="main-section">
+      <div class="content-card">
+        <div class="card-header">
+          <div class="card-title-wrapper">
+            <h2>Certificado Digital</h2>
+            <div class="card-badge" *ngIf="certificateInfo">
+              <span class="status-dot" [class.status-active]="!certificateInfo.bloqueado" [class.status-blocked]="certificateInfo.bloqueado"></span>
+              {{ certificateInfo.bloqueado ? 'Bloqueado' : 'Activo' }}
+            </div>
+          </div>
+          <p class="subtitle">Complete la información del certificado digital</p>
+        </div>
+
+        <form class="certificate-form" (ngSubmit)="onSubmit()" #certForm="ngForm">
+          <div class="form-section">
+            <div class="section-title">
+              <span class="section-icon">📋</span>
+              <h3>Información del Certificado</h3>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="entidadEmisora">
+                  <span class="label-text">Entidad Emisora</span>
+                  <span class="label-required">*</span>
+                </label>
+                <div class="input-wrapper">
+                  <span class="input-icon">🏢</span>
+                  <input
+                    type="text"
+                    id="entidadEmisora"
+                    name="entidadEmisora"
+                    [(ngModel)]="certificateData.entidadEmisora"
+                    class="form-input"
+                    placeholder="Ej: Digifirma"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="alias">
+                  <span class="label-text">Alias</span>
+                  <span class="label-required">*</span>
+                </label>
+                <div class="input-wrapper">
+                  <span class="input-icon">🏷️</span>
+                  <input
+                    type="text"
+                    id="alias"
+                    name="alias"
+                    [(ngModel)]="certificateData.alias"
+                    class="form-input"
+                    placeholder="Alias del certificado"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="fechaEfectiva">
+                  <span class="label-text">Fecha Efectiva</span>
+                  <span class="label-required">*</span>
+                </label>
+                <div class="input-wrapper">
+                  <span class="input-icon">📅</span>
+                  <input
+                    type="date"
+                    id="fechaEfectiva"
+                    name="fechaEfectiva"
+                    [(ngModel)]="certificateData.fechaEfectiva"
+                    class="form-input"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="fechaExpira">
+                  <span class="label-text">Fecha de Expiración</span>
+                  <span class="label-required">*</span>
+                </label>
+                <div class="input-wrapper">
+                  <span class="input-icon">⏰</span>
+                  <input
+                    type="date"
+                    id="fechaExpira"
+                    name="fechaExpira"
+                    [(ngModel)]="certificateData.fechaExpira"
+                    class="form-input"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group full-width">
+                <label for="credenciales">
+                  <span class="label-text">Contraseña del Certificado</span>
+                  <span class="label-required">*</span>
+                </label>
+                <div class="input-wrapper">
+                  <span class="input-icon">🔒</span>
+                  <input
+                    type="password"
+                    id="credenciales"
+                    name="credenciales"
+                    [(ngModel)]="certificateData.credenciales"
+                    class="form-input"
+                    placeholder="Contraseña del certificado"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-title">
+              <span class="section-icon">📁</span>
+              <h3>Archivo del Certificado</h3>
+            </div>
+
+            <div class="form-group full-width">
+              <div class="file-upload-area" [class.has-file]="selectedFile" (click)="fileInput.click()">
+                <input
+                  type="file"
+                  id="certificado"
+                  name="certificado"
+                  (change)="onFileSelected($event)"
+                  accept=".p12,.pfx"
+                  class="file-input"
+                  #fileInput
+                />
+                <div class="upload-content" *ngIf="!selectedFile">
+                  <div class="upload-icon-wrapper">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upload-icon">
+                      <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M17 8L12 3L7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M12 3V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div class="upload-text">
+                    <strong>Haz clic para seleccionar</strong>
+                    <span>o arrastra y suelta el archivo aquí</span>
+                  </div>
+                  <div class="upload-hint">Formatos soportados: .p12, .pfx (Máx. 10MB)</div>
+                </div>
+                <div class="file-selected" *ngIf="selectedFile">
+                  <div class="file-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"/>
+                    </svg>
+                  </div>
+                  <div class="file-info">
+                    <strong>{{ selectedFile.name }}</strong>
+                    <span>{{ (selectedFile.size / 1024).toFixed(2) }} KB</span>
+                  </div>
+                  <button type="button" class="remove-file" (click)="removeFile($event)" title="Remover archivo">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group full-width checkbox-group">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="default"
+                  [(ngModel)]="certificateData.default"
+                  class="checkbox-input"
+                />
+                <span class="checkbox-custom"></span>
+                <span class="checkbox-text">Usar como certificado predeterminado</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="onCancel()">
+              <span>Cancelar</span>
+            </button>
+            <button
+              type="submit"
+              class="btn-primary"
+              [disabled]="!certForm.valid || !selectedFile || loading"
+            >
+              <span *ngIf="!loading" class="btn-content">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="btn-icon">
+                  <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M17 21V13H7V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M7 3V8H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Guardar Certificado
+              </span>
+              <span *ngIf="loading" class="btn-content">
+                <span class="spinner"></span>
+                Guardando...
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="info-card company-info" *ngIf="empresaInfo">
+        <div class="card-header-small">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="card-icon">
+            <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h3>Información de la Empresa</h3>
+        </div>
+
+        <div class="company-details">
+          <div class="detail-row">
+            <label>RNC</label>
+            <span class="highlight">{{ empresaInfo.rnc }}</span>
+          </div>
+          <div class="detail-row">
+            <label>Razón Social</label>
+            <span>{{ empresaInfo.razonSocial }}</span>
+          </div>
+          <div class="detail-row">
+            <label>Nombre Comercial</label>
+            <span>{{ empresaInfo.nombreComercial }}</span>
+          </div>
+          <div class="detail-row">
+            <label>Email</label>
+            <span>{{ empresaInfo.email }}</span>
+          </div>
+          <div class="detail-row">
+            <label>Dirección</label>
+            <span>{{ empresaInfo.direccion }}</span>
+          </div>
+          <div class="detail-row">
+            <label>Ciudad</label>
+            <span>{{ empresaInfo.ciudad }}, {{ empresaInfo.provincia }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

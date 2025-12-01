@@ -50,6 +50,7 @@
             </td>
             <td class="actions">
               <button (click)="viewFactura(factura)" class="btn-icon btn-view" title="Ver detalles">👁️</button>
+              <button (click)="printFactura(factura)" class="btn-icon btn-print" title="Imprimir Factura">🖨️</button>
               <button (click)="crearNotaCredito(factura)" class="btn-icon btn-credit" title="Crear Nota de Crédito">📝</button>
             </td>
           </tr>
@@ -169,6 +170,39 @@
           </div>
         </div>
 
+        <div class="detail-section" *ngIf="selectedFactura.detalles && selectedFactura.detalles.length > 0">
+          <h3>Productos / Servicios</h3>
+          <div class="products-table-wrapper">
+            <table class="products-detail-table">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cant.</th>
+                  <th>Precio</th>
+                  <th>Desc.</th>
+                  <th>ITBIS</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let detalle of selectedFactura.detalles">
+                  <td>
+                    <div class="product-info">
+                      <div class="product-name">{{ detalle.descripcionProducto }}</div>
+                      <div class="product-meta">{{ detalle.descripcionMedida }} - {{ detalle.descripcionItbi }}</div>
+                    </div>
+                  </td>
+                  <td class="text-center">{{ detalle.cantidad }}</td>
+                  <td class="text-right">{{ formatCurrency(detalle.precio) }}</td>
+                  <td class="text-right">{{ formatCurrency(detalle.valorDescuento) }}</td>
+                  <td class="text-right">{{ formatCurrency(detalle.valorItbis) }}</td>
+                  <td class="text-right font-bold">{{ formatCurrency(detalle.totalDetalle) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div class="detail-section">
           <h3>Totales</h3>
           <div class="totals-grid">
@@ -191,6 +225,33 @@
             <div class="total-item total-final">
               <label>Total General:</label>
               <span>{{ formatCurrency(selectedFactura.totalGeneral) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section" *ngIf="selectedFactura.qrDgii">
+          <h3>Información DGII</h3>
+          <div class="dgii-info-container">
+            <div class="qr-code-container">
+              <div class="qr-code-wrapper">
+                <img [src]="getQrCodeUrl(selectedFactura.qrDgii)"
+                     alt="Código QR DGII"
+                     class="qr-code-image"
+                     (error)="onQrImageError($event)" />
+                <p class="qr-instruction">Escanea para verificar</p>
+                <div class="qr-details">
+                  <div class="qr-detail-item">
+                    <span class="qr-detail-label">Código de Seguridad: <span class="qr-detail-value">{{ selectedFactura.codigoSeguridad || 'N/A' }}</span></span>
+                    
+                  </div>
+                  <div class="qr-detail-item">
+                    <span class="qr-detail-label">Fecha Firma: <span class="qr-detail-value">{{ selectedFactura.fechaFirmaDgii || 'N/A' }}</span></span>
+                  </div>
+                </div>
+              </div>
+              <a [href]="selectedFactura.qrDgii" target="_blank" class="qr-link-button">
+                🔗 Ver Comprobante en DGII
+              </a>
             </div>
           </div>
         </div>
