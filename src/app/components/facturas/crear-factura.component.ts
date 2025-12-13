@@ -40,7 +40,7 @@ interface InvoiceItem extends Product {
 @Component({
   selector: 'app-crear-factura',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule,LoadingComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, LoadingComponent],
   templateUrl: './crear-factura.component.html',
   styleUrls: ['./crear-factura.component.scss']
 })
@@ -69,6 +69,7 @@ export class CrearFacturaComponent implements OnInit {
   showProductDropdown = false;
   isSearchingProduct = false;
   productError = '';
+  fechaEmisionEcf: string = new Date().toLocaleDateString('en-CA');
 
   items: InvoiceItem[] = [];
   loading = false;
@@ -90,8 +91,8 @@ export class CrearFacturaComponent implements OnInit {
     private commonService: CommonService,
     private facturasService: FacturaService,
     private notificationService: NotificationService,
-    private configutionService:ConfigutionService
-  ) {}
+    private configutionService: ConfigutionService
+  ) { }
 
   ngOnInit() {
     this.form = this.fb.group({
@@ -253,14 +254,14 @@ export class CrearFacturaComponent implements OnInit {
 
   get hasNoResults(): boolean {
     return !this.isSearchingClient && !this.clientError &&
-           this.clientResults.length === 0 &&
-           this.form.value.clientSearch?.length >= 2;
+      this.clientResults.length === 0 &&
+      this.form.value.clientSearch?.length >= 2;
   }
 
   get hasNoProductResults(): boolean {
     return !this.isSearchingProduct && !this.productError &&
-           this.productResults.length === 0 &&
-           this.form.value.productSearch?.length >= 2;
+      this.productResults.length === 0 &&
+      this.form.value.productSearch?.length >= 2;
   }
 
   get visibleColumnsCount(): number {

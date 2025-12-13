@@ -2,7 +2,7 @@
 <div class="page-wrapper">
   <div class="page-header">
     <h1>{{ isNotaCredito ? 'Nueva Nota de Crédito' : 'Nueva Factura' }}</h1>
-    <p>{{ isNotaCredito ? 'Crea una nueva nota de crédito electrónica' : 'Crea una nueva factura electrónica' }}</p>
+    <!-- <p>{{ isNotaCredito ? 'Crea una nueva nota de crédito electrónica' : 'Crea una nueva factura electrónica' }}</p> -->
   </div>
 
   <main class="main-content">
@@ -17,14 +17,14 @@
               <option [ngValue]="null" disabled>Selecciona tipo de comprobante</option>
               <option *ngFor="let t of tiposEcf" [ngValue]="t.idTipoEcf">
                 <!-- {{t.codigo}} - -->
-                 {{ t.descripcionTipoEcf }}
+                {{ t.descripcionTipoEcf }}
               </option>
             </select>
           </div>
 
           <div class="form-group">
             <label for="fechaEmisionEcf">📅 Fecha de Emisión *</label>
-            <input type="date" id="fechaEmisionEcf" class="modern-input" required />
+            <input value="{{fechaEmisionEcf}}" type="date" id="fechaEmisionEcf" class="modern-input" required />
           </div>
 
           <div class="form-group">

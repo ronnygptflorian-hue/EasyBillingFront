@@ -7,13 +7,8 @@
 
   <div class="filters-bar">
     <div class="search-box">
-      <input
-        type="text"
-        [(ngModel)]="searchTerm"
-        (input)="filterFacturas()"
-        placeholder="Buscar por NCF o cliente..."
-        class="search-input"
-      />
+      <input type="text" [(ngModel)]="searchTerm" (input)="filterFacturas()" placeholder="Buscar por NCF o cliente..."
+        class="search-input" />
     </div>
     <select [(ngModel)]="selectedEstado" (change)="filterFacturas()" class="filter-select">
       <option value="">Todos los tipos</option>
@@ -32,7 +27,9 @@
             <th>Fecha</th>
             <th>ITBIS</th>
             <th>Total</th>
+            <th>Estado</th>
             <th>Tipo</th>
+
             <th>Acciones</th>
           </tr>
         </thead>
@@ -51,7 +48,8 @@
             <td class="actions">
               <button (click)="viewFactura(factura)" class="btn-icon btn-view" title="Ver detalles">👁️</button>
               <button (click)="printFactura(factura)" class="btn-icon btn-print" title="Imprimir Factura">🖨️</button>
-              <button (click)="crearNotaCredito(factura)" class="btn-icon btn-credit" title="Crear Nota de Crédito">📝</button>
+              <button (click)="crearNotaCredito(factura)" class="btn-icon btn-credit"
+                title="Crear Nota de Crédito">📝</button>
             </td>
           </tr>
         </tbody>
@@ -79,25 +77,16 @@
       de {{ pagination.totalCount }} facturas
     </div>
     <div class="pagination-controls">
-      <button
-        (click)="previousPage()"
-        [disabled]="!pagination.hasPreviousPage"
-        class="btn-pagination">
+      <button (click)="previousPage()" [disabled]="!pagination.hasPreviousPage" class="btn-pagination">
         ← Anterior
       </button>
 
-      <button
-        *ngFor="let page of pages"
-        (click)="goToPage(page)"
-        [class.active]="page === pagination.pageNumber"
+      <button *ngFor="let page of pages" (click)="goToPage(page)" [class.active]="page === pagination.pageNumber"
         class="btn-page">
         {{ page }}
       </button>
 
-      <button
-        (click)="nextPage()"
-        [disabled]="!pagination.hasNextPage"
-        class="btn-pagination">
+      <button (click)="nextPage()" [disabled]="!pagination.hasNextPage" class="btn-pagination">
         Siguiente →
       </button>
     </div>
@@ -234,18 +223,18 @@
           <div class="dgii-info-container">
             <div class="qr-code-container">
               <div class="qr-code-wrapper">
-                <img [src]="getQrCodeUrl(selectedFactura.qrDgii)"
-                     alt="Código QR DGII"
-                     class="qr-code-image"
-                     (error)="onQrImageError($event)" />
+                <img [src]="getQrCodeUrl(selectedFactura.qrDgii)" alt="Código QR DGII" class="qr-code-image"
+                  (error)="onQrImageError($event)" />
                 <p class="qr-instruction">Escanea para verificar</p>
                 <div class="qr-details">
                   <div class="qr-detail-item">
-                    <span class="qr-detail-label">Código de Seguridad: <span class="qr-detail-value">{{ selectedFactura.codigoSeguridad || 'N/A' }}</span></span>
-                    
+                    <span class="qr-detail-label">Código de Seguridad: <span class="qr-detail-value">{{
+                        selectedFactura.codigoSeguridad || 'N/A' }}</span></span>
+
                   </div>
                   <div class="qr-detail-item">
-                    <span class="qr-detail-label">Fecha Firma: <span class="qr-detail-value">{{ selectedFactura.fechaFirmaDgii || 'N/A' }}</span></span>
+                    <span class="qr-detail-label">Fecha Firma: <span class="qr-detail-value">{{
+                        selectedFactura.fechaFirmaDgii || 'N/A' }}</span></span>
                   </div>
                 </div>
               </div>

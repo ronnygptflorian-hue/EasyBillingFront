@@ -1,4 +1,4 @@
 export const enviroment = {
     production: false,
-    apiBaseUrl: 'https://dev-fe.histratos.net/backoffice/api/v1/',
+    apiBaseUrl: 'http://localhost:5260/api/v1/',
 }
