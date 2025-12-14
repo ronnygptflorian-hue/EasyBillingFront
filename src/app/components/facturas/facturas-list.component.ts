@@ -4,7 +4,9 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FacturaService } from './service/facturas.service';
 import { Factura, FacturaResponse, PaginationInfo } from './model/factura-request.model';
-import { LoadingComponent } from '../shared/loading.component/loading.component'
+import { LoadingComponent } from '../shared/loading.component/loading.component';
+import { CustomerService } from '../clientes/service/customer.service';
+import { Customer } from '../clientes/model/customer.model';
 
 
 @Component({
@@ -30,6 +32,9 @@ export class FacturasListComponent implements OnInit {
   showAdvancedFilters = false;
   Math = Math;
   notaCredito = 34;
+  showClienteDropdown = false;
+  clienteSuggestions: Customer[] = [];
+  selectedCliente: Customer | null = null;
   pagination: PaginationInfo = {
     totalCount: 0,
     pageNumber: 1,
@@ -41,7 +46,8 @@ export class FacturasListComponent implements OnInit {
 
   constructor(
     private facturasService: FacturaService,
-    private router: Router
+    private router: Router,
+    private customerService: CustomerService
   ) {}
 
   async ngOnInit() {
@@ -132,6 +138,52 @@ export class FacturasListComponent implements OnInit {
 
   toggleAdvancedFilters() {
     this.showAdvancedFilters = !this.showAdvancedFilters;
+  }
+
+  onClienteSearch(event: any) {
+    const searchValue = event.target.value;
+    if (searchValue.length >= 2) {
+      this.loadClienteSuggestions(searchValue);
+    } else if (searchValue.length === 0) {
+      this.loadClienteSuggestions('');
+    } else {
+      this.clienteSuggestions = [];
+      this.showClienteDropdown = false;
+    }
+  }
+
+  onClienteFocus() {
+    if (this.searchTerm.length === 0) {
+      this.loadClienteSuggestions('');
+    } else if (this.searchTerm.length >= 2) {
+      this.loadClienteSuggestions(this.searchTerm);
+    }
+  }
+
+  onClienteBlur() {
+    setTimeout(() => {
+      this.showClienteDropdown = false;
+    }, 200);
+  }
+
+  loadClienteSuggestions(search: string) {
+    const filters = search ? { Nombre: search } : {};
+    this.customerService.getClientes(1, 3, filters).subscribe({
+      next: (response) => {
+        this.clienteSuggestions = response.data;
+        this.showClienteDropdown = this.clienteSuggestions.length > 0;
+      },
+      error: (error) => {
+        console.error('Error al cargar clientes:', error);
+        this.clienteSuggestions = [];
+      }
+    });
+  }
+
+  selectCliente(cliente: Customer) {
+    this.searchTerm = cliente.razonSocial;
+    this.selectedCliente = cliente;
+    this.showClienteDropdown = false;
   }
 
   viewFactura(factura: FacturaResponse) {

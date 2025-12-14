@@ -23,8 +23,23 @@
 
         <div class="filter-group">
           <label class="filter-label">Cliente</label>
-          <input type="text" [(ngModel)]="searchTerm" placeholder="Nombre del cliente..."
-            class="filter-input" />
+          <div class="autocomplete-wrapper">
+            <input type="text" [(ngModel)]="searchTerm"
+              (input)="onClienteSearch($event)"
+              (focus)="onClienteFocus()"
+              (blur)="onClienteBlur()"
+              placeholder="Buscar cliente..."
+              class="filter-input"
+              autocomplete="off" />
+            <div class="autocomplete-dropdown" *ngIf="showClienteDropdown && clienteSuggestions.length > 0">
+              <div *ngFor="let cliente of clienteSuggestions"
+                class="autocomplete-item"
+                (mousedown)="selectCliente(cliente)">
+                <div class="cliente-name">{{ cliente.razonSocial }}</div>
+                <div class="cliente-rnc">{{ cliente.rnc }}</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="filter-group">
