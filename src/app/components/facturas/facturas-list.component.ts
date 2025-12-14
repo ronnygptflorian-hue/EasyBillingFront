@@ -69,10 +69,10 @@ export class FacturasListComponent implements OnInit {
         params.IdCliente = parseInt(this.filtroIdCliente);
       }
       if (this.filtroFechaDesde) {
-        params.FechaDesde = this.filtroFechaDesde;
+        params.FechaDesde = this.convertYYYYMMDDtoDDMMYYYY(this.filtroFechaDesde);
       }
       if (this.filtroFechaHasta) {
-        params.FechaHasta = this.filtroFechaHasta;
+        params.FechaHasta = this.convertYYYYMMDDtoDDMMYYYY(this.filtroFechaHasta);
       }
 
       this.facturasService.getAllPagination('invoice/GetInvoice', params).subscribe({
@@ -234,6 +234,11 @@ export class FacturasListComponent implements OnInit {
       pages.push(i);
     }
     return pages;
+  }
+
+  convertYYYYMMDDtoDDMMYYYY(fecha: string): string {
+    const [year, month, day] = fecha.split('-');
+    return `${day}/${month}/${year}`;
   }
 
   formatCurrency(value: number): string {
