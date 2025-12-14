@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConfigutionService } from '../../service/configuracion.service';
 import { Certificado, EmpresaCertificadoResponse } from '../../model/configuration.model';
+import { CustomDatepickerComponent } from '../../../shared/custom-datepicker/custom-datepicker.component';
 
 interface CertificateData {
   idEmpresa: number;
@@ -22,7 +23,7 @@ interface CertificateData {
 @Component({
   selector: 'app-certificate-tab',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CustomDatepickerComponent],
   templateUrl: './certificate-tab.component.html',
   styleUrls: ['./certificate-tab.component.scss']
 })

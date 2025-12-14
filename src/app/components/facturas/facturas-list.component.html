@@ -68,12 +68,12 @@
 
           <div class="filter-group">
             <label class="filter-label">Fecha Desde</label>
-            <input type="date" [(ngModel)]="filtroFechaDesde" class="filter-input" />
+            <app-custom-datepicker [(ngModel)]="filtroFechaDesde" placeholder="Seleccionar fecha"></app-custom-datepicker>
           </div>
 
           <div class="filter-group">
             <label class="filter-label">Fecha Hasta</label>
-            <input type="date" [(ngModel)]="filtroFechaHasta" class="filter-input" />
+            <app-custom-datepicker [(ngModel)]="filtroFechaHasta" placeholder="Seleccionar fecha"></app-custom-datepicker>
           </div>
         </div>
       </div>

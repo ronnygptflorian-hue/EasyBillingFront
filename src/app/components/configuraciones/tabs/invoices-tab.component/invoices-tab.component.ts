@@ -5,12 +5,13 @@ import { ConfigutionService } from '../../service/configuracion.service';
 import { SecuenciaEcf } from '../../model/secuencia-ecf.model';
 import { TipoEcf } from '../../../../models/common-data.model'
 import { NotificationService } from '../../../../services/notification.service';
+import { CustomDatepickerComponent } from '../../../shared/custom-datepicker/custom-datepicker.component';
 
 
 @Component({
   selector: 'app-invoices-tab',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CustomDatepickerComponent],
   templateUrl: './invoices-tab.component.html',
   styleUrls: ['./invoices-tab.component.scss']
 })
