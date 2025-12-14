@@ -9,6 +9,7 @@ import { ProductosComponent } from './components/productos/productos.component';
 import { FacturasListComponent } from './components/facturas/facturas-list.component';
 import { CrearFacturaComponent } from './components/facturas/crear-factura.component';
 import { ConfiguracionesComponent } from './components/configuraciones/configuraciones.component';
+import { FacturasRecibidasComponent } from './components/facturas-recibidas/facturas-recibidas.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -24,7 +25,8 @@ export const routes: Routes = [
       { path: 'productos', component: ProductosComponent },
       { path: 'facturas', component: FacturasListComponent },
       { path: 'facturas/crear', component: CrearFacturaComponent },
-      { path: 'configuraciones', component: ConfiguracionesComponent }
+      { path: 'facturasRecibidas', component: FacturasRecibidasComponent },
+      { path: 'configuraciones', component: ConfiguracionesComponent },
     ]
   },
   { path: '**', redirectTo: '/dashboard' }
