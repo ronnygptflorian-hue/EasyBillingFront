@@ -10,11 +10,20 @@
       <input type="text" [(ngModel)]="searchTerm" (input)="filterFacturas()" placeholder="Buscar por NCF o cliente..."
         class="search-input" />
     </div>
+    <input type="number" [(ngModel)]="filtroId" (input)="filterFacturas()" placeholder="ID Factura"
+      class="filter-input" />
+    <input type="number" [(ngModel)]="filtroIdCliente" (input)="filterFacturas()" placeholder="ID Cliente"
+      class="filter-input" />
+    <input type="date" [(ngModel)]="filtroFechaDesde" (change)="filterFacturas()" placeholder="Fecha Desde"
+      class="filter-input" />
+    <input type="date" [(ngModel)]="filtroFechaHasta" (change)="filterFacturas()" placeholder="Fecha Hasta"
+      class="filter-input" />
     <select [(ngModel)]="selectedEstado" (change)="filterFacturas()" class="filter-select">
       <option value="">Todos los tipos</option>
       <option value="CO">Contado</option>
       <option value="CR">Crédito</option>
     </select>
+    <button (click)="limpiarFiltros()" class="btn-clear-filters" title="Limpiar filtros">Limpiar</button>
   </div>
 
   <div class="content-card" *ngIf="!loading">
@@ -45,6 +54,7 @@
                 {{ getEstadoLabel(factura.tipoVenta) }}
               </span>
             </td>
+            <td>{{ factura.descripcionTipoEcf || 'N/A' }}</td>
             <td class="actions">
               <button (click)="viewFactura(factura)" class="btn-icon btn-view" title="Ver detalles">👁️</button>
               <button (click)="printFactura(factura)" class="btn-icon btn-print" title="Imprimir Factura">🖨️</button>

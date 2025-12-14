@@ -20,6 +20,10 @@ export class FacturasListComponent implements OnInit {
   loading = true;
   searchTerm = '';
   selectedEstado = '';
+  filtroId = '';
+  filtroIdCliente = '';
+  filtroFechaDesde = '';
+  filtroFechaHasta = '';
   showDetailModal = false;
   selectedFactura: Factura | null = null;
   Math = Math;
@@ -83,7 +87,48 @@ export class FacturasListComponent implements OnInit {
       filtered = filtered.filter(f => f.tipoVenta === this.selectedEstado);
     }
 
+    if (this.filtroId) {
+      const id = parseInt(this.filtroId);
+      if (!isNaN(id)) {
+        filtered = filtered.filter(f => f.id === id);
+      }
+    }
+
+    if (this.filtroIdCliente) {
+      const idCliente = parseInt(this.filtroIdCliente);
+      if (!isNaN(idCliente)) {
+        filtered = filtered.filter(f => f.idCliente === idCliente);
+      }
+    }
+
+    if (this.filtroFechaDesde) {
+      const fechaDesde = new Date(this.filtroFechaDesde);
+      filtered = filtered.filter(f => {
+        const fechaFactura = new Date(f.fechaAdd);
+        return fechaFactura >= fechaDesde;
+      });
+    }
+
+    if (this.filtroFechaHasta) {
+      const fechaHasta = new Date(this.filtroFechaHasta);
+      fechaHasta.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(f => {
+        const fechaFactura = new Date(f.fechaAdd);
+        return fechaFactura <= fechaHasta;
+      });
+    }
+
     this.filteredFacturas = filtered;
+  }
+
+  limpiarFiltros() {
+    this.searchTerm = '';
+    this.selectedEstado = '';
+    this.filtroId = '';
+    this.filtroIdCliente = '';
+    this.filtroFechaDesde = '';
+    this.filtroFechaHasta = '';
+    this.filteredFacturas = [...this.facturas];
   }
 
   viewFactura(factura: FacturaResponse) {
