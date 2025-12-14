@@ -27,6 +27,7 @@ export class FacturasListComponent implements OnInit {
   showDetailModal = false;
   selectedFactura: Factura | null = null;
   showFilters = true;
+  showAdvancedFilters = false;
   Math = Math;
   notaCredito = 34;
   pagination: PaginationInfo = {
@@ -124,6 +125,10 @@ export class FacturasListComponent implements OnInit {
 
   toggleFilters() {
     this.showFilters = !this.showFilters;
+  }
+
+  toggleAdvancedFilters() {
+    this.showAdvancedFilters = !this.showAdvancedFilters;
   }
 
   viewFactura(factura: FacturaResponse) {
