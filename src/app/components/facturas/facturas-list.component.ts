@@ -147,8 +147,6 @@ export class FacturasListComponent implements OnInit {
     } else if (searchValue.length === 0) {
       this.selectedCliente = null;
       this.filtroIdCliente = '';
-      this.pagination.pageNumber = 1;
-      this.loadFacturas();
       this.loadClienteSuggestions('');
     } else {
       this.clienteSuggestions = [];
@@ -189,8 +187,6 @@ export class FacturasListComponent implements OnInit {
     this.selectedCliente = cliente;
     this.filtroIdCliente = cliente.id.toString();
     this.showClienteDropdown = false;
-    this.pagination.pageNumber = 1;
-    this.loadFacturas();
   }
 
   viewFactura(factura: FacturaResponse) {
