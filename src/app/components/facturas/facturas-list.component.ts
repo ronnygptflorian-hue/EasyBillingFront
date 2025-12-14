@@ -169,7 +169,7 @@ export class FacturasListComponent implements OnInit {
   }
 
   loadClienteSuggestions(search: string) {
-    const filters = search ? { Nombre: search } : {};
+    const filters = search ? { razonSocial: search } : {};
     this.customerService.getClientes(1, 3, filters).subscribe({
       next: (response) => {
         this.clienteSuggestions = response.data;
