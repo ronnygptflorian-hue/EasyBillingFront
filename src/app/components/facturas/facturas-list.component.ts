@@ -26,6 +26,7 @@ export class FacturasListComponent implements OnInit {
   filtroFechaHasta = '';
   showDetailModal = false;
   selectedFactura: Factura | null = null;
+  showFilters = true;
   Math = Math;
   notaCredito = 34;
   pagination: PaginationInfo = {
@@ -49,16 +50,31 @@ export class FacturasListComponent implements OnInit {
   async loadFacturas() {
     try {
       this.loading = true;
-      this.facturasService.getAllPagination('invoice/GetInvoice', {
+      const params: any = {
         pageIndex: this.pagination.pageNumber,
         pageSize: this.pagination.pageSize
-      }).subscribe({
+      };
+
+      if (this.filtroId) {
+        params.Id = parseInt(this.filtroId);
+      }
+      if (this.filtroIdCliente) {
+        params.IdCliente = parseInt(this.filtroIdCliente);
+      }
+      if (this.filtroFechaDesde) {
+        params.FechaDesde = this.filtroFechaDesde;
+      }
+      if (this.filtroFechaHasta) {
+        params.FechaHasta = this.filtroFechaHasta;
+      }
+
+      this.facturasService.getAllPagination('invoice/GetInvoice', params).subscribe({
         next: (resp) => {
           this.facturas = resp.data;
           if (resp.pagination) {
             this.pagination = resp.pagination;
           }
-          this.filteredFacturas = [...this.facturas];
+          this.filteredFacturas = this.filterLocal([...this.facturas]);
           this.loading = false;
         },
         error: (error) => {
@@ -72,8 +88,8 @@ export class FacturasListComponent implements OnInit {
     }
   }
 
-  filterFacturas() {
-    let filtered = [...this.facturas];
+  filterLocal(data: FacturaResponse[]): FacturaResponse[] {
+    let filtered = [...data];
 
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
@@ -87,38 +103,12 @@ export class FacturasListComponent implements OnInit {
       filtered = filtered.filter(f => f.tipoVenta === this.selectedEstado);
     }
 
-    if (this.filtroId) {
-      const id = parseInt(this.filtroId);
-      if (!isNaN(id)) {
-        filtered = filtered.filter(f => f.id === id);
-      }
-    }
+    return filtered;
+  }
 
-    if (this.filtroIdCliente) {
-      const idCliente = parseInt(this.filtroIdCliente);
-      if (!isNaN(idCliente)) {
-        filtered = filtered.filter(f => f.idCliente === idCliente);
-      }
-    }
-
-    if (this.filtroFechaDesde) {
-      const fechaDesde = new Date(this.filtroFechaDesde);
-      filtered = filtered.filter(f => {
-        const fechaFactura = new Date(f.fechaAdd);
-        return fechaFactura >= fechaDesde;
-      });
-    }
-
-    if (this.filtroFechaHasta) {
-      const fechaHasta = new Date(this.filtroFechaHasta);
-      fechaHasta.setHours(23, 59, 59, 999);
-      filtered = filtered.filter(f => {
-        const fechaFactura = new Date(f.fechaAdd);
-        return fechaFactura <= fechaHasta;
-      });
-    }
-
-    this.filteredFacturas = filtered;
+  aplicarFiltros() {
+    this.pagination.pageNumber = 1;
+    this.loadFacturas();
   }
 
   limpiarFiltros() {
@@ -128,7 +118,12 @@ export class FacturasListComponent implements OnInit {
     this.filtroIdCliente = '';
     this.filtroFechaDesde = '';
     this.filtroFechaHasta = '';
-    this.filteredFacturas = [...this.facturas];
+    this.pagination.pageNumber = 1;
+    this.loadFacturas();
+  }
+
+  toggleFilters() {
+    this.showFilters = !this.showFilters;
   }
 
   viewFactura(factura: FacturaResponse) {

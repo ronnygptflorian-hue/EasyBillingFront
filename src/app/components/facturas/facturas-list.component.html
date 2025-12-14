@@ -5,25 +5,63 @@
     <a routerLink="/facturas/crear" class="btn-primary">+ Nueva Factura</a>
   </div>
 
-  <div class="filters-bar">
-    <div class="search-box">
-      <input type="text" [(ngModel)]="searchTerm" (input)="filterFacturas()" placeholder="Buscar por NCF o cliente..."
-        class="search-input" />
+  <div class="filters-container">
+    <div class="filters-header">
+      <h3>Filtros de Búsqueda</h3>
+      <button (click)="toggleFilters()" class="btn-toggle-filters">
+        {{ showFilters ? '▼' : '▶' }} {{ showFilters ? 'Ocultar' : 'Mostrar' }} Filtros
+      </button>
     </div>
-    <input type="number" [(ngModel)]="filtroId" (input)="filterFacturas()" placeholder="ID Factura"
-      class="filter-input" />
-    <input type="number" [(ngModel)]="filtroIdCliente" (input)="filterFacturas()" placeholder="ID Cliente"
-      class="filter-input" />
-    <input type="date" [(ngModel)]="filtroFechaDesde" (change)="filterFacturas()" placeholder="Fecha Desde"
-      class="filter-input" />
-    <input type="date" [(ngModel)]="filtroFechaHasta" (change)="filterFacturas()" placeholder="Fecha Hasta"
-      class="filter-input" />
-    <select [(ngModel)]="selectedEstado" (change)="filterFacturas()" class="filter-select">
-      <option value="">Todos los tipos</option>
-      <option value="CO">Contado</option>
-      <option value="CR">Crédito</option>
-    </select>
-    <button (click)="limpiarFiltros()" class="btn-clear-filters" title="Limpiar filtros">Limpiar</button>
+
+    <div class="filters-content" [class.collapsed]="!showFilters">
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label class="filter-label">Búsqueda General</label>
+          <input type="text" [(ngModel)]="searchTerm" placeholder="NCF o cliente..."
+            class="filter-input" />
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">ID Factura</label>
+          <input type="number" [(ngModel)]="filtroId" placeholder="Ingrese ID"
+            class="filter-input" />
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">ID Cliente</label>
+          <input type="number" [(ngModel)]="filtroIdCliente" placeholder="Ingrese ID Cliente"
+            class="filter-input" />
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Fecha Desde</label>
+          <input type="date" [(ngModel)]="filtroFechaDesde" class="filter-input" />
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Fecha Hasta</label>
+          <input type="date" [(ngModel)]="filtroFechaHasta" class="filter-input" />
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Tipo de Venta</label>
+          <select [(ngModel)]="selectedEstado" class="filter-select">
+            <option value="">Todos</option>
+            <option value="CO">Contado</option>
+            <option value="CR">Crédito</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filters-actions">
+        <button (click)="aplicarFiltros()" class="btn-apply-filters">
+          <span class="btn-icon">🔍</span> Consultar
+        </button>
+        <button (click)="limpiarFiltros()" class="btn-clear-filters">
+          <span class="btn-icon">✖</span> Limpiar
+        </button>
+      </div>
+    </div>
   </div>
 
   <div class="content-card" *ngIf="!loading">
