@@ -4,7 +4,9 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FacturaService } from './service/facturas.service';
 import { Factura, FacturaResponse, PaginationInfo } from './model/factura-request.model';
-import { LoadingComponent } from '../shared/loading.component/loading.component'
+import { LoadingComponent } from '../shared/loading.component/loading.component';
+import { CustomerService } from '../clientes/service/customer.service';
+import { Customer } from '../clientes/model/customer.model';
 
 
 @Component({
@@ -19,11 +21,20 @@ export class FacturasListComponent implements OnInit {
   filteredFacturas: FacturaResponse[] = [];
   loading = true;
   searchTerm = '';
+  filtroNcf = '';
   selectedEstado = '';
+  filtroId = '';
+  filtroIdCliente = '';
+  filtroFechaDesde = '';
+  filtroFechaHasta = '';
   showDetailModal = false;
   selectedFactura: Factura | null = null;
+  showAdvancedFilters = false;
   Math = Math;
   notaCredito = 34;
+  showClienteDropdown = false;
+  clienteSuggestions: Customer[] = [];
+  selectedCliente: Customer | null = null;
   pagination: PaginationInfo = {
     totalCount: 0,
     pageNumber: 1,
@@ -35,7 +46,8 @@ export class FacturasListComponent implements OnInit {
 
   constructor(
     private facturasService: FacturaService,
-    private router: Router
+    private router: Router,
+    private customerService: CustomerService
   ) {}
 
   async ngOnInit() {
@@ -45,16 +57,31 @@ export class FacturasListComponent implements OnInit {
   async loadFacturas() {
     try {
       this.loading = true;
-      this.facturasService.getAllPagination('invoice/GetInvoice', {
+      const params: any = {
         pageIndex: this.pagination.pageNumber,
         pageSize: this.pagination.pageSize
-      }).subscribe({
+      };
+
+      if (this.filtroId) {
+        params.Id = parseInt(this.filtroId);
+      }
+      if (this.filtroIdCliente) {
+        params.IdCliente = parseInt(this.filtroIdCliente);
+      }
+      if (this.filtroFechaDesde) {
+        params.FechaDesde = this.convertYYYYMMDDtoDDMMYYYY(this.filtroFechaDesde);
+      }
+      if (this.filtroFechaHasta) {
+        params.FechaHasta = this.convertYYYYMMDDtoDDMMYYYY(this.filtroFechaHasta);
+      }
+
+      this.facturasService.getAllPagination('invoice/GetInvoice', params).subscribe({
         next: (resp) => {
           this.facturas = resp.data;
           if (resp.pagination) {
             this.pagination = resp.pagination;
           }
-          this.filteredFacturas = [...this.facturas];
+          this.filteredFacturas = this.filterLocal([...this.facturas]);
           this.loading = false;
         },
         error: (error) => {
@@ -68,14 +95,20 @@ export class FacturasListComponent implements OnInit {
     }
   }
 
-  filterFacturas() {
-    let filtered = [...this.facturas];
+  filterLocal(data: FacturaResponse[]): FacturaResponse[] {
+    let filtered = [...data];
+
+    if (this.filtroNcf) {
+      const ncf = this.filtroNcf.toLowerCase();
+      filtered = filtered.filter(f =>
+        f.ecf && f.ecf.toLowerCase().includes(ncf)
+      );
+    }
 
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(f =>
-        (f.ecf && f.ecf.toLowerCase().includes(term)) ||
-        (f.nombreCliente && f.nombreCliente.toLowerCase().includes(term))
+        f.nombreCliente && f.nombreCliente.toLowerCase().includes(term)
       );
     }
 
@@ -83,7 +116,77 @@ export class FacturasListComponent implements OnInit {
       filtered = filtered.filter(f => f.tipoVenta === this.selectedEstado);
     }
 
-    this.filteredFacturas = filtered;
+    return filtered;
+  }
+
+  aplicarFiltros() {
+    this.pagination.pageNumber = 1;
+    this.loadFacturas();
+  }
+
+  limpiarFiltros() {
+    this.searchTerm = '';
+    this.filtroNcf = '';
+    this.selectedEstado = '';
+    this.filtroId = '';
+    this.filtroIdCliente = '';
+    this.filtroFechaDesde = '';
+    this.filtroFechaHasta = '';
+    this.pagination.pageNumber = 1;
+    this.loadFacturas();
+  }
+
+  toggleAdvancedFilters() {
+    this.showAdvancedFilters = !this.showAdvancedFilters;
+  }
+
+  onClienteSearch(event: any) {
+    const searchValue = event.target.value;
+    if (searchValue.length >= 2) {
+      this.loadClienteSuggestions(searchValue);
+    } else if (searchValue.length === 0) {
+      this.selectedCliente = null;
+      this.filtroIdCliente = '';
+      this.loadClienteSuggestions('');
+    } else {
+      this.clienteSuggestions = [];
+      this.showClienteDropdown = false;
+    }
+  }
+
+  onClienteFocus() {
+    if (this.searchTerm.length === 0) {
+      this.loadClienteSuggestions('');
+    } else if (this.searchTerm.length >= 2) {
+      this.loadClienteSuggestions(this.searchTerm);
+    }
+  }
+
+  onClienteBlur() {
+    setTimeout(() => {
+      this.showClienteDropdown = false;
+    }, 200);
+  }
+
+  loadClienteSuggestions(search: string) {
+    const filters = search ? { razonSocial: search } : {};
+    this.customerService.getClientes(1, 3, filters).subscribe({
+      next: (response) => {
+        this.clienteSuggestions = response.data;
+        this.showClienteDropdown = this.clienteSuggestions.length > 0;
+      },
+      error: (error) => {
+        console.error('Error al cargar clientes:', error);
+        this.clienteSuggestions = [];
+      }
+    });
+  }
+
+  selectCliente(cliente: Customer) {
+    this.searchTerm = cliente.razonSocial;
+    this.selectedCliente = cliente;
+    this.filtroIdCliente = cliente.id.toString();
+    this.showClienteDropdown = false;
   }
 
   viewFactura(factura: FacturaResponse) {
@@ -131,6 +234,11 @@ export class FacturasListComponent implements OnInit {
       pages.push(i);
     }
     return pages;
+  }
+
+  convertYYYYMMDDtoDDMMYYYY(fecha: string): string {
+    const [year, month, day] = fecha.split('-');
+    return `${day}-${month}-${year}`;
   }
 
   formatCurrency(value: number): string {
