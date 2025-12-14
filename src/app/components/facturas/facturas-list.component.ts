@@ -19,6 +19,7 @@ export class FacturasListComponent implements OnInit {
   filteredFacturas: FacturaResponse[] = [];
   loading = true;
   searchTerm = '';
+  filtroNcf = '';
   selectedEstado = '';
   filtroId = '';
   filtroIdCliente = '';
@@ -92,11 +93,17 @@ export class FacturasListComponent implements OnInit {
   filterLocal(data: FacturaResponse[]): FacturaResponse[] {
     let filtered = [...data];
 
+    if (this.filtroNcf) {
+      const ncf = this.filtroNcf.toLowerCase();
+      filtered = filtered.filter(f =>
+        f.ecf && f.ecf.toLowerCase().includes(ncf)
+      );
+    }
+
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(f =>
-        (f.ecf && f.ecf.toLowerCase().includes(term)) ||
-        (f.nombreCliente && f.nombreCliente.toLowerCase().includes(term))
+        f.nombreCliente && f.nombreCliente.toLowerCase().includes(term)
       );
     }
 
@@ -114,6 +121,7 @@ export class FacturasListComponent implements OnInit {
 
   limpiarFiltros() {
     this.searchTerm = '';
+    this.filtroNcf = '';
     this.selectedEstado = '';
     this.filtroId = '';
     this.filtroIdCliente = '';

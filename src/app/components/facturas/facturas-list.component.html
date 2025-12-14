@@ -8,46 +8,51 @@
   <div class="filters-container">
     <div class="filters-header">
       <h3>Filtros de Búsqueda</h3>
-      <button (click)="toggleFilters()" class="btn-toggle-filters">
-        {{ showFilters ? '▼' : '▶' }} {{ showFilters ? 'Ocultar' : 'Mostrar' }} Filtros
-      </button>
+      <div class="header-actions">
+        <button (click)="toggleAdvancedFilters()" class="btn-advanced-filters">
+          {{ showAdvancedFilters ? '▲' : '▼' }} Avanzados
+        </button>
+        <button (click)="toggleFilters()" class="btn-toggle-filters">
+          {{ showFilters ? '▼' : '▶' }}
+        </button>
+      </div>
     </div>
 
     <div class="filters-content" [class.collapsed]="!showFilters">
-      <div class="filters-main-section">
-        <div class="filters-grid-main">
-          <div class="filter-group">
-            <label class="filter-label">NCF / Cliente</label>
-            <input type="text" [(ngModel)]="searchTerm" placeholder="Buscar por NCF o nombre de cliente..."
-              class="filter-input" />
-          </div>
-
-          <div class="filter-group">
-            <label class="filter-label">Estado</label>
-            <select [(ngModel)]="selectedEstado" class="filter-select">
-              <option value="">Todos los estados</option>
-              <option value="CO">Contado</option>
-              <option value="CR">Crédito</option>
-            </select>
-          </div>
+      <div class="filters-grid-main">
+        <div class="filter-group">
+          <label class="filter-label">NCF</label>
+          <input type="text" [(ngModel)]="filtroNcf" placeholder="Buscar por NCF..."
+            class="filter-input" />
         </div>
 
-        <button (click)="toggleAdvancedFilters()" class="btn-advanced-filters">
-          {{ showAdvancedFilters ? '▲' : '▼' }} Filtros Avanzados
-        </button>
+        <div class="filter-group">
+          <label class="filter-label">Cliente</label>
+          <input type="text" [(ngModel)]="searchTerm" placeholder="Nombre del cliente..."
+            class="filter-input" />
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Estado</label>
+          <select [(ngModel)]="selectedEstado" class="filter-select">
+            <option value="">Todos</option>
+            <option value="CO">Contado</option>
+            <option value="CR">Crédito</option>
+          </select>
+        </div>
       </div>
 
       <div class="filters-advanced-section" [class.collapsed]="!showAdvancedFilters">
         <div class="filters-grid">
           <div class="filter-group">
             <label class="filter-label">ID Factura</label>
-            <input type="number" [(ngModel)]="filtroId" placeholder="Ingrese ID"
+            <input type="number" [(ngModel)]="filtroId" placeholder="ID"
               class="filter-input" />
           </div>
 
           <div class="filter-group">
             <label class="filter-label">ID Cliente</label>
-            <input type="number" [(ngModel)]="filtroIdCliente" placeholder="Ingrese ID Cliente"
+            <input type="number" [(ngModel)]="filtroIdCliente" placeholder="ID Cliente"
               class="filter-input" />
           </div>
 
