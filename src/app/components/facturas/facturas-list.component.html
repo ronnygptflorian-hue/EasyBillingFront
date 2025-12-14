@@ -17,23 +17,16 @@
       <div class="filters-grid-main">
         <div class="filter-group">
           <label class="filter-label">NCF</label>
-          <input type="text" [(ngModel)]="filtroNcf" placeholder="Buscar por NCF..."
-            class="filter-input" />
+          <input type="text" [(ngModel)]="filtroNcf" placeholder="Buscar por NCF..." class="filter-input" />
         </div>
 
         <div class="filter-group">
           <label class="filter-label">Cliente</label>
           <div class="autocomplete-wrapper">
-            <input type="text" [(ngModel)]="searchTerm"
-              (input)="onClienteSearch($event)"
-              (focus)="onClienteFocus()"
-              (blur)="onClienteBlur()"
-              placeholder="Buscar cliente..."
-              class="filter-input"
-              autocomplete="off" />
+            <input type="text" [(ngModel)]="searchTerm" (input)="onClienteSearch($event)" (focus)="onClienteFocus()"
+              (blur)="onClienteBlur()" placeholder="Buscar cliente..." class="filter-input" autocomplete="off" />
             <div class="autocomplete-dropdown" *ngIf="showClienteDropdown && clienteSuggestions.length > 0">
-              <div *ngFor="let cliente of clienteSuggestions"
-                class="autocomplete-item"
+              <div *ngFor="let cliente of clienteSuggestions" class="autocomplete-item"
                 (mousedown)="selectCliente(cliente)">
                 <div class="cliente-name">{{ cliente.razonSocial }}</div>
                 <div class="cliente-rnc">{{ cliente.rnc }}</div>
@@ -102,8 +95,8 @@
             <td>{{ formatCurrency(factura.totalItbis) }}</td>
             <td class="font-bold">{{ formatCurrency(factura.totalGeneral) }}</td>
             <td>
-              <span [class]="'badge ' + getEstadoClass(factura.tipoVenta)">
-                {{ getEstadoLabel(factura.tipoVenta) }}
+              <span [class]="'badge ' + getEstadoClass(factura.estadoFactura)">
+                {{ getEstadoLabel(factura.estadoFactura) }}
               </span>
             </td>
             <td>{{ factura.descripcionTipoEcf || 'N/A' }}</td>
