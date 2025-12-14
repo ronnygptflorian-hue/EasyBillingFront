@@ -4,12 +4,16 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from './service/auth.service';
 import { UserLogin } from './model/auth.model'
-import {LocalStorageService} from '../../services/storage.service'
+import { LocalStorageService } from '../../services/storage.service'
+import { NotificationService } from '../../services/notification.service';
+import { ToastNotificationsComponent } from '../shared/toast-notifications.component/toast-notifications.component';
+
+
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, ToastNotificationsComponent],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
@@ -22,7 +26,8 @@ export class LoginComponent {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private localService: LocalStorageService
+    private localService: LocalStorageService,
+    private notificationService: NotificationService
   ) { }
 
 
@@ -39,11 +44,15 @@ export class LoginComponent {
         this.router.navigate(['/dashboard']);
       },
       error: (resp) => {
-        if (resp.status === 422) {
-          this.localService.set('User', JSON.stringify(resp));
-          this.loading = true;
+        if (resp.status = 422) {
+          this.notificationService.warning(resp.error.messages[0].msg)
+          this.loading = false;
 
-
+        }
+        else {
+          this.notificationService.error(resp.message)
+          this.logout()
+          this.loading = false;
         }
       }
     })
@@ -63,5 +72,9 @@ export class LoginComponent {
       this.loading = false;
       this.router.navigate(['/dashboard']);
     }, 500);
+  }
+
+  logout() {
+    localStorage.removeItem('User');
   }
 }

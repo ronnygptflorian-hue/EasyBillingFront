@@ -5,16 +5,77 @@
     <a routerLink="/facturas/crear" class="btn-primary">+ Nueva Factura</a>
   </div>
 
-  <div class="filters-bar">
-    <div class="search-box">
-      <input type="text" [(ngModel)]="searchTerm" (input)="filterFacturas()" placeholder="Buscar por NCF o cliente..."
-        class="search-input" />
+  <div class="filters-container">
+    <div class="filters-header">
+      <h3>Filtros de Búsqueda</h3>
+      <button (click)="toggleAdvancedFilters()" class="btn-advanced-filters">
+        {{ showAdvancedFilters ? '▲' : '▼' }} Avanzados
+      </button>
     </div>
-    <select [(ngModel)]="selectedEstado" (change)="filterFacturas()" class="filter-select">
-      <option value="">Todos los tipos</option>
-      <option value="CO">Contado</option>
-      <option value="CR">Crédito</option>
-    </select>
+
+    <div class="filters-content">
+      <div class="filters-grid-main">
+        <div class="filter-group">
+          <label class="filter-label">NCF</label>
+          <input type="text" [(ngModel)]="filtroNcf" placeholder="Buscar por NCF..."
+            class="filter-input" />
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Cliente</label>
+          <div class="autocomplete-wrapper">
+            <input type="text" [(ngModel)]="searchTerm"
+              (input)="onClienteSearch($event)"
+              (focus)="onClienteFocus()"
+              (blur)="onClienteBlur()"
+              placeholder="Buscar cliente..."
+              class="filter-input"
+              autocomplete="off" />
+            <div class="autocomplete-dropdown" *ngIf="showClienteDropdown && clienteSuggestions.length > 0">
+              <div *ngFor="let cliente of clienteSuggestions"
+                class="autocomplete-item"
+                (mousedown)="selectCliente(cliente)">
+                <div class="cliente-name">{{ cliente.razonSocial }}</div>
+                <div class="cliente-rnc">{{ cliente.rnc }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Estado</label>
+          <select [(ngModel)]="selectedEstado" class="filter-select">
+            <option value="">Todos</option>
+            <option value="CO">Contado</option>
+            <option value="CR">Crédito</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filters-advanced-section" [class.collapsed]="!showAdvancedFilters">
+        <div class="filters-grid">
+
+          <div class="filter-group">
+            <label class="filter-label">Fecha Desde</label>
+            <input type="date" [(ngModel)]="filtroFechaDesde" class="filter-input" />
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Fecha Hasta</label>
+            <input type="date" [(ngModel)]="filtroFechaHasta" class="filter-input" />
+          </div>
+        </div>
+      </div>
+
+      <div class="filters-actions">
+        <button (click)="aplicarFiltros()" class="btn-apply-filters">
+          🔍 Consultar
+        </button>
+        <button (click)="limpiarFiltros()" class="btn-clear-filters">
+          ✖ Limpiar
+        </button>
+      </div>
+    </div>
   </div>
 
   <div class="content-card" *ngIf="!loading">
@@ -45,6 +106,7 @@
                 {{ getEstadoLabel(factura.tipoVenta) }}
               </span>
             </td>
+            <td>{{ factura.descripcionTipoEcf || 'N/A' }}</td>
             <td class="actions">
               <button (click)="viewFactura(factura)" class="btn-icon btn-view" title="Ver detalles">👁️</button>
               <button (click)="printFactura(factura)" class="btn-icon btn-print" title="Imprimir Factura">🖨️</button>
