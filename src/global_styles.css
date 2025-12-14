@@ -179,6 +179,69 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   opacity: 0;
 }
 
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+input[type="date"]::-webkit-datetime-edit {
+  color: var(--gray-700);
+  font-weight: 500;
+}
+
+input[type="date"]::-webkit-datetime-edit-text {
+  color: var(--gray-400);
+  padding: 0 0.25rem;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: var(--gray-700);
+  font-weight: 500;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.15s ease;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field:focus,
+input[type="date"]::-webkit-datetime-edit-day-field:focus,
+input[type="date"]::-webkit-datetime-edit-year-field:focus {
+  background-color: var(--blue-50);
+  color: var(--blue-700);
+  outline: none;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 0.2;
+}
+
+input[type="date"].active {
+  border-color: var(--blue-600);
+  box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.25), 0 8px 16px rgba(66, 153, 225, 0.15);
+  transform: translateY(-1px);
+}
+
+input[type="date"]:focus-visible {
+  border-color: var(--blue-600);
+  box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.2), 0 4px 8px rgba(66, 153, 225, 0.1);
+}
+
+::-webkit-calendar-picker-indicator {
+  filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(194deg) brightness(98%) contrast(87%);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+::-webkit-calendar-picker-indicator:hover {
+  filter: invert(42%) sepia(98%) saturate(1352%) hue-rotate(194deg) brightness(93%) contrast(84%);
+  transform: scale(1.1);
+}
+
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-clear-button {
+  display: none;
+}
+
 input[type="text"],
 input[type="email"],
 input[type="password"],
