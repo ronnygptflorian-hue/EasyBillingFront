@@ -8,17 +8,12 @@
   <div class="filters-container">
     <div class="filters-header">
       <h3>Filtros de Búsqueda</h3>
-      <div class="header-actions">
-        <button (click)="toggleAdvancedFilters()" class="btn-advanced-filters">
-          {{ showAdvancedFilters ? '▲' : '▼' }} Avanzados
-        </button>
-        <button (click)="toggleFilters()" class="btn-toggle-filters">
-          {{ showFilters ? '▼' : '▶' }}
-        </button>
-      </div>
+      <button (click)="toggleAdvancedFilters()" class="btn-advanced-filters">
+        {{ showAdvancedFilters ? '▲' : '▼' }} Avanzados
+      </button>
     </div>
 
-    <div class="filters-content" [class.collapsed]="!showFilters">
+    <div class="filters-content">
       <div class="filters-grid-main">
         <div class="filter-group">
           <label class="filter-label">NCF</label>
@@ -70,10 +65,10 @@
 
       <div class="filters-actions">
         <button (click)="aplicarFiltros()" class="btn-apply-filters">
-          <span class="btn-icon">🔍</span> Consultar
+          🔍 Consultar
         </button>
         <button (click)="limpiarFiltros()" class="btn-clear-filters">
-          <span class="btn-icon">✖</span> Limpiar
+          ✖ Limpiar
         </button>
       </div>
     </div>

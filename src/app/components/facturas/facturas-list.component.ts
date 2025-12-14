@@ -27,7 +27,6 @@ export class FacturasListComponent implements OnInit {
   filtroFechaHasta = '';
   showDetailModal = false;
   selectedFactura: Factura | null = null;
-  showFilters = true;
   showAdvancedFilters = false;
   Math = Math;
   notaCredito = 34;
@@ -129,10 +128,6 @@ export class FacturasListComponent implements OnInit {
     this.filtroFechaHasta = '';
     this.pagination.pageNumber = 1;
     this.loadFacturas();
-  }
-
-  toggleFilters() {
-    this.showFilters = !this.showFilters;
   }
 
   toggleAdvancedFilters() {
