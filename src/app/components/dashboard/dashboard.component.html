@@ -62,7 +62,7 @@
     <div class="card">
       <div class="card-header">
         <h3>Facturas Recientes</h3>
-        <a routerLink="/facturas" class="btn btn-primary btn-sm">Ver todas</a>
+        <a routerLink="/facturas-recibidas" class="btn btn-primary btn-sm">Ver todas</a>
       </div>
       <div class="table-container">
         <table class="table">
@@ -76,18 +76,16 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let factura of facturasRecientes">
-              <td>{{ factura.ncf }}</td>
-              <td>{{ factura.cliente?.nombre || 'N/A' }}</td>
+            <tr *ngFor="let factura of dashboardInformation.facturasRecibidasTercero">
+              <td>{{ factura.ecf }}</td>
+              <td>{{ factura.proveedor || 'N/A' }}</td>
               <td>{{ formatDate(factura.fecha) }}</td>
               <td>{{ formatCurrency(factura.total) }}</td>
               <td>
-                <span [class]="'badge ' + getEstadoBadgeClass(factura.estado)">
-                  {{ factura.estado }}
-                </span>
+                <span class="badge badge-success">Recibida</span>
               </td>
             </tr>
-            <tr *ngIf="facturasRecientes.length === 0">
+            <tr *ngIf="dashboardInformation.facturasRecibidasTercero.length === 0">
               <td colspan="5" style="text-align: center; color: var(--gray-500);">
                 No hay facturas registradas
               </td>
