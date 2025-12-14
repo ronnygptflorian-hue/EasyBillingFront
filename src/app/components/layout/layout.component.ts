@@ -6,14 +6,14 @@ import { ToastNotificationsComponent } from '../shared/toast-notifications.compo
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, RouterOutlet,ToastNotificationsComponent],
+  imports: [CommonModule, RouterModule, RouterOutlet, ToastNotificationsComponent],
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.scss']
 })
 export class LayoutComponent implements OnInit {
   user: any = null;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   ngOnInit() {
     const mockUser = localStorage.getItem('mockUser');
@@ -23,7 +23,7 @@ export class LayoutComponent implements OnInit {
   }
 
   logout() {
-    localStorage.removeItem('mockUser');
+    localStorage.clear();
     this.router.navigate(['/login']);
   }
 }
