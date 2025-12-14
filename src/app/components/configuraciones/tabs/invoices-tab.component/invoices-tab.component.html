@@ -171,11 +171,9 @@
 
       <div class="form-group">
         <label>Fecha de Expiración <span class="required">*</span></label>
-        <app-custom-datepicker
+        <input type="date" class="form-control"
           [(ngModel)]="currentSecuencia.fechaExpiracion"
-          name="fechaExpiracion"
-          placeholder="Seleccionar fecha"
-        ></app-custom-datepicker>
+          name="fechaExpiracion" required />
       </div>
 
       <div class="form-group">

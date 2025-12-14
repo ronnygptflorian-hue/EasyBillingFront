@@ -167,4 +167,3 @@ El proyecto está construido con Angular 20 usando:
 ## 📄 Licencia
 
 Proyecto privado
-"# EasyBillingFront" 

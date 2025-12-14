@@ -13,7 +13,7 @@ import { CustomDatepickerComponent } from '../shared/custom-datepicker/custom-da
 @Component({
   selector: 'app-facturas-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, LoadingComponent, CustomDatepickerComponent],
+  imports: [CommonModule, RouterModule, FormsModule,LoadingComponent,CustomDatepickerComponent],
   templateUrl: './facturas-list.component.html',
   styleUrls: ['./facturas-list.component.scss']
 })

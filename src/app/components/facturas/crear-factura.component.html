@@ -24,12 +24,12 @@
 
           <div class="form-group">
             <label for="fechaEmisionEcf">📅 Fecha de Emisión *</label>
-            <app-custom-datepicker [(ngModel)]="fechaEmisionEcf" placeholder="Seleccionar fecha"></app-custom-datepicker>
+            <input value="{{fechaEmisionEcf}}" type="date" id="fechaEmisionEcf" class="modern-input" required />
           </div>
 
           <div class="form-group">
             <label for="referencia">🔖 Referencia</label>
-            <input type="text" id="referencia" class="modern-input" placeholder="FCT-001" />
+            <input value="{{referenciaCode}}" type="text" id="referencia" class="modern-input" placeholder="FCT-001" />
           </div>
         </div>
 

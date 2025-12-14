@@ -14,7 +14,6 @@ import { NotificationService } from '../../services/notification.service';
 import { LoadingComponent } from '../shared/loading.component/loading.component'
 import { ConfigutionService } from '../configuraciones/service/configuracion.service';
 import { SecuenciaEcf } from '../configuraciones/model/secuencia-ecf.model';
-import { CustomDatepickerComponent } from '../shared/custom-datepicker/custom-datepicker.component';
 
 
 interface InvoiceItem extends Product {
@@ -41,7 +40,7 @@ interface InvoiceItem extends Product {
 @Component({
   selector: 'app-crear-factura',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, LoadingComponent, CustomDatepickerComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, LoadingComponent],
   templateUrl: './crear-factura.component.html',
   styleUrls: ['./crear-factura.component.scss']
 })
@@ -71,10 +70,10 @@ export class CrearFacturaComponent implements OnInit {
   isSearchingProduct = false;
   productError = '';
   fechaEmisionEcf: string = new Date().toLocaleDateString('en-CA');
-
+  referencia: string = '';
   items: InvoiceItem[] = [];
   loading = false;
-
+  referenciaCode: string = '';
   activeTaxDropdownIndex: number | null = null;
 
   isNotaCredito = false;
@@ -101,7 +100,7 @@ export class CrearFacturaComponent implements OnInit {
       clientSearch: ['', Validators.required],
       selectedClient: [null],
       productSearch: [''],
-      referencia: [''],
+      referencia: [this.referencia],
       comentario: [''],
       idMoneda: [1, Validators.required],
       tasaCambio: [1.0, Validators.required],
@@ -120,6 +119,8 @@ export class CrearFacturaComponent implements OnInit {
 
     this.loadCommonData();
     this.loadSecuencias();
+    const random3 = Math.random().toString(36).substring(2, 5).toUpperCase();
+    this.referenciaCode = `FCT-${random3}`;
   }
 
   loadCommonData() {
