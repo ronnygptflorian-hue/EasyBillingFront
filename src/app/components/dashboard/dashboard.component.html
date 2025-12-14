@@ -59,35 +59,56 @@
       </button>
     </div>
 
-    <div class="card">
+    <div class="card facturas-card">
       <div class="card-header">
-        <h3>Facturas Recientes</h3>
+        <div class="header-content">
+          <div class="header-icon">📄</div>
+          <div>
+            <h3>Facturas Recientes</h3>
+            <p class="header-subtitle">Facturas recibidas de terceros</p>
+          </div>
+        </div>
         <a routerLink="/facturas-recibidas" class="btn btn-primary btn-sm">Ver todas</a>
       </div>
       <div class="table-container">
-        <table class="table">
+        <table class="modern-table">
           <thead>
             <tr>
-              <th>NCF</th>
-              <th>Cliente</th>
-              <th>Fecha</th>
-              <th>Total</th>
-              <th>Estado</th>
+              <th><span class="th-content">🔢 NCF</span></th>
+              <th><span class="th-content">👤 Cliente</span></th>
+              <th><span class="th-content">📅 Fecha</span></th>
+              <th><span class="th-content">💵 Total</span></th>
+              <th><span class="th-content">✓ Estado</span></th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let factura of dashboardInformation.facturasRecibidasTercero">
-              <td>{{ factura.ecf }}</td>
-              <td>{{ factura.proveedor || 'N/A' }}</td>
-              <td>{{ formatDate(factura.fecha) }}</td>
-              <td>{{ formatCurrency(factura.total) }}</td>
+            <tr *ngFor="let factura of dashboardInformation.facturasRecibidasTercero" class="table-row">
+              <td class="ncf-cell">
+                <span class="ncf-badge">{{ factura.ecf }}</span>
+              </td>
+              <td class="proveedor-cell">
+                <div class="proveedor-content">
+                  <span class="proveedor-avatar">{{ (factura.proveedor || 'N/A').charAt(0).toUpperCase() }}</span>
+                  <span class="proveedor-name">{{ factura.proveedor || 'N/A' }}</span>
+                </div>
+              </td>
+              <td class="fecha-cell">{{ formatDate(factura.fecha) }}</td>
+              <td class="total-cell">
+                <span class="total-amount">{{ formatCurrency(factura.total) }}</span>
+              </td>
               <td>
-                <span class="badge badge-success">Recibida</span>
+                <span class="status-badge status-received">
+                  <span class="status-dot"></span>
+                  Recibida
+                </span>
               </td>
             </tr>
             <tr *ngIf="dashboardInformation.facturasRecibidasTercero.length === 0">
-              <td colspan="5" style="text-align: center; color: var(--gray-500);">
-                No hay facturas registradas
+              <td colspan="5" class="empty-state">
+                <div class="empty-content">
+                  <span class="empty-icon">📭</span>
+                  <p>No hay facturas registradas</p>
+                </div>
               </td>
             </tr>
           </tbody>
