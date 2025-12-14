@@ -238,7 +238,7 @@ export class FacturasListComponent implements OnInit {
 
   convertYYYYMMDDtoDDMMYYYY(fecha: string): string {
     const [year, month, day] = fecha.split('-');
-    return `${day}/${month}/${year}`;
+    return `${day}-${month}-${year}`;
   }
 
   formatCurrency(value: number): string {
