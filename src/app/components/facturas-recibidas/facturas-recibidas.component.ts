@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FacturasRecibidasService } from './service/facturas-recibidas.service';
-import { FacturaRecibida } from './model/factura-recibida.model';
+import { FacturaRecibida, FacturaRecibidaDetalle } from './model/factura-recibida.model';
 import { Pagination } from '../../models/api-response.model';
 import { LoadingComponent } from '../shared/loading.component/loading.component';
 import { CustomDatepickerComponent } from '../shared/custom-datepicker/custom-datepicker.component';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-facturas-recibidas',
@@ -18,9 +19,12 @@ export class FacturasRecibidasComponent implements OnInit {
   facturas: FacturaRecibida[] = [];
   filteredFacturas: FacturaRecibida[] = [];
   loading = true;
+  loadingDetail = false;
   showAdvancedFilters = false;
   showDetailModal = false;
-  selectedFactura: FacturaRecibida | null = null;
+  showRechazarModal = false;
+  selectedFactura: FacturaRecibidaDetalle | null = null;
+  motivoRechazo = '';
   Math = Math;
 
   filtroRazonSocialEmisor = '';
@@ -47,7 +51,10 @@ export class FacturasRecibidasComponent implements OnInit {
     { value: 'Rechazado', label: 'Rechazado' }
   ];
 
-  constructor(private facturasRecibidasService: FacturasRecibidasService) {}
+  constructor(
+    private facturasRecibidasService: FacturasRecibidasService,
+    private notificationService: NotificationService
+  ) {}
 
   async ngOnInit() {
     await this.loadFacturas();
@@ -137,13 +144,96 @@ export class FacturasRecibidasComponent implements OnInit {
   }
 
   viewFactura(factura: FacturaRecibida) {
-    this.selectedFactura = factura;
+    this.loadingDetail = true;
     this.showDetailModal = true;
+    this.facturasRecibidasService.getFacturaRecibidaById(factura.idDocumento).subscribe({
+      next: (detalle) => {
+        this.selectedFactura = detalle;
+        this.loadingDetail = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar detalle:', error);
+        this.notificationService.error('Error al cargar el detalle de la factura');
+        this.loadingDetail = false;
+        this.closeDetailModal();
+      }
+    });
   }
 
   closeDetailModal() {
     this.showDetailModal = false;
     this.selectedFactura = null;
+  }
+
+  aprobarFactura() {
+    if (!this.selectedFactura) return;
+
+    this.loadingDetail = true;
+    this.facturasRecibidasService.aprobarFactura(this.selectedFactura.idDocumento).subscribe({
+      next: () => {
+        this.notificationService.success('Factura aprobada exitosamente');
+        this.loadingDetail = false;
+        this.closeDetailModal();
+        this.loadFacturas();
+      },
+      error: (error) => {
+        console.error('Error al aprobar factura:', error);
+        this.notificationService.error('Error al aprobar la factura');
+        this.loadingDetail = false;
+      }
+    });
+  }
+
+  openRechazarModal() {
+    this.motivoRechazo = '';
+    this.showRechazarModal = true;
+  }
+
+  closeRechazarModal() {
+    this.showRechazarModal = false;
+    this.motivoRechazo = '';
+  }
+
+  rechazarFactura() {
+    if (!this.selectedFactura || !this.motivoRechazo.trim()) {
+      this.notificationService.error('Debe indicar un motivo para rechazar la factura');
+      return;
+    }
+
+    this.loadingDetail = true;
+    this.facturasRecibidasService.rechazarFactura(this.selectedFactura.idDocumento, this.motivoRechazo).subscribe({
+      next: () => {
+        this.notificationService.success('Factura rechazada exitosamente');
+        this.loadingDetail = false;
+        this.closeRechazarModal();
+        this.closeDetailModal();
+        this.loadFacturas();
+      },
+      error: (error) => {
+        console.error('Error al rechazar factura:', error);
+        this.notificationService.error('Error al rechazar la factura');
+        this.loadingDetail = false;
+      }
+    });
+  }
+
+  descargarXml() {
+    if (!this.selectedFactura || !this.selectedFactura.documentosXmldata || this.selectedFactura.documentosXmldata.length === 0) {
+      this.notificationService.error('No hay XML disponible para descargar');
+      return;
+    }
+
+    const xmlData = this.selectedFactura.documentosXmldata[0].fullXmldata;
+    const blob = this.facturasRecibidasService.descargarXml(this.selectedFactura.ecf, xmlData);
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${this.selectedFactura.ecf}.xml`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    this.notificationService.success('XML descargado exitosamente');
   }
 
   goToPage(page: number) {
@@ -216,5 +306,10 @@ export class FacturasRecibidasComponent implements OnInit {
       7: 'Gastos Menores'
     };
     return tipos[idTipoEcf] || `Tipo ${idTipoEcf}`;
+  }
+
+  formatCurrency(value: number): string {
+    if (!value) return 'RD$ 0.00';
+    return new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'DOP' }).format(value);
   }
 }

@@ -192,13 +192,50 @@
   </div>
 </div>
 
+<app-loading [show]="loadingDetail" [fullscreen]="true" message="Cargando detalle..."></app-loading>
+
 <div class="modal-overlay" *ngIf="showDetailModal" (click)="closeDetailModal()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
+  <div class="modal-content modal-large" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h2>Detalle de Factura Recibida</h2>
       <button (click)="closeDetailModal()" class="btn-close">✕</button>
     </div>
-    <div class="modal-body" *ngIf="selectedFactura">
+
+    <div class="modal-actions" *ngIf="selectedFactura">
+      <button
+        (click)="aprobarFactura()"
+        class="btn-action btn-aprobar"
+        [disabled]="loadingDetail || selectedFactura.estatusAprobacion === 'Aprobado'">
+        ✓ Aprobar
+      </button>
+      <button
+        (click)="openRechazarModal()"
+        class="btn-action btn-rechazar"
+        [disabled]="loadingDetail || selectedFactura.estatusAprobacion === 'Rechazado'">
+        ✕ Rechazar
+      </button>
+      <button
+        (click)="descargarXml()"
+        class="btn-action btn-download"
+        [disabled]="loadingDetail">
+        ⬇ Descargar XML
+      </button>
+    </div>
+
+    <div class="modal-body" *ngIf="selectedFactura && !loadingDetail">
+      <div class="summary-section">
+        <div class="summary-item">
+          <span class="summary-label">Monto Total:</span>
+          <span class="summary-value">{{ formatCurrency(selectedFactura.montoTotal) }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Estado:</span>
+          <span [class]="'badge ' + getEstatusClass(selectedFactura.estatusAprobacion)">
+            {{ selectedFactura.estatusAprobacion }}
+          </span>
+        </div>
+      </div>
+
       <div class="detail-grid">
         <div class="detail-section">
           <h3>Información del Emisor</h3>
@@ -209,6 +246,18 @@
           <div class="detail-row">
             <span class="detail-label">RNC:</span>
             <span class="detail-value font-mono">{{ selectedFactura.rncEmisor }}</span>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Información del Receptor</h3>
+          <div class="detail-row">
+            <span class="detail-label">Razón Social:</span>
+            <span class="detail-value">{{ selectedFactura.razonSocialReceptor }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">RNC:</span>
+            <span class="detail-value font-mono">{{ selectedFactura.rncReceptor }}</span>
           </div>
         </div>
 
@@ -252,23 +301,71 @@
             <span class="detail-label">Fuente:</span>
             <span class="detail-value">{{ selectedFactura.tipoDeFuente === 'R' ? 'Recibida' : 'Otro' }}</span>
           </div>
-        </div>
-
-        <div class="detail-section" *ngIf="selectedFactura.ecfModificado">
-          <h3>Información de Modificación</h3>
-          <div class="detail-row">
-            <span class="detail-label">ECF Modificado:</span>
-            <span class="detail-value font-mono">{{ selectedFactura.ecfModificado }}</span>
-          </div>
-          <div class="detail-row" *ngIf="selectedFactura.razonModificacion">
-            <span class="detail-label">Razón:</span>
-            <span class="detail-value">{{ selectedFactura.razonModificacion }}</span>
+          <div class="detail-row" *ngIf="selectedFactura.facturaAprobadaPorPortal !== null">
+            <span class="detail-label">Aprobada por Portal:</span>
+            <span class="detail-value">{{ selectedFactura.facturaAprobadaPorPortal ? 'Sí' : 'No' }}</span>
           </div>
         </div>
       </div>
+
+      <div class="detail-section full-width" *ngIf="selectedFactura.documentosDetalles && selectedFactura.documentosDetalles.length > 0">
+        <h3>Detalles de Productos/Servicios</h3>
+        <div class="table-container">
+          <table class="detail-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Ítem</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+                <th>Total Bruto</th>
+                <th>Descuentos</th>
+                <th>Impuestos</th>
+                <th>Total Neto</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let detalle of selectedFactura.documentosDetalles; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>{{ detalle.item }}</td>
+                <td>{{ detalle.cantidad }}</td>
+                <td>{{ formatCurrency(detalle.precio) }}</td>
+                <td>{{ formatCurrency(detalle.totalBruto) }}</td>
+                <td>{{ formatCurrency(detalle.totalDescuentos) }}</td>
+                <td>{{ formatCurrency(detalle.totalImpuestos) }}</td>
+                <td class="font-bold">{{ formatCurrency(detalle.totalNeto) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
+
     <div class="modal-footer">
       <button (click)="closeDetailModal()" class="btn-secondary">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showRechazarModal" (click)="closeRechazarModal()">
+  <div class="modal-content modal-small" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Rechazar Factura</h2>
+      <button (click)="closeRechazarModal()" class="btn-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Motivo del rechazo:</label>
+        <textarea
+          [(ngModel)]="motivoRechazo"
+          class="form-textarea"
+          rows="4"
+          placeholder="Indique el motivo por el cual rechaza esta factura..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button (click)="closeRechazarModal()" class="btn-secondary">Cancelar</button>
+      <button (click)="rechazarFactura()" class="btn-primary btn-danger">Rechazar</button>
     </div>
   </div>
 </div>
