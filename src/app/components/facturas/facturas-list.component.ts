@@ -7,12 +7,13 @@ import { Factura, FacturaResponse, PaginationInfo } from './model/factura-reques
 import { LoadingComponent } from '../shared/loading.component/loading.component';
 import { CustomerService } from '../clientes/service/customer.service';
 import { Customer } from '../clientes/model/customer.model';
+import { CustomDatepickerComponent } from '../shared/custom-datepicker/custom-datepicker.component';
 
 
 @Component({
   selector: 'app-facturas-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule,LoadingComponent],
+  imports: [CommonModule, RouterModule, FormsModule,LoadingComponent,CustomDatepickerComponent],
   templateUrl: './facturas-list.component.html',
   styleUrls: ['./facturas-list.component.scss']
 })
