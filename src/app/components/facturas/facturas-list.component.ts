@@ -12,7 +12,7 @@ import { Customer } from '../clientes/model/customer.model';
 @Component({
   selector: 'app-facturas-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule,LoadingComponent],
+  imports: [CommonModule, RouterModule, FormsModule, LoadingComponent, CustomDatepickerComponent],
   templateUrl: './facturas-list.component.html',
   styleUrls: ['./facturas-list.component.scss']
 })
@@ -48,7 +48,7 @@ export class FacturasListComponent implements OnInit {
     private facturasService: FacturaService,
     private router: Router,
     private customerService: CustomerService
-  ) {}
+  ) { }
 
   async ngOnInit() {
     await this.loadFacturas();
