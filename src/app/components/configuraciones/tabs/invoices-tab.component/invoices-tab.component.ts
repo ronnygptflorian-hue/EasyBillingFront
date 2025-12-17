@@ -5,12 +5,13 @@ import { ConfigutionService } from '../../service/configuracion.service';
 import { SecuenciaEcf } from '../../model/secuencia-ecf.model';
 import { TipoEcf } from '../../../../models/common-data.model'
 import { NotificationService } from '../../../../services/notification.service';
+import { CustomDatepickerComponent } from '../../../shared/custom-datepicker/custom-datepicker.component';
 
 
 @Component({
   selector: 'app-invoices-tab',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CustomDatepickerComponent],
   templateUrl: './invoices-tab.component.html',
   styleUrls: ['./invoices-tab.component.scss']
 })
@@ -30,8 +31,8 @@ export class InvoicesTabComponent implements OnInit {
   currentSecuencia: Partial<SecuenciaEcf> = {
     idTipoEcf: 1,
     descripcionTipoEcf: '',
-    inicioSecuencia: 1,
-    finSecuencia: 10000,
+    inicioSecuencia: 0,
+    finSecuencia: 0,
     fechaExpiracion: '',
     bloqueado: false,
     idEmpresa: this.configutionService.EMPRESA?.userCompanies[0]?.id || 0
@@ -47,7 +48,7 @@ export class InvoicesTabComponent implements OnInit {
 
   constructor(
     private configutionService: ConfigutionService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
   ) { }
 
   ngOnInit() {
@@ -138,9 +139,9 @@ export class InvoicesTabComponent implements OnInit {
     this.currentSecuencia = {
       idTipoEcf: 1,
       descripcionTipoEcf: '',
-      inicioSecuencia: 1,
-      finSecuencia: 10000,
-      fechaExpiracion: '',
+      inicioSecuencia:  null,
+      finSecuencia:  null,
+      fechaExpiracion: new Date().toLocaleDateString('es-DO'),
       bloqueado: false,
       idEmpresa: this.configutionService.EMPRESA?.userCompanies[0]?.id || 0
     };
@@ -202,12 +203,14 @@ export class InvoicesTabComponent implements OnInit {
   }
 
   getPorcentajeUsado(sec: SecuenciaEcf): number {
+    if (!sec.finSecuencia || !sec.inicioSecuencia) return 0;
     const total = sec.finSecuencia - sec.inicioSecuencia + 1;
     const usados = sec.inicioSecuencia - sec.inicioSecuencia;
     return Math.round((usados / total) * 100);
   }
 
   getDisponibles(sec: SecuenciaEcf): number {
+    if (!sec.finSecuencia || !sec.inicioSecuencia) return 0;
     return sec.finSecuencia - sec.inicioSecuencia + 1;
   }
 

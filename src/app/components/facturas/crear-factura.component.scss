@@ -649,6 +649,35 @@
   text-align: center;
 }
 
+.products-table input.small-input,
+.products-table select.small-input {
+  width: 100%;
+  min-width: 80px;
+  max-width: 140px;
+  padding: 6px 8px;
+  font-size: 0.95rem;
+}
+
+.products-table td {
+  vertical-align: middle;
+}
+
+.discount-input-wrapper .input-error {
+  font-size: 12px;
+  color: #d9534f;
+  margin-top: 2px;
+}
+
+.products-table td {
+  overflow: visible;
+}
+
+.products-table select.small-input {
+  min-width: 120px;
+}
+
+
+
 @media (max-width: 1024px) {
   .bottom-section {
     grid-template-columns: 1fr;

@@ -17,6 +17,7 @@ import { SecuenciaEcf } from '../configuraciones/model/secuencia-ecf.model';
 
 
 interface InvoiceItem extends Product {
+  discountError?: string;
   product: Product;
   quantity: number;
   price: number;
@@ -46,7 +47,7 @@ interface InvoiceItem extends Product {
 })
 export class CrearFacturaComponent implements OnInit {
   form!: FormGroup;
-
+tiposImpuestoPrincipales: TipoImpuesto[] = [];
   tiposEcf: SecuenciaEcf[] = [];
   monedas: Moneda[] = [];
   tiposIngreso: TipoIngreso[] = [];
@@ -54,6 +55,7 @@ export class CrearFacturaComponent implements OnInit {
   tiposImpuesto: TipoImpuesto[] = [];
   impuestosAdicionales: TipoImpuesto[] = [];
   additionalTaxes: TipoImpuesto[] = [];
+  discountError?: string;
 
   aplicaDescuento = false;
   tieneRetencion = false;
@@ -104,7 +106,7 @@ export class CrearFacturaComponent implements OnInit {
       comentario: [''],
       idMoneda: [1, Validators.required],
       tasaCambio: [1.0, Validators.required],
-      fechaEmisionEcf: [new Date().toISOString().split('T')[0], Validators.required],
+      fechaEmisionEcf: [new Date().toLocaleDateString('en-CA'), Validators.required],
       idTipoIngreso: [1, Validators.required],
       idCondicionPago: [1, Validators.required]
     });
@@ -132,6 +134,8 @@ export class CrearFacturaComponent implements OnInit {
         this.condicionesPago = resp.data.condicionesPago;
         this.tiposIngreso = resp.data.tiposIngreso;
         this.tiposImpuesto = resp.data.tiposImpuestos;
+        this.tiposImpuestoPrincipales = this.tiposImpuesto.filter(t => !t.adicional);
+
         this.impuestosAdicionales = resp.data.tiposImpuestos || [];
 
         if (this.isNotaCredito) {
@@ -408,18 +412,49 @@ export class CrearFacturaComponent implements OnInit {
     this.items.splice(index, 1);
   }
 
-  onDiscountModelChange(index: number) {
+  onApplyItbisInclusiveModelChange(index: number) {
     const str = this.items[index].discountStr;
     const val = parseFloat(str) || 0;
     this.items[index].porcientoDescuento = Math.min(100, Math.max(0, val));
     this.calculateItem(index);
   }
 
+onDiscountModelChange(index: number) {
+  let str = this.items[index].discountStr;
+  let val = parseFloat(str);
+
+  if (isNaN(val)) val = 0;
+
+  if (val < 1) val = 1;
+  if (val > 100) val = 100;
+
+  this.items[index].discountStr = val.toString();
+  this.items[index].porcientoDescuento = val;
+
+  this.calculateItem(index);
+}
+
+
+
+  onChangeTipoImpuesto(index: number) {
+  const item = this.items[index];
+  const tipo = this.tiposImpuesto.find(t => t.id === item.idTipoImpuesto);
+
+  if (tipo) {
+    item.itbisPct = tipo.impuestoP;
+  }
+
+  this.calculateItem(index);
+}
+
+
+
+
   calculateItem(index: number) {
     const item = this.items[index];
-    let baseAmount = item.quantity * item.precio;
+    let baseAmount = item.quantity * item.price;
 
-    if (this.precioIncluyeImpuestos && item.itbisIncluido) {
+    if (this.precioIncluyeImpuestos) {
       const tipoImpuesto = this.tiposImpuesto.find(t => t.id === item.idTipoImpuesto);
       const tasaImpuesto = tipoImpuesto ? tipoImpuesto.impuestoP : 18;
       baseAmount = baseAmount / (1 + tasaImpuesto / 100);
@@ -459,6 +494,13 @@ export class CrearFacturaComponent implements OnInit {
     item.total = total;
   }
 
+  onToggleItbisInclusive(event: any) {
+  this.precioIncluyeImpuestos = event.target.checked;
+
+  this.items.forEach((_, index) => this.calculateItem(index));
+}
+
+
   onToggleDescuento(event: any) {
     this.aplicaDescuento = event.target.checked;
     this.items.forEach((_, i) => this.calculateItem(i));
@@ -482,15 +524,27 @@ export class CrearFacturaComponent implements OnInit {
     this.activeTaxDropdownIndex = null;
   }
 
-  onToggleTax(itemIndex: number, taxId: number, checked: boolean) {
-    const item = this.items[itemIndex];
-    if (checked) {
-      item.additionalTaxesSelected.add(taxId);
-    } else {
-      item.additionalTaxesSelected.delete(taxId);
-    }
-    this.calculateItem(itemIndex);
+onToggleTax(itemIndex: number, taxId: number, checked: boolean) {
+  const item = this.items[itemIndex];
+
+  if (!item.additionalTaxesSelected) {
+    item.additionalTaxesSelected = new Set<number>();
   }
+
+  if (checked && item.additionalTaxesSelected.size >= 2) {
+    this.notificationService.error("Solo puedes seleccionar máximo 2 impuestos adicionales.");
+    return;
+  }
+
+  if (checked) {
+    item.additionalTaxesSelected.add(taxId);
+  } else {
+    item.additionalTaxesSelected.delete(taxId);
+  }
+
+  this.calculateItem(itemIndex);
+}
+
 
   focusProductSearch() {
     const input = document.getElementById('productSearch') as HTMLInputElement;
@@ -499,7 +553,7 @@ export class CrearFacturaComponent implements OnInit {
 
   get subtotal(): number {
     return this.items.reduce((sum, item) => {
-      let base = item.quantity * item.precio;
+      let base = item.quantity * item.price;
       if (this.precioIncluyeImpuestos && item.itbisIncluido) {
         const tipoImpuesto = this.tiposImpuesto.find(t => t.id === item.idTipoImpuesto);
         const tasaImpuesto = tipoImpuesto ? tipoImpuesto.impuestoP : 18;
@@ -521,7 +575,7 @@ export class CrearFacturaComponent implements OnInit {
   }
 
   get totalImpuestos(): number {
-    return this.totalItbis + this.items.reduce((sum, item) => sum + item.valorImpuesto, 0);
+    return this.items.reduce((sum, item) => sum + item.valorImpuesto, 0);
   }
 
   get montoTotal(): number {
@@ -534,6 +588,44 @@ export class CrearFacturaComponent implements OnInit {
     }
     return total;
   }
+
+  get totalItbisRetencion(): number {
+    return this.items.reduce((sum, item) => sum + item.valorItbisRetencion, 0);
+  }
+
+  get totalIsrRetencion(): number {
+    return this.items.reduce((sum, item) => sum + item.valorIsrRetencion, 0);
+  }
+
+
+  validateDiscount(index: number) {
+  const item = this.items[index];
+  const value = Number(item.discountStr);
+
+  // Reset error
+  item.discountError = '';
+
+  if (isNaN(value)) {
+    item.discountError = 'Debe introducir un número válido.';
+    return;
+  }
+
+  if (value < 1) {
+    item.discountError = 'El descuento no puede ser menor que 1%.';
+    return;
+  }
+
+  if (value > 100) {
+    item.discountError = 'El descuento no puede exceder 100%.';
+    return;
+  }
+
+  // Si no hay error → guardamos el valor real
+  item.porcientoDescuento = value;
+
+  this.calculateItem(index);
+}
+
 
   buildFacturaRequest(): FacturaRequest | null {
     const formValue = this.form.value;
