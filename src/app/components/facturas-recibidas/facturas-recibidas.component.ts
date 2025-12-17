@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FacturasRecibidasService } from './service/facturas-recibidas.service';
-import { FacturaRecibida, FacturaRecibidaDetalle } from './model/factura-recibida.model';
+import { ChangeStatusFactura, FacturaRecibida, FacturaRecibidaDetalle } from './model/factura-recibida.model';
 import { Pagination } from '../../models/api-response.model';
 import { LoadingComponent } from '../shared/loading.component/loading.component';
 import { CustomDatepickerComponent } from '../shared/custom-datepicker/custom-datepicker.component';
@@ -54,7 +54,7 @@ export class FacturasRecibidasComponent implements OnInit {
   constructor(
     private facturasRecibidasService: FacturasRecibidasService,
     private notificationService: NotificationService
-  ) {}
+  ) { }
 
   async ngOnInit() {
     await this.loadFacturas();
@@ -167,9 +167,13 @@ export class FacturasRecibidasComponent implements OnInit {
 
   aprobarFactura() {
     if (!this.selectedFactura) return;
-
+    const changeStatus: ChangeStatusFactura = {
+      IdDocumento: this.selectedFactura.idDocumento,
+      Aprobado: true,
+      ComentarioRechazo: null
+    };
     this.loadingDetail = true;
-    this.facturasRecibidasService.aprobarFactura(this.selectedFactura.idDocumento).subscribe({
+    this.facturasRecibidasService.changeStatusFactura(changeStatus).subscribe({
       next: () => {
         this.notificationService.success('Factura aprobada exitosamente');
         this.loadingDetail = false;
@@ -199,9 +203,13 @@ export class FacturasRecibidasComponent implements OnInit {
       this.notificationService.error('Debe indicar un motivo para rechazar la factura');
       return;
     }
-
+    const changeStatus: ChangeStatusFactura = {
+      IdDocumento: this.selectedFactura.idDocumento,
+      Aprobado: true,
+      ComentarioRechazo: null
+    };
     this.loadingDetail = true;
-    this.facturasRecibidasService.rechazarFactura(this.selectedFactura.idDocumento, this.motivoRechazo).subscribe({
+    this.facturasRecibidasService.changeStatusFactura(changeStatus).subscribe({
       next: () => {
         this.notificationService.success('Factura rechazada exitosamente');
         this.loadingDetail = false;

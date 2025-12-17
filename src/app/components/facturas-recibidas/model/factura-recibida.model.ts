@@ -110,3 +110,8 @@ export interface FacturaRecibidaFilters {
   pageIndex?: number;
   pageSize?: number;
 }
+export interface ChangeStatusFactura {
+  IdDocumento: number,
+  Aprobado: boolean,
+  ComentarioRechazo: string | null
+}

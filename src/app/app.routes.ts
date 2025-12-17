@@ -25,7 +25,7 @@ export const routes: Routes = [
       { path: 'productos', component: ProductosComponent },
       { path: 'facturas', component: FacturasListComponent },
       { path: 'facturas/crear', component: CrearFacturaComponent },
-      { path: 'facturasRecibidas', component: FacturasRecibidasComponent },
+      { path: 'facturas-recibidas', component: FacturasRecibidasComponent },
       { path: 'configuraciones', component: ConfiguracionesComponent },
     ]
   },
