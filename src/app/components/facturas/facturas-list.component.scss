@@ -38,7 +38,7 @@
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .filters-header {
@@ -48,6 +48,7 @@
   padding: 10px 16px;
   background: linear-gradient(135deg, var(--blue-50) 0%, var(--blue-100) 100%);
   border-bottom: 1px solid var(--blue-200);
+  border-radius: 12px 12px 0 0;
 
   h3 {
     font-size: 13px;
@@ -95,10 +96,10 @@
 }
 
 .filters-advanced-section {
-  max-height: 300px;
+  max-height: 500px;
   opacity: 1;
   transition: all 0.3s ease-in-out;
-  overflow: hidden;
+  overflow: visible;
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--gray-200);
@@ -109,6 +110,7 @@
     margin-top: 0;
     opacity: 0;
     border-top: none;
+    overflow: hidden;
   }
 }
 
