@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BaseService } from '../../../services/base.service';
-import { FacturaRecibida, FacturaRecibidaFilters, FacturaRecibidaDetalle } from '../model/factura-recibida.model';
+import { FacturaRecibida, FacturaRecibidaFilters, FacturaRecibidaDetalle, ChangeStatusFactura } from '../model/factura-recibida.model';
 import { ApiResponse } from '../../../models/api-response.model';
 
 @Injectable({ providedIn: 'root' })
@@ -15,12 +15,8 @@ export class FacturasRecibidasService extends BaseService<FacturaRecibida> {
     return this._http.get<FacturaRecibidaDetalle>(`${this.baseUrl}Document/GetbyId?id=${id}`);
   }
 
-  aprobarFactura(id: number): Observable<any> {
-    return this.post(`document/AprobarFactura/${id}`, {});
-  }
-
-  rechazarFactura(id: number, motivo: string): Observable<any> {
-    return this.post(`document/RechazarFactura/${id}`, { motivo });
+  changeStatusFactura(body: ChangeStatusFactura): Observable<any> {
+    return this.post(`tracking/Approval`,body);
   }
 
   descargarXml(ecf: string, xmlData: string): Blob {
