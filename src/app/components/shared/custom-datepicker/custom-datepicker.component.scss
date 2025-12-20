@@ -1,5 +1,8 @@
+@import 'flatpickr/dist/flatpickr.css';
+
 .datepicker-wrapper {
   width: 100%;
+  position: relative;
 }
 
 .datepicker-input {
@@ -17,32 +20,8 @@
   transition: all 0.2s ease;
   box-sizing: border-box;
 
-  &::-webkit-datetime-edit-fields-wrapper {
-    padding: 0;
-  }
-
-  &::-webkit-datetime-edit-text {
+  &::placeholder {
     color: var(--gray-400);
-    padding: 0 0.25em;
-  }
-
-  &::-webkit-datetime-edit-month-field,
-  &::-webkit-datetime-edit-day-field,
-  &::-webkit-datetime-edit-year-field {
-    color: var(--gray-700);
-    padding: 0;
-  }
-
-  &::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    color: var(--blue-500);
-    opacity: 1;
-    padding: 0;
-    margin-left: 4px;
-  }
-
-  &::-webkit-clear-button {
-    display: none;
   }
 
   &:hover:not(:disabled) {
@@ -59,5 +38,74 @@
     background: var(--gray-50);
     cursor: not-allowed;
     opacity: 0.6;
+  }
+}
+
+:host ::ng-deep {
+  .flatpickr-calendar {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    font-family: inherit;
+  }
+
+  .flatpickr-months {
+    background: var(--blue-500);
+    border-radius: 8px 8px 0 0;
+  }
+
+  .flatpickr-month {
+    color: white;
+  }
+
+  .flatpickr-current-month .flatpickr-monthDropdown-months {
+    background: var(--blue-500);
+    color: white;
+  }
+
+  .flatpickr-current-month input.cur-year {
+    color: white;
+    font-weight: 500;
+  }
+
+  .flatpickr-weekdays {
+    background: var(--gray-50);
+  }
+
+  .flatpickr-weekday {
+    color: var(--gray-600);
+    font-weight: 600;
+  }
+
+  .flatpickr-day {
+    color: var(--gray-700);
+    border-radius: 4px;
+
+    &:hover:not(.flatpickr-disabled):not(.selected) {
+      background: var(--blue-50);
+      border-color: var(--blue-200);
+    }
+
+    &.selected {
+      background: var(--blue-500);
+      border-color: var(--blue-500);
+    }
+
+    &.today {
+      border-color: var(--blue-500);
+
+      &:hover:not(.selected) {
+        background: var(--blue-50);
+      }
+    }
+  }
+
+  .flatpickr-prev-month,
+  .flatpickr-next-month {
+    fill: white;
+
+    &:hover svg {
+      fill: var(--blue-100);
+    }
   }
 }
