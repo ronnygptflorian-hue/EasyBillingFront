@@ -118,7 +118,7 @@ export class CustomDatepickerComponent implements ControlValueAccessor, OnInit {
   @HostListener('window:scroll', ['$event'])
   onWindowScroll() {
     if (this.isOpen) {
-      this.updateDropdownPosition();
+      this.isOpen = false;
     }
   }
 
