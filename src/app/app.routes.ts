@@ -10,6 +10,7 @@ import { FacturasListComponent } from './components/facturas/facturas-list.compo
 import { CrearFacturaComponent } from './components/facturas/crear-factura.component';
 import { ConfiguracionesComponent } from './components/configuraciones/configuraciones.component';
 import { FacturasRecibidasComponent } from './components/facturas-recibidas/facturas-recibidas.component';
+import { MiCuentaComponent } from './components/mi-cuenta/mi-cuenta.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -27,6 +28,7 @@ export const routes: Routes = [
       { path: 'facturas/crear', component: CrearFacturaComponent },
       { path: 'facturas-recibidas', component: FacturasRecibidasComponent },
       { path: 'configuraciones', component: ConfiguracionesComponent },
+      { path: 'mi-cuenta', component: MiCuentaComponent },
     ]
   },
   { path: '**', redirectTo: '/dashboard' }

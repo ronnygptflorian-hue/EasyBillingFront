@@ -1,0 +1,140 @@
+<div class="mi-cuenta-container">
+  <div class="page-header">
+    <h1>Mi Cuenta</h1>
+    <p>Información de tu empresa y actividad</p>
+  </div>
+
+  <app-loading *ngIf="loading"></app-loading>
+
+  <div *ngIf="!loading && cuentaData" class="cuenta-content">
+    <!-- Tarjeta de Información de la Empresa -->
+    <div class="card empresa-card">
+      <div class="card-header">
+        <h2>Información de la Empresa</h2>
+      </div>
+      <div class="card-body">
+        <div class="empresa-info">
+          <div *ngIf="cuentaData.empresa.logo" class="logo-container">
+            <img [src]="cuentaData.empresa.logo" alt="Logo de la empresa">
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <label>RNC</label>
+              <span>{{ cuentaData.empresa.rnc }}</span>
+            </div>
+            <div class="info-item">
+              <label>Razón Social</label>
+              <span>{{ cuentaData.empresa.razonSocial }}</span>
+            </div>
+            <div class="info-item">
+              <label>Nombre Comercial</label>
+              <span>{{ cuentaData.empresa.nombreComercial }}</span>
+            </div>
+            <div class="info-item">
+              <label>Email</label>
+              <span>{{ cuentaData.empresa.email }}</span>
+            </div>
+            <div class="info-item">
+              <label>Teléfono</label>
+              <span>{{ cuentaData.empresa.telefonos || 'No especificado' }}</span>
+            </div>
+            <div class="info-item full-width">
+              <label>Dirección</label>
+              <span>{{ cuentaData.empresa.direccion }}</span>
+            </div>
+            <div class="info-item">
+              <label>Ciudad</label>
+              <span>{{ cuentaData.empresa.ciudad }}</span>
+            </div>
+            <div class="info-item">
+              <label>Provincia</label>
+              <span>{{ cuentaData.empresa.provincia }}</span>
+            </div>
+            <div class="info-item">
+              <label>Código Postal</label>
+              <span>{{ cuentaData.empresa.codigoPostal }}</span>
+            </div>
+            <div class="info-item">
+              <label>Fecha de Registro</label>
+              <span>{{ formatDate(cuentaData.empresa.fechaAdd) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarjeta de Certificado Digital -->
+    <div class="card certificado-card" *ngIf="cuentaData.certificado">
+      <div class="card-header">
+        <h2>Certificado Digital</h2>
+        <span class="badge" [ngClass]="getCertificadoStatus()">
+          {{ getCertificadoStatusText() }}
+        </span>
+      </div>
+      <div class="card-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Entidad Emisora</label>
+            <span>{{ cuentaData.certificado.entidadEmisora }}</span>
+          </div>
+          <div class="info-item">
+            <label>Alias</label>
+            <span>{{ cuentaData.certificado.alias }}</span>
+          </div>
+          <div class="info-item">
+            <label>Fecha Efectiva</label>
+            <span>{{ formatDate(cuentaData.certificado.fechaEfectiva) }}</span>
+          </div>
+          <div class="info-item">
+            <label>Fecha de Expiración</label>
+            <span>{{ formatDate(cuentaData.certificado.fechaExpira) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarjeta de Estadísticas -->
+    <div class="card estadisticas-card">
+      <div class="card-header">
+        <h2>Estadísticas de Actividad</h2>
+      </div>
+      <div class="card-body">
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-icon">📄</div>
+            <div class="stat-content">
+              <span class="stat-value">{{ cuentaData.estadisticas.totalFacturasEmitidas }}</span>
+              <span class="stat-label">Facturas Emitidas</span>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+              <span class="stat-value">{{ cuentaData.estadisticas.totalClientes }}</span>
+              <span class="stat-label">Clientes</span>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">📦</div>
+            <div class="stat-content">
+              <span class="stat-value">{{ cuentaData.estadisticas.totalProductos }}</span>
+              <span class="stat-label">Productos</span>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">💰</div>
+            <div class="stat-content">
+              <span class="stat-value">{{ formatMonto(cuentaData.estadisticas.montoTotalFacturado) }}</span>
+              <span class="stat-label">Total Facturado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && !cuentaData" class="error-message">
+    <p>No se pudo cargar la información de la cuenta. Por favor, intenta de nuevo.</p>
+  </div>
+</div>
