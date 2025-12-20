@@ -11,7 +11,7 @@ import { CustomDatepickerComponent } from '../../../shared/custom-datepicker/cus
 @Component({
   selector: 'app-invoices-tab',
   standalone: true,
-  imports: [CommonModule, FormsModule, CustomDatepickerComponent],
+  imports: [CommonModule, FormsModule,CustomDatepickerComponent],
   templateUrl: './invoices-tab.component.html',
   styleUrls: ['./invoices-tab.component.scss']
 })

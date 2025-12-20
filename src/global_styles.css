@@ -1,3 +1,5 @@
+@import 'flatpickr/dist/flatpickr.css';
+
 :root {
   --blue-50: #ebf8ff;
   --blue-100: #bee3f8;
@@ -370,4 +372,72 @@ textarea {
 
 .text-center {
   text-align: center;
+}
+
+.flatpickr-calendar {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  font-family: inherit;
+}
+
+.flatpickr-months {
+  background: var(--blue-500);
+  border-radius: 8px 8px 0 0;
+}
+
+.flatpickr-month {
+  color: white;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+  background: var(--blue-500);
+  color: white;
+}
+
+.flatpickr-current-month input.cur-year {
+  color: white;
+  font-weight: 500;
+}
+
+.flatpickr-weekdays {
+  background: var(--gray-50);
+}
+
+.flatpickr-weekday {
+  color: var(--gray-600);
+  font-weight: 600;
+}
+
+.flatpickr-day {
+  color: var(--gray-700);
+  border-radius: 4px;
+}
+
+.flatpickr-day:hover:not(.flatpickr-disabled):not(.selected) {
+  background: var(--blue-50);
+  border-color: var(--blue-200);
+}
+
+.flatpickr-day.selected {
+  background: var(--blue-500);
+  border-color: var(--blue-500);
+}
+
+.flatpickr-day.today {
+  border-color: var(--blue-500);
+}
+
+.flatpickr-day.today:hover:not(.selected) {
+  background: var(--blue-50);
+}
+
+.flatpickr-prev-month svg,
+.flatpickr-next-month svg {
+  fill: white;
+}
+
+.flatpickr-prev-month:hover svg,
+.flatpickr-next-month:hover svg {
+  fill: var(--blue-100);
 }
