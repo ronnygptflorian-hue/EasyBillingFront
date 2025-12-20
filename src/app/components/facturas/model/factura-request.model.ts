@@ -72,6 +72,8 @@ export interface FacturaResponse {
   bloqueado: boolean;
   idDocumento: number | null;
   descripcionMoneda: string;
+  estadoFactura: string;
+
   rnc: string;
   tipoId: string;
   direccion: string;

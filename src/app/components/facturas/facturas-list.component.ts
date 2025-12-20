@@ -49,7 +49,7 @@ export class FacturasListComponent implements OnInit {
     private facturasService: FacturaService,
     private router: Router,
     private customerService: CustomerService
-  ) {}
+  ) { }
 
   async ngOnInit() {
     await this.loadFacturas();
