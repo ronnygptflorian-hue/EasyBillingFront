@@ -115,13 +115,6 @@ export class CustomDatepickerComponent implements ControlValueAccessor, OnInit {
     }
   }
 
-  @HostListener('window:scroll', ['$event'])
-  onWindowScroll() {
-    if (this.isOpen) {
-      this.isOpen = false;
-    }
-  }
-
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     if (this.isOpen && this.inputElement && this.dropdownElement) {
@@ -156,6 +149,16 @@ export class CustomDatepickerComponent implements ControlValueAccessor, OnInit {
 
   nextMonth() {
     this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1);
+    this.generateCalendar();
+  }
+
+  previousYear() {
+    this.currentMonth = new Date(this.currentMonth.getFullYear() - 1, this.currentMonth.getMonth());
+    this.generateCalendar();
+  }
+
+  nextYear() {
+    this.currentMonth = new Date(this.currentMonth.getFullYear() + 1, this.currentMonth.getMonth());
     this.generateCalendar();
   }
 

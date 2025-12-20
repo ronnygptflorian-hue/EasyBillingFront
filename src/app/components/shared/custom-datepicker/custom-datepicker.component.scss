@@ -107,7 +107,14 @@
     letter-spacing: 0.02em;
   }
 
-  .nav-button {
+  .year-navigation {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .nav-button,
+  .nav-button-year {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -132,6 +139,13 @@
 
     &:active {
       transform: scale(0.92);
+    }
+  }
+
+  .nav-button-year {
+    svg {
+      width: 20px;
+      height: 20px;
     }
   }
 }
