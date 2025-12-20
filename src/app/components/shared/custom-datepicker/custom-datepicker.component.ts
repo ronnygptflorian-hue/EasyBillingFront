@@ -61,7 +61,7 @@ export class CustomDatepickerComponent implements ControlValueAccessor, AfterVie
     };
 
     this.flatpickrInstance = flatpickr(this.dateInput.nativeElement, {
-      dateFormat: 'Y-m-d',
+      dateFormat: 'd-m-Y',
       locale: spanishLocale,
       allowInput: false,
       clickOpens: !this.disabled,
