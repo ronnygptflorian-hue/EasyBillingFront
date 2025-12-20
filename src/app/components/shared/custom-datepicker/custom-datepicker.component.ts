@@ -122,10 +122,17 @@ export class CustomDatepickerComponent implements ControlValueAccessor, OnInit {
     }
   }
 
-  closeCalendar() {
-    setTimeout(() => {
-      this.isOpen = false;
-    }, 200);
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (this.isOpen && this.inputElement && this.dropdownElement) {
+      const inputEl = this.inputElement.nativeElement;
+      const dropdownEl = this.dropdownElement.nativeElement;
+      const target = event.target as Node;
+
+      if (!inputEl.contains(target) && !dropdownEl.contains(target)) {
+        this.isOpen = false;
+      }
+    }
   }
 
   selectDate(day: CalendarDay) {
