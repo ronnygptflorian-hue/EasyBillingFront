@@ -85,22 +85,32 @@ export class CustomDatepickerComponent implements ControlValueAccessor, OnInit {
     if (!this.inputElement || !this.dropdownElement) return;
 
     const inputRect = this.inputElement.nativeElement.getBoundingClientRect();
-    const dropdownHeight = 400;
-    const spaceBelow = window.innerHeight - inputRect.bottom;
-    const spaceAbove = inputRect.top;
+    const dropdownHeight = 440;
+    const dropdownWidth = 320;
+    const padding = 8;
+
+    const spaceBelow = window.innerHeight - inputRect.bottom - padding;
+    const spaceAbove = inputRect.top - padding;
 
     let top: number;
-    if (spaceBelow >= dropdownHeight || spaceBelow >= spaceAbove) {
-      top = inputRect.bottom + 8;
+    if (spaceBelow >= dropdownHeight) {
+      top = inputRect.bottom + padding;
+    } else if (spaceAbove >= dropdownHeight) {
+      top = inputRect.top - dropdownHeight - padding;
+    } else if (spaceBelow > spaceAbove) {
+      top = inputRect.bottom + padding;
+      top = Math.min(top, window.innerHeight - dropdownHeight - padding);
     } else {
-      top = inputRect.top - dropdownHeight - 8;
+      top = padding;
     }
 
+    top = Math.max(padding, top);
+
     let left = inputRect.left;
-    const dropdownWidth = 320;
-    if (left + dropdownWidth > window.innerWidth) {
-      left = window.innerWidth - dropdownWidth - 16;
+    if (left + dropdownWidth > window.innerWidth - padding) {
+      left = window.innerWidth - dropdownWidth - padding;
     }
+    left = Math.max(padding, left);
 
     this.dropdownPosition = {
       top: `${top}px`,
