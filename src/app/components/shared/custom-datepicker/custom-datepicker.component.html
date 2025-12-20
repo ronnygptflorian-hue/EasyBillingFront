@@ -1,6 +1,7 @@
 <div class="datepicker-container">
   <div class="datepicker-input" [class.disabled]="disabled" [class.open]="isOpen" (click)="toggleCalendar()">
     <input
+      #inputElement
       type="text"
       [value]="displayValue"
       [placeholder]="placeholder"
@@ -16,7 +17,13 @@
     </svg>
   </div>
 
-  <div class="calendar-dropdown" [class.open]="isOpen" (click)="$event.stopPropagation()">
+  <div
+    #dropdownElement
+    class="calendar-dropdown"
+    [class.open]="isOpen"
+    [style.top]="dropdownPosition.top"
+    [style.left]="dropdownPosition.left"
+    (click)="$event.stopPropagation()">
     <div class="calendar-header">
       <button type="button" class="nav-button" (click)="previousMonth()">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

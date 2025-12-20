@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, forwardRef, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, forwardRef, OnInit, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
@@ -28,6 +28,8 @@ export class CustomDatepickerComponent implements ControlValueAccessor, OnInit {
   @Input() placeholder: string = 'mm / dd / yyyy';
   @Input() disabled: boolean = false;
   @Output() dateChange = new EventEmitter<string>();
+  @ViewChild('inputElement') inputElement!: ElementRef<HTMLInputElement>;
+  @ViewChild('dropdownElement') dropdownElement!: ElementRef<HTMLDivElement>;
 
   isOpen = false;
   selectedDate: Date | null = null;
@@ -37,6 +39,7 @@ export class CustomDatepickerComponent implements ControlValueAccessor, OnInit {
   weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
   monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                 'July', 'August', 'September', 'October', 'November', 'December'];
+  dropdownPosition = { top: '0px', left: '0px' };
 
   private onChange: (value: string) => void = () => {};
   private onTouched: () => void = () => {};
@@ -74,6 +77,48 @@ export class CustomDatepickerComponent implements ControlValueAccessor, OnInit {
     this.isOpen = !this.isOpen;
     if (this.isOpen) {
       this.onTouched();
+      setTimeout(() => this.updateDropdownPosition(), 0);
+    }
+  }
+
+  private updateDropdownPosition() {
+    if (!this.inputElement || !this.dropdownElement) return;
+
+    const inputRect = this.inputElement.nativeElement.getBoundingClientRect();
+    const dropdownHeight = 400;
+    const spaceBelow = window.innerHeight - inputRect.bottom;
+    const spaceAbove = inputRect.top;
+
+    let top: number;
+    if (spaceBelow >= dropdownHeight || spaceBelow >= spaceAbove) {
+      top = inputRect.bottom + 8;
+    } else {
+      top = inputRect.top - dropdownHeight - 8;
+    }
+
+    let left = inputRect.left;
+    const dropdownWidth = 320;
+    if (left + dropdownWidth > window.innerWidth) {
+      left = window.innerWidth - dropdownWidth - 16;
+    }
+
+    this.dropdownPosition = {
+      top: `${top}px`,
+      left: `${left}px`
+    };
+  }
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    if (this.isOpen) {
+      this.updateDropdownPosition();
+    }
+  }
+
+  @HostListener('window:scroll', ['$event'])
+  onWindowScroll() {
+    if (this.isOpen) {
+      this.updateDropdownPosition();
     }
   }
 
