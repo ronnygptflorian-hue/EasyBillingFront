@@ -14,6 +14,7 @@ import { NotificationService } from '../../services/notification.service';
 import { LoadingComponent } from '../shared/loading.component/loading.component'
 import { ConfigutionService } from '../configuraciones/service/configuracion.service';
 import { SecuenciaEcf } from '../configuraciones/model/secuencia-ecf.model';
+import { CustomDatepickerComponent } from '../shared/custom-datepicker/custom-datepicker.component';
 
 
 interface InvoiceItem extends Product {
@@ -40,7 +41,7 @@ interface InvoiceItem extends Product {
 @Component({
   selector: 'app-crear-factura',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, LoadingComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, LoadingComponent,CustomDatepickerComponent],
   templateUrl: './crear-factura.component.html',
   styleUrls: ['./crear-factura.component.scss']
 })

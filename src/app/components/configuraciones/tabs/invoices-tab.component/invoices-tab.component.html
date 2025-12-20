@@ -40,9 +40,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let sec of secuencias"
-          [class.row-blocked]="sec.bloqueado"
-          [class.row-expired]="isExpired(sec)"
+        <tr *ngFor="let sec of secuencias" [class.row-blocked]="sec.bloqueado" [class.row-expired]="isExpired(sec)"
           [class.row-warning]="isNearExpiry(sec)">
           <td class="tipo-cell">
             <span class="tipo-badge">{{ getTipoCodigo(sec.idTipoEcf) }}</span>
@@ -61,10 +59,8 @@
             <div class="uso-container">
               <span class="uso-text">{{ getPorcentajeUsado(sec) }}%</span>
               <div class="progress-bar-mini">
-                <div class="progress-fill-mini"
-                  [style.width.%]="getPorcentajeUsado(sec)"
-                  [class.warning]="getPorcentajeUsado(sec) > 80"
-                  [class.danger]="getPorcentajeUsado(sec) > 95">
+                <div class="progress-fill-mini" [style.width.%]="getPorcentajeUsado(sec)"
+                  [class.warning]="getPorcentajeUsado(sec) > 80" [class.danger]="getPorcentajeUsado(sec) > 95">
                 </div>
               </div>
             </div>
@@ -76,10 +72,8 @@
             <span class="alert-icon" *ngIf="isNearExpiry(sec) && !isExpired(sec)">⚠️</span>
           </td>
           <td class="estado-cell">
-            <span class="status-badge"
-              [class.status-active]="!sec.bloqueado && !isExpired(sec)"
-              [class.status-blocked]="sec.bloqueado"
-              [class.status-expired]="isExpired(sec)">
+            <span class="status-badge" [class.status-active]="!sec.bloqueado && !isExpired(sec)"
+              [class.status-blocked]="sec.bloqueado" [class.status-expired]="isExpired(sec)">
               {{ getEstado(sec) }}
             </span>
           </td>
@@ -89,8 +83,7 @@
                 ✏️
               </button>
               <label class="toggle-switch-mini" title="Bloquear/Desbloquear">
-                <input type="checkbox" [checked]="!sec.bloqueado"
-                  (change)="toggleBloqueo(sec)" />
+                <input type="checkbox" [checked]="!sec.bloqueado" (change)="toggleBloqueo(sec)" />
                 <span class="slider-mini"></span>
               </label>
             </div>
@@ -101,7 +94,8 @@
 
     <div class="pagination-container">
       <div class="pagination-info">
-        <span>Mostrando {{ (pageIndex - 1) * pageSize + 1 }} - {{ Math.min(pageIndex * pageSize, totalRecords) }} de {{ totalRecords }} registros</span>
+        <span>Mostrando {{ (pageIndex - 1) * pageSize + 1 }} - {{ Math.min(pageIndex * pageSize, totalRecords) }} de {{
+          totalRecords }} registros</span>
         <div class="page-size-selector">
           <label>Mostrar:</label>
           <select [(ngModel)]="pageSize" (change)="changePageSize(pageSize)" class="page-size-select">
@@ -118,9 +112,7 @@
           ‹ Anterior
         </button>
 
-        <button *ngFor="let page of visiblePages"
-          class="pagination-number"
-          [class.active]="page === pageIndex"
+        <button *ngFor="let page of visiblePages" class="pagination-number" [class.active]="page === pageIndex"
           (click)="goToPage(page)">
           {{ page }}
         </button>
@@ -132,7 +124,7 @@
     </div>
   </div>
 
-  
+
 </div>
 
 <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
@@ -145,8 +137,7 @@
     <form (ngSubmit)="saveSecuencia()" class="modal-body">
       <div class="form-group">
         <label>Tipo de Comprobante <span class="required">*</span></label>
-        <select class="form-control" [(ngModel)]="currentSecuencia.idTipoEcf"
-          name="tipoEcf" required>
+        <select class="form-control" [(ngModel)]="currentSecuencia.idTipoEcf" name="tipoEcf" required>
           <option *ngFor="let tipo of tiposEcf" [value]="tipo.id">
             {{ tipo.codigo }} - {{ tipo.descripcion }}
           </option>
@@ -156,30 +147,26 @@
       <div class="form-row">
         <div class="form-group">
           <label>Inicio Secuencia <span class="required">*</span></label>
-          <input type="number" class="form-control"
-            [(ngModel)]="currentSecuencia.inicioSecuencia"
+          <input type="number" class="form-control" [(ngModel)]="currentSecuencia.inicioSecuencia"
             name="inicioSecuencia" required min="1" />
         </div>
 
         <div class="form-group">
           <label>Fin Secuencia <span class="required">*</span></label>
-          <input type="number" class="form-control"
-            [(ngModel)]="currentSecuencia.finSecuencia"
-            name="finSecuencia" required min="1" />
+          <input type="number" class="form-control" [(ngModel)]="currentSecuencia.finSecuencia" name="finSecuencia"
+            required min="1" />
         </div>
       </div>
 
       <div class="form-group">
         <label>Fecha de Expiración <span class="required">*</span></label>
-        <input type="date" class="form-control"
-          [(ngModel)]="currentSecuencia.fechaExpiracion"
-          name="fechaExpiracion" required />
+        <app-custom-datepicker [(ngModel)]="currentSecuencia.fechaExpiracion" placeholder="Seleccionar fecha">
+        </app-custom-datepicker>
       </div>
 
       <div class="form-group">
         <label class="checkbox-label">
-          <input type="checkbox" [(ngModel)]="currentSecuencia.bloqueado"
-            name="bloqueado" />
+          <input type="checkbox" [(ngModel)]="currentSecuencia.bloqueado" name="bloqueado" />
           <span>Bloquear secuencia</span>
         </label>
       </div>
