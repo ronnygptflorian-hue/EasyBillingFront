@@ -2,8 +2,7 @@ import { Component, Input, Output, EventEmitter, forwardRef, ElementRef, ViewChi
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import flatpickr from 'flatpickr';
-import { Instance as FlatpickrInstance } from 'flatpickr/dist/types/instance';
-import { Spanish } from 'flatpickr/dist/l10n/es.js';
+import type { Instance } from 'flatpickr/dist/types/instance';
 
 @Component({
   selector: 'app-custom-datepicker',
@@ -26,12 +25,14 @@ export class CustomDatepickerComponent implements ControlValueAccessor, AfterVie
   @Output() dateChange = new EventEmitter<string>();
 
   value: string = '';
-  private flatpickrInstance?: FlatpickrInstance;
+  private flatpickrInstance?: Instance;
   private onChange: (value: string) => void = () => {};
   private onTouched: () => void = () => {};
 
   ngAfterViewInit(): void {
-    this.initFlatpickr();
+    setTimeout(() => {
+      this.initFlatpickr();
+    }, 0);
   }
 
   ngOnDestroy(): void {
@@ -41,13 +42,30 @@ export class CustomDatepickerComponent implements ControlValueAccessor, AfterVie
   }
 
   private initFlatpickr(): void {
-    if (!this.dateInput) return;
+    if (!this.dateInput?.nativeElement) return;
+
+    const spanishLocale = {
+      weekdays: {
+        shorthand: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'] as [string, string, string, string, string, string, string],
+        longhand: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'] as [string, string, string, string, string, string, string]
+      },
+      months: {
+        shorthand: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'] as [string, string, string, string, string, string, string, string, string, string, string, string],
+        longhand: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'] as [string, string, string, string, string, string, string, string, string, string, string, string]
+      },
+      firstDayOfWeek: 1,
+      rangeSeparator: ' a ',
+      weekAbbreviation: 'Sem',
+      scrollTitle: 'Desplazar para aumentar',
+      toggleTitle: 'Hacer clic para cambiar'
+    };
 
     this.flatpickrInstance = flatpickr(this.dateInput.nativeElement, {
       dateFormat: 'Y-m-d',
-      locale: Spanish,
-      allowInput: true,
-      onChange: (selectedDates, dateStr) => {
+      locale: spanishLocale,
+      allowInput: false,
+      clickOpens: !this.disabled,
+      onChange: (selectedDates: Date[], dateStr: string) => {
         this.value = dateStr;
         this.onChange(dateStr);
         this.dateChange.emit(dateStr);
@@ -60,16 +78,12 @@ export class CustomDatepickerComponent implements ControlValueAccessor, AfterVie
     if (this.value) {
       this.flatpickrInstance.setDate(this.value, false);
     }
-
-    if (this.disabled) {
-      this.flatpickrInstance.set('clickOpens', false);
-    }
   }
 
   writeValue(value: string): void {
     this.value = value || '';
-    if (this.flatpickrInstance) {
-      this.flatpickrInstance.setDate(value || '', false);
+    if (this.flatpickrInstance && value) {
+      this.flatpickrInstance.setDate(value, false);
     }
   }
 
@@ -84,7 +98,11 @@ export class CustomDatepickerComponent implements ControlValueAccessor, AfterVie
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
     if (this.flatpickrInstance) {
-      this.flatpickrInstance.set('clickOpens', !isDisabled);
+      if (isDisabled) {
+        this.flatpickrInstance.set('clickOpens', false);
+      } else {
+        this.flatpickrInstance.set('clickOpens', true);
+      }
     }
   }
 }
