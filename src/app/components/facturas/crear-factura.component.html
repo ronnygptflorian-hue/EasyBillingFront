@@ -30,7 +30,7 @@
                 Selecciona tipo de comprobante
               </option>
               <option *ngFor="let t of tiposEcf" [ngValue]="t.idTipoEcf">
-                <!-- {{t.codigo}} - -->
+                E{{ t.codigoTipoEcf }} -
                 {{ t.descripcionTipoEcf }}
               </option>
             </select>
@@ -40,7 +40,8 @@
             <label for="fechaEmisionEcf">📅 Fecha de Emisión *</label>
             <app-custom-datepicker
               [(ngModel)]="fechaEmisionEcf"
-              placeholder="Seleccionar fecha">
+              placeholder="Seleccionar fecha"
+            >
             </app-custom-datepicker>
           </div>
 

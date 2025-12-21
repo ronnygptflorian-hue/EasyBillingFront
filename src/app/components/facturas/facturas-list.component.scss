@@ -454,7 +454,7 @@
 .modal-content {
   background: white;
   border-radius: 12px;
-  width: 100%;
+  width: 80%;
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
@@ -490,6 +490,78 @@
     }
   }
 }
+
+
+/* Contenedor principal del header */
+.action-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+/* Agrupa el título y los botones */
+.title-group {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Contenedor de los botones */
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+/* Estilo base de los botones */
+.action-buttons .btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: all 0.2s ease;
+  border: 1px solid #ccc;
+  background: #f8f8f8;
+  color: #333;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Hover */
+.action-buttons .btn:hover {
+  background: #eaeaea;
+  border-color: #bbb;
+}
+
+/* Outline (match your system buttons) */
+.btn-outline {
+  background: #ffffff;
+  border: 1px solid #cfcfcf;
+}
+
+.btn-outline:hover {
+  background: #f3f3f3;
+}
+
+/* Close button */
+.btn-close {
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #666;
+  padding: 5px;
+  transition: color 0.2s ease;
+}
+
+.btn-close:hover {
+  color: #111;
+}
+
 
 .modal-body {
   padding: 24px;

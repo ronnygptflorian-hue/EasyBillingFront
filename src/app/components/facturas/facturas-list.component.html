@@ -1,4 +1,8 @@
-<app-loading [show]="loading" [fullscreen]="true" message="Cargando Factura..."></app-loading>
+<app-loading
+  [show]="loading"
+  [fullscreen]="true"
+  message="Cargando Factura..."
+></app-loading>
 <div class="page-container">
   <div class="page-header">
     <h1>Facturas</h1>
@@ -9,7 +13,7 @@
     <div class="filters-header">
       <h3>Filtros de Búsqueda</h3>
       <button (click)="toggleAdvancedFilters()" class="btn-advanced-filters">
-        {{ showAdvancedFilters ? '▲' : '▼' }} Avanzados
+        {{ showAdvancedFilters ? "▲" : "▼" }} Avanzados
       </button>
     </div>
 
@@ -17,17 +21,36 @@
       <div class="filters-grid-main">
         <div class="filter-group">
           <label class="filter-label">NCF</label>
-          <input type="text" [(ngModel)]="filtroNcf" placeholder="Buscar por NCF..." class="filter-input" />
+          <input
+            type="text"
+            [(ngModel)]="filtroNcf"
+            placeholder="Buscar por NCF..."
+            class="filter-input"
+          />
         </div>
 
         <div class="filter-group">
           <label class="filter-label">Cliente</label>
           <div class="autocomplete-wrapper">
-            <input type="text" [(ngModel)]="searchTerm" (input)="onClienteSearch($event)" (focus)="onClienteFocus()"
-              (blur)="onClienteBlur()" placeholder="Buscar cliente..." class="filter-input" autocomplete="off" />
-            <div class="autocomplete-dropdown" *ngIf="showClienteDropdown && clienteSuggestions.length > 0">
-              <div *ngFor="let cliente of clienteSuggestions" class="autocomplete-item"
-                (mousedown)="selectCliente(cliente)">
+            <input
+              type="text"
+              [(ngModel)]="searchTerm"
+              (input)="onClienteSearch($event)"
+              (focus)="onClienteFocus()"
+              (blur)="onClienteBlur()"
+              placeholder="Buscar cliente..."
+              class="filter-input"
+              autocomplete="off"
+            />
+            <div
+              class="autocomplete-dropdown"
+              *ngIf="showClienteDropdown && clienteSuggestions.length > 0"
+            >
+              <div
+                *ngFor="let cliente of clienteSuggestions"
+                class="autocomplete-item"
+                (mousedown)="selectCliente(cliente)"
+              >
                 <div class="cliente-name">{{ cliente.razonSocial }}</div>
                 <div class="cliente-rnc">{{ cliente.rnc }}</div>
               </div>
@@ -45,19 +68,25 @@
         </div>
       </div>
 
-      <div class="filters-advanced-section" [class.collapsed]="!showAdvancedFilters">
+      <div
+        class="filters-advanced-section"
+        [class.collapsed]="!showAdvancedFilters"
+      >
         <div class="filters-grid">
-
           <div class="filter-group">
             <label class="filter-label">Fecha Desde</label>
-            <app-custom-datepicker [(ngModel)]="filtroFechaDesde"
-              placeholder="Seleccionar fecha"></app-custom-datepicker>
+            <app-custom-datepicker
+              [(ngModel)]="filtroFechaDesde"
+              placeholder="Seleccionar fecha"
+            ></app-custom-datepicker>
           </div>
 
           <div class="filter-group">
             <label class="filter-label">Fecha Hasta</label>
-            <app-custom-datepicker [(ngModel)]="filtroFechaHasta"
-              placeholder="Seleccionar fecha"></app-custom-datepicker>
+            <app-custom-datepicker
+              [(ngModel)]="filtroFechaHasta"
+              placeholder="Seleccionar fecha"
+            ></app-custom-datepicker>
           </div>
         </div>
 
@@ -90,22 +119,41 @@
           </thead>
           <tbody>
             <tr *ngFor="let factura of filteredFacturas">
-              <td class="font-mono">{{ factura.ecf || 'N/A' }}</td>
-              <td>{{ factura.nombreCliente || 'N/A' }}</td>
+              <td class="font-mono">{{ factura.ecf || "N/A" }}</td>
+              <td>{{ factura.nombreCliente || "N/A" }}</td>
               <td>{{ formatDate(factura.fechaAdd) }}</td>
               <td>{{ formatCurrency(factura.totalItbis) }}</td>
-              <td class="font-bold">{{ formatCurrency(factura.totalGeneral) }}</td>
+              <td class="font-bold">
+                {{ formatCurrency(factura.totalGeneral) }}
+              </td>
               <td>
                 <span [class]="'badge ' + getEstadoClass(factura.tipoVenta)">
                   {{ getEstadoLabel(factura.tipoVenta) }}
                 </span>
               </td>
-              <td>{{ factura.descripcionTipoEcf || 'N/A' }}</td>
+              <td>{{ factura.descripcionTipoEcf || "N/A" }}</td>
               <td class="actions">
-                <button (click)="viewFactura(factura)" class="btn-icon btn-view" title="Ver detalles">👁️</button>
-                <button (click)="printFactura(factura)" class="btn-icon btn-print" title="Imprimir Factura">🖨️</button>
-                <button (click)="crearNotaCredito(factura)" class="btn-icon btn-credit"
-                  title="Crear Nota de Crédito">📝</button>
+                <button
+                  (click)="viewFactura(factura)"
+                  class="btn-icon btn-view"
+                  title="Ver detalles"
+                >
+                  👁️
+                </button>
+                <button
+                  (click)="printFactura(factura)"
+                  class="btn-icon btn-print"
+                  title="Imprimir Factura"
+                >
+                  🖨️
+                </button>
+                <button
+                  (click)="crearNotaCredito(factura)"
+                  class="btn-icon btn-credit"
+                  title="Crear Nota de Crédito"
+                >
+                  📝
+                </button>
               </td>
             </tr>
           </tbody>
@@ -113,14 +161,20 @@
       </div>
     </div>
 
-    <div class="empty-state" *ngIf="!loading && filteredFacturas.length === 0 && facturas.length === 0">
+    <div
+      class="empty-state"
+      *ngIf="!loading && filteredFacturas.length === 0 && facturas.length === 0"
+    >
       <div class="empty-icon">📄</div>
       <h3>No hay facturas</h3>
       <p>Crea tu primera factura para comenzar</p>
       <a routerLink="/facturas/crear" class="btn-primary">Crear Factura</a>
     </div>
 
-    <div class="empty-state" *ngIf="!loading && filteredFacturas.length === 0 && facturas.length > 0">
+    <div
+      class="empty-state"
+      *ngIf="!loading && filteredFacturas.length === 0 && facturas.length > 0"
+    >
       <div class="empty-icon">🔍</div>
       <h3>No se encontraron resultados</h3>
       <p>Intenta con otros criterios de búsqueda</p>
@@ -129,20 +183,37 @@
     <div class="pagination-container" *ngIf="!loading && facturas.length > 0">
       <div class="pagination-info">
         Mostrando {{ (pagination.pageNumber - 1) * pagination.pageSize + 1 }} -
-        {{ Math.min(pagination.pageNumber * pagination.pageSize, pagination.totalCount) }}
+        {{
+          Math.min(
+            pagination.pageNumber * pagination.pageSize,
+            pagination.totalCount
+          )
+        }}
         de {{ pagination.totalCount }} facturas
       </div>
       <div class="pagination-controls">
-        <button (click)="previousPage()" [disabled]="!pagination.hasPreviousPage" class="btn-pagination">
+        <button
+          (click)="previousPage()"
+          [disabled]="!pagination.hasPreviousPage"
+          class="btn-pagination"
+        >
           ← Anterior
         </button>
 
-        <button *ngFor="let page of pages" (click)="goToPage(page)" [class.active]="page === pagination.pageNumber"
-          class="btn-page">
+        <button
+          *ngFor="let page of pages"
+          (click)="goToPage(page)"
+          [class.active]="page === pagination.pageNumber"
+          class="btn-page"
+        >
           {{ page }}
         </button>
 
-        <button (click)="nextPage()" [disabled]="!pagination.hasNextPage" class="btn-pagination">
+        <button
+          (click)="nextPage()"
+          [disabled]="!pagination.hasNextPage"
+          class="btn-pagination"
+        >
           Siguiente →
         </button>
       </div>
@@ -150,8 +221,26 @@
 
     <div class="modal" *ngIf="showDetailModal" (click)="closeDetailModal()">
       <div class="modal-content modal-large" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h2>Detalle de Factura</h2>
+        <div class="modal-header action-header">
+          <div class="title-group">
+            <h2>Detalle de Factura</h2>
+
+            <div class="action-buttons">
+              <button
+                class="btn btn-outline"
+                (click)="onDownloadPdf(selectedFactura)"
+              >
+                📄 PDF
+              </button>
+              <button
+                class="btn btn-outline"
+                (click)="onDownloadXml(selectedFactura)"
+              >
+                🧾 XML DGII
+              </button>
+            </div>
+          </div>
+
           <button (click)="closeDetailModal()" class="btn-close">×</button>
         </div>
 
@@ -161,19 +250,19 @@
             <div class="detail-grid">
               <div class="detail-item">
                 <label>NCF:</label>
-                <span>{{ selectedFactura.ecf || 'N/A' }}</span>
+                <span>{{ selectedFactura.ecf || "N/A" }}</span>
               </div>
               <div class="detail-item">
                 <label>Tipo ECF:</label>
-                <span>{{ selectedFactura.descripcionTipoEcf || 'N/A' }}</span>
+                <span>{{ selectedFactura.descripcionTipoEcf || "N/A" }}</span>
               </div>
               <div class="detail-item">
                 <label>Cliente:</label>
-                <span>{{ selectedFactura.nombreCliente || 'N/A' }}</span>
+                <span>{{ selectedFactura.nombreCliente || "N/A" }}</span>
               </div>
               <div class="detail-item">
                 <label>RNC/Cédula:</label>
-                <span>{{ selectedFactura.rnc || 'N/A' }}</span>
+                <span>{{ selectedFactura.rnc || "N/A" }}</span>
               </div>
               <div class="detail-item">
                 <label>Fecha Emisión:</label>
@@ -185,13 +274,19 @@
               </div>
               <div class="detail-item">
                 <label>Tipo Venta:</label>
-                <span [class]="'badge ' + getEstadoClass(selectedFactura.tipoVenta)">
+                <span
+                  [class]="'badge ' + getEstadoClass(selectedFactura.tipoVenta)"
+                >
                   {{ getEstadoLabel(selectedFactura.tipoVenta) }}
                 </span>
               </div>
               <div class="detail-item">
                 <label>Moneda:</label>
-                <span>{{ selectedFactura.descripcionMoneda }} ({{ selectedFactura.codigoISO }})</span>
+                <span
+                  >{{ selectedFactura.descripcionMoneda }} ({{
+                    selectedFactura.codigoISO
+                  }})</span
+                >
               </div>
             </div>
           </div>
@@ -206,16 +301,21 @@
             <div class="detail-grid">
               <div class="detail-item">
                 <label>Dirección:</label>
-                <span>{{ selectedFactura.direccion || 'N/A' }}</span>
+                <span>{{ selectedFactura.direccion || "N/A" }}</span>
               </div>
               <div class="detail-item">
                 <label>Teléfonos:</label>
-                <span>{{ selectedFactura.telefonos || 'N/A' }}</span>
+                <span>{{ selectedFactura.telefonos || "N/A" }}</span>
               </div>
             </div>
           </div>
 
-          <div class="detail-section" *ngIf="selectedFactura.detalles && selectedFactura.detalles.length > 0">
+          <div
+            class="detail-section"
+            *ngIf="
+              selectedFactura.detalles && selectedFactura.detalles.length > 0
+            "
+          >
             <h3>Productos / Servicios</h3>
             <div class="products-table-wrapper">
               <table class="products-detail-table">
@@ -233,15 +333,78 @@
                   <tr *ngFor="let detalle of selectedFactura.detalles">
                     <td>
                       <div class="product-info">
-                        <div class="product-name">{{ detalle.descripcionProducto }}</div>
-                        <div class="product-meta">{{ detalle.descripcionMedida }} - {{ detalle.descripcionItbi }}</div>
+                        <div class="product-name">
+                          {{ detalle.descripcionProducto }}
+                        </div>
+
+                        <div class="product-meta">
+                          {{ detalle.descripcionMedida }} -
+                          {{ detalle.descripcionItbi }}
+
+                          <span *ngIf="detalle.porcientoDescuento > 0">
+                            • Descuento: {{ detalle.porcientoDescuento }}%
+                          </span>
+
+                          <span *ngIf="detalle.porcientoRecargo > 0">
+                            • Recargo: {{ detalle.porcientoRecargo }}%
+                          </span>
+
+                          <span *ngIf="detalle.tipoRetencion">
+                            • Retención: ITBIS
+                            {{
+                              detalle.valorItbisRetencion | number : "1.2-2"
+                            }}, ISR
+                            {{ detalle.valorIsrRetencion | number : "1.2-2" }}
+                          </span>
+
+                          <span
+                            *ngIf="
+                              detalle.impuestosAdicionales &&
+                              detalle.impuestosAdicionales.length > 0
+                            "
+                          >
+                            • Impuestos Adicionales:
+                          </span>
+
+                          <div
+                            class="extra-taxes"
+                            *ngIf="
+                              detalle.impuestosAdicionales &&
+                              detalle.impuestosAdicionales.length > 0
+                            "
+                          >
+                            <div
+                              *ngFor="let adic of detalle.impuestosAdicionales"
+                            >
+                              → {{ adic.porcientoImpuesto }}% ({{
+                                formatCurrency(adic.valorImpuesto)
+                              }})
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </td>
+
                     <td class="text-center">{{ detalle.cantidad }}</td>
-                    <td class="text-right">{{ formatCurrency(detalle.precio) }}</td>
-                    <td class="text-right">{{ formatCurrency(detalle.valorDescuento) }}</td>
-                    <td class="text-right">{{ formatCurrency(detalle.valorItbis) }}</td>
-                    <td class="text-right font-bold">{{ formatCurrency(detalle.totalDetalle) }}</td>
+
+                    <td class="text-right">
+                      {{ formatCurrency(detalle.precio) }}
+                    </td>
+
+                    <td class="text-right">
+                      <span *ngIf="detalle.valorDescuento > 0">{{
+                        formatCurrency(detalle.valorDescuento)
+                      }}</span>
+                      <span *ngIf="detalle.valorDescuento == 0">—</span>
+                    </td>
+
+                    <td class="text-right">
+                      {{ formatCurrency(detalle.valorItbis) }}
+                    </td>
+
+                    <td class="text-right font-bold">
+                      {{ formatCurrency(detalle.totalDetalle) }}
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -250,23 +413,37 @@
 
           <div class="detail-section">
             <h3>Totales</h3>
+
             <div class="totals-grid">
               <div class="total-item">
-                <label>Descuento:</label>
-                <span>{{ formatCurrency(selectedFactura.totalDescuento) }}</span>
+                <label>Subtotal:</label>
+                <span>{{ formatCurrency(getSubtotal(selectedFactura)) }}</span>
               </div>
+
               <div class="total-item">
-                <label>Recargo:</label>
-                <span>{{ formatCurrency(selectedFactura.totalRecargo) }}</span>
+                <label>Descuento:</label>
+                <span>{{
+                  formatCurrency(selectedFactura.totalDescuento)
+                }}</span>
               </div>
+
               <div class="total-item">
                 <label>ITBIS:</label>
                 <span>{{ formatCurrency(selectedFactura.totalItbis) }}</span>
               </div>
+
               <div class="total-item">
                 <label>Otros Impuestos:</label>
                 <span>{{ formatCurrency(selectedFactura.totalImpuesto) }}</span>
               </div>
+
+              <div class="total-item">
+                <label>Total Retención:</label>
+                <span>{{
+                  formatCurrency(getTotalRetencion(selectedFactura))
+                }}</span>
+              </div>
+
               <div class="total-item total-final">
                 <label>Total General:</label>
                 <span>{{ formatCurrency(selectedFactura.totalGeneral) }}</span>
@@ -279,22 +456,37 @@
             <div class="dgii-info-container">
               <div class="qr-code-container">
                 <div class="qr-code-wrapper">
-                  <img [src]="getQrCodeUrl(selectedFactura.qrDgii)" alt="Código QR DGII" class="qr-code-image"
-                    (error)="onQrImageError($event)" />
+                  <img
+                    [src]="getQrCodeUrl(selectedFactura.qrDgii)"
+                    alt="Código QR DGII"
+                    class="qr-code-image"
+                    (error)="onQrImageError($event)"
+                  />
                   <p class="qr-instruction">Escanea para verificar</p>
                   <div class="qr-details">
                     <div class="qr-detail-item">
-                      <span class="qr-detail-label">Código de Seguridad: <span class="qr-detail-value">{{
-                          selectedFactura.codigoSeguridad || 'N/A' }}</span></span>
-
+                      <span class="qr-detail-label"
+                        >Código de Seguridad:
+                        <span class="qr-detail-value">{{
+                          selectedFactura.codigoSeguridad || "N/A"
+                        }}</span></span
+                      >
                     </div>
                     <div class="qr-detail-item">
-                      <span class="qr-detail-label">Fecha Firma: <span class="qr-detail-value">{{
-                          selectedFactura.fechaFirmaDgii || 'N/A' }}</span></span>
+                      <span class="qr-detail-label"
+                        >Fecha Firma:
+                        <span class="qr-detail-value">{{
+                          selectedFactura.fechaFirmaDgii || "N/A"
+                        }}</span></span
+                      >
                     </div>
                   </div>
                 </div>
-                <a [href]="selectedFactura.qrDgii" target="_blank" class="qr-link-button">
+                <a
+                  [href]="selectedFactura.qrDgii"
+                  target="_blank"
+                  class="qr-link-button"
+                >
                   🔗 Ver Comprobante en DGII
                 </a>
               </div>
@@ -303,8 +495,11 @@
         </div>
 
         <div class="modal-actions">
-          <button (click)="closeDetailModal()" class="btn-secondary">Cerrar</button>
+          <button (click)="closeDetailModal()" class="btn-secondary">
+            Cerrar
+          </button>
         </div>
       </div>
     </div>
   </div>
+</div>

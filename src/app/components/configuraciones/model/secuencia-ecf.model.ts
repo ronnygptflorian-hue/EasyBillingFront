@@ -8,4 +8,5 @@ export interface SecuenciaEcf {
   fechaAdd: string ;
   bloqueado: boolean;
   descripcionTipoEcf: string;
+  codigoTipoEcf: string;
 }

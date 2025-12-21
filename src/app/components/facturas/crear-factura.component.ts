@@ -580,7 +580,7 @@ onToggleTax(itemIndex: number, taxId: number, checked: boolean) {
   }
 
   get montoTotal(): number {
-    let total = this.subtotal + this.totalImpuestos;
+    let total = this.subtotal + this.totalImpuestos + this.totalItbis;
     if (this.tieneRetencion) {
       const retenciones = this.items.reduce((sum, item) => {
         return sum + item.valorItbisRetencion + item.valorIsrRetencion;
