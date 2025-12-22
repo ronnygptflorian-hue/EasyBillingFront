@@ -2,10 +2,11 @@ export interface SecuenciaEcf {
   id: number;
   idEmpresa: number;
   idTipoEcf: number;
-  inicioSecuencia: number;
-  finSecuencia: number;
-  fechaExpiracion: string; 
-  fechaAdd: string;        
+  inicioSecuencia: number | null;
+  finSecuencia: number | null;
+  fechaExpiracion: string ;
+  fechaAdd: string ;
   bloqueado: boolean;
   descripcionTipoEcf: string;
+  codigoTipoEcf: string;
 }

@@ -72,6 +72,8 @@ export interface FacturaResponse {
   bloqueado: boolean;
   idDocumento: number | null;
   descripcionMoneda: string;
+  estadoFactura: string;
+
   rnc: string;
   tipoId: string;
   direccion: string;
@@ -239,16 +241,16 @@ export interface Factura {
   idTipoIngreso: number | null;
   idCondicionPago: number | null;
   fechaEmisionEcf: string | null;
-  impuestoIncluido: number | null;
-  estadoFactura: string | null;
-  qrDgii: string;
-  codigoSeguridad: string;
-  fechaFirmaDgii: string;
-  motivoRechazo: string | null;
+  impuestoIncluido: boolean;
+  estadoFactura: string;
+  qrDgii: string | null;
+  codigoSeguridad: string | null;
+  fechaFirmaDgii: string | null;
+
 }
 
 export interface Detalle {
-  id: number;
+ id: number;
   idEmpresa: number;
   idFactura: number;
   idNumFactura: number | null;
@@ -276,7 +278,19 @@ export interface Detalle {
   simboloUnidad: string;
   descripcionItbi: string;
   descripcionImpuesto: string | null;
+  tipoRetencion: number | null;
+  valorItbisRetencion: number;
+  valorIsrRetencion: number;
+  impuestosAdicionales?: ImpuestoAdicionalDetalle[];
+
 }
+
+export interface ImpuestoAdicionalRequest {
+  idImpuestoAdicional: number;
+  porcientoImpuesto: number;
+  valorImpuesto: number;
+}
+
 
 export interface Mensaje {
   code: number;

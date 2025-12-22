@@ -49,7 +49,7 @@ export class FacturasListComponent implements OnInit {
     private facturasService: FacturaService,
     private router: Router,
     private customerService: CustomerService
-  ) {}
+  ) { }
 
   async ngOnInit() {
     await this.loadFacturas();
@@ -299,4 +299,63 @@ export class FacturasListComponent implements OnInit {
       }
     });
   }
+
+  getSubtotal(factura: any): number {
+  if (!factura.detalles) return 0;
+
+  return factura.detalles.reduce((sum: number, d: any) => {
+    const base = d.cantidad * d.precio;
+    return sum + base;
+  }, 0);
+}
+
+getTotalRetencion(factura: any): number {
+  if (!factura.detalles) return 0;
+
+  return factura.detalles.reduce((sum: number, d: any) => {
+    return sum + (d.valorItbisRetencion || 0) + (d.valorIsrRetencion || 0);
+  }, 0);
+}
+
+
+    onDownloadPdf(factura: any) {
+    this.facturasService.printFactura(factura.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${factura.rnc}${factura.ecf || factura.id}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        console.error('Error al imprimir factura:', error);
+      }
+    });
+  }
+
+
+onDownloadXml(factura: any) {
+  // TODO
+}
+
+onDownloadJson(factura: any) {
+  const data = JSON.stringify(factura, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Factura-${factura.ecf || factura.id}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+onPreviewFactura(factura: any) {
+  // Abrir modal o página con layout de PDF
+}
+
+
 }
