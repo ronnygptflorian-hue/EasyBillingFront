@@ -1,4 +1,8 @@
-<app-loading [show]="loading" [fullscreen]="true" message="Cargando Facturas Recibidas..."></app-loading>
+<app-loading
+  [show]="loading"
+  [fullscreen]="true"
+  message="Cargando Facturas Recibidas..."
+></app-loading>
 
 <div class="page-container">
   <div class="page-header">
@@ -12,7 +16,7 @@
     <div class="filters-header">
       <h3>Filtros de Búsqueda</h3>
       <button (click)="toggleAdvancedFilters()" class="btn-advanced-filters">
-        {{ showAdvancedFilters ? '▲' : '▼' }} Avanzados
+        {{ showAdvancedFilters ? "▲" : "▼" }} Avanzados
       </button>
     </div>
 
@@ -41,14 +45,20 @@
         <div class="filter-group">
           <label class="filter-label">Estatus Aprobación</label>
           <select [(ngModel)]="filtroEstatusAprobacion" class="filter-select">
-            <option *ngFor="let option of estatusAprobacionOptions" [value]="option.value">
+            <option
+              *ngFor="let option of estatusAprobacionOptions"
+              [value]="option.value"
+            >
               {{ option.label }}
             </option>
           </select>
         </div>
       </div>
 
-      <div class="filters-advanced-section" [class.collapsed]="!showAdvancedFilters">
+      <div
+        class="filters-advanced-section"
+        [class.collapsed]="!showAdvancedFilters"
+      >
         <div class="filters-grid">
           <div class="filter-group">
             <label class="filter-label">Razón Social Emisor</label>
@@ -75,7 +85,8 @@
             <label class="filter-label">Fecha Desde</label>
             <app-custom-datepicker
               [(ngModel)]="filtroFechaDesde"
-              placeholder="Seleccionar fecha">
+              placeholder="Seleccionar fecha"
+            >
             </app-custom-datepicker>
           </div>
 
@@ -83,7 +94,8 @@
             <label class="filter-label">Fecha Hasta</label>
             <app-custom-datepicker
               [(ngModel)]="filtroFechaHasta"
-              placeholder="Seleccionar fecha">
+              placeholder="Seleccionar fecha"
+            >
             </app-custom-datepicker>
           </div>
         </div>
@@ -117,20 +129,26 @@
         </thead>
         <tbody>
           <tr *ngFor="let factura of filteredFacturas">
-            <td class="font-mono">{{ factura.ecf || 'N/A' }}</td>
+            <td class="font-mono">{{ factura.ecf || "N/A" }}</td>
             <td>
               <div class="emisor-info">
-                <span class="emisor-name">{{ factura.razonSocialEmisor || 'Sin nombre' }}</span>
+                <span class="emisor-name">{{
+                  factura.razonSocialEmisor || "Sin nombre"
+                }}</span>
               </div>
             </td>
             <td class="font-mono">{{ factura.rncEmisor }}</td>
             <td>{{ formatDate(factura.fecha) }}</td>
             <td>{{ formatDate(factura.fechaAdd) }}</td>
             <td>
-              <span class="tipo-ecf-badge">{{ getTipoEcfLabel(factura.idTipoEcf) }}</span>
+              <span class="tipo-ecf-badge">{{
+                getTipoEcfLabel(factura.idTipoEcf)
+              }}</span>
             </td>
             <td>
-              <span [class]="'badge ' + getEstatusClass(factura.estatusAprobacion)">
+              <span
+                [class]="'badge ' + getEstatusClass(factura.estatusAprobacion)"
+              >
                 {{ factura.estatusAprobacion }}
               </span>
             </td>
@@ -138,7 +156,8 @@
               <button
                 (click)="viewFactura(factura)"
                 class="btn-icon btn-view"
-                title="Ver detalles">
+                title="Ver detalles"
+              >
                 👁️
               </button>
             </td>
@@ -148,13 +167,19 @@
     </div>
   </div>
 
-  <div class="empty-state" *ngIf="!loading && filteredFacturas.length === 0 && facturas.length === 0">
+  <div
+    class="empty-state"
+    *ngIf="!loading && filteredFacturas.length === 0 && facturas.length === 0"
+  >
     <div class="empty-icon">📥</div>
     <h3>No hay facturas recibidas</h3>
     <p>Las facturas que recibas de tus proveedores aparecerán aquí</p>
   </div>
 
-  <div class="empty-state" *ngIf="!loading && filteredFacturas.length === 0 && facturas.length > 0">
+  <div
+    class="empty-state"
+    *ngIf="!loading && filteredFacturas.length === 0 && facturas.length > 0"
+  >
     <div class="empty-icon">🔍</div>
     <h3>No se encontraron resultados</h3>
     <p>Intenta con otros criterios de búsqueda</p>
@@ -163,14 +188,20 @@
   <div class="pagination-container" *ngIf="!loading && facturas.length > 0">
     <div class="pagination-info">
       Mostrando {{ (pagination.pageNumber - 1) * pagination.pageSize + 1 }} -
-      {{ Math.min(pagination.pageNumber * pagination.pageSize, pagination.totalCount) }}
+      {{
+        Math.min(
+          pagination.pageNumber * pagination.pageSize,
+          pagination.totalCount
+        )
+      }}
       de {{ pagination.totalCount }} facturas
     </div>
     <div class="pagination-controls">
       <button
         (click)="previousPage()"
         [disabled]="!pagination.hasPreviousPage"
-        class="btn-pagination">
+        class="btn-pagination"
+      >
         ← Anterior
       </button>
 
@@ -178,21 +209,27 @@
         *ngFor="let page of pages"
         (click)="goToPage(page)"
         [class.active]="page === pagination.pageNumber"
-        class="btn-page">
+        class="btn-page"
+      >
         {{ page }}
       </button>
 
       <button
         (click)="nextPage()"
         [disabled]="!pagination.hasNextPage"
-        class="btn-pagination">
+        class="btn-pagination"
+      >
         Siguiente →
       </button>
     </div>
   </div>
 </div>
 
-<app-loading [show]="loadingDetail" [fullscreen]="true" message="Cargando detalle..."></app-loading>
+<app-loading
+  [show]="loadingDetail"
+  [fullscreen]="true"
+  message="Cargando detalle..."
+></app-loading>
 
 <div class="modal-overlay" *ngIf="showDetailModal" (click)="closeDetailModal()">
   <div class="modal-content modal-large" (click)="$event.stopPropagation()">
@@ -201,23 +238,30 @@
       <button (click)="closeDetailModal()" class="btn-close">✕</button>
     </div>
 
-    <div class="modal-actions" *ngIf="selectedFactura">
+    <div class="modal-actions" *ngIf="selectedFactura && aproval">
       <button
         (click)="aprobarFactura()"
         class="btn-action btn-aprobar"
-        [disabled]="loadingDetail || selectedFactura.estatusAprobacion === 'Aprobado'">
+        [disabled]="
+          loadingDetail || selectedFactura.estatusAprobacion === 'Aprobado'
+        "
+      >
         ✓ Aprobar
       </button>
       <button
         (click)="openRechazarModal()"
         class="btn-action btn-rechazar"
-        [disabled]="loadingDetail || selectedFactura.estatusAprobacion === 'Rechazado'">
+        [disabled]="
+          loadingDetail || selectedFactura.estatusAprobacion === 'Rechazado'
+        "
+      >
         ✕ Rechazar
       </button>
       <button
         (click)="descargarXml()"
         class="btn-action btn-download"
-        [disabled]="loadingDetail">
+        [disabled]="loadingDetail"
+      >
         ⬇ Descargar XML
       </button>
     </div>
@@ -226,11 +270,17 @@
       <div class="summary-section">
         <div class="summary-item">
           <span class="summary-label">Monto Total:</span>
-          <span class="summary-value">{{ formatCurrency(selectedFactura.montoTotal) }}</span>
+          <span class="summary-value">{{
+            formatCurrency(selectedFactura.montoTotal)
+          }}</span>
         </div>
         <div class="summary-item">
           <span class="summary-label">Estado:</span>
-          <span [class]="'badge ' + getEstatusClass(selectedFactura.estatusAprobacion)">
+          <span
+            [class]="
+              'badge ' + getEstatusClass(selectedFactura.estatusAprobacion)
+            "
+          >
             {{ selectedFactura.estatusAprobacion }}
           </span>
         </div>
@@ -241,11 +291,15 @@
           <h3>Información del Emisor</h3>
           <div class="detail-row">
             <span class="detail-label">Razón Social:</span>
-            <span class="detail-value">{{ selectedFactura.razonSocialEmisor || 'N/A' }}</span>
+            <span class="detail-value">{{
+              selectedFactura.razonSocialEmisor || "N/A"
+            }}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">RNC:</span>
-            <span class="detail-value font-mono">{{ selectedFactura.rncEmisor }}</span>
+            <span class="detail-value font-mono">{{
+              selectedFactura.rncEmisor
+            }}</span>
           </div>
         </div>
 
@@ -253,11 +307,15 @@
           <h3>Información del Receptor</h3>
           <div class="detail-row">
             <span class="detail-label">Razón Social:</span>
-            <span class="detail-value">{{ selectedFactura.razonSocialReceptor }}</span>
+            <span class="detail-value">{{
+              selectedFactura.razonSocialReceptor
+            }}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">RNC:</span>
-            <span class="detail-value font-mono">{{ selectedFactura.rncReceptor }}</span>
+            <span class="detail-value font-mono">{{
+              selectedFactura.rncReceptor
+            }}</span>
           </div>
         </div>
 
@@ -265,23 +323,33 @@
           <h3>Información del Documento</h3>
           <div class="detail-row">
             <span class="detail-label">NCF / ECF:</span>
-            <span class="detail-value font-mono">{{ selectedFactura.ecf || 'N/A' }}</span>
+            <span class="detail-value font-mono">{{
+              selectedFactura.ecf || "N/A"
+            }}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Tipo ECF:</span>
-            <span class="detail-value">{{ getTipoEcfLabel(selectedFactura.idTipoEcf) }}</span>
+            <span class="detail-value">{{
+              getTipoEcfLabel(selectedFactura.idTipoEcf)
+            }}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Fecha Documento:</span>
-            <span class="detail-value">{{ formatDate(selectedFactura.fecha) }}</span>
+            <span class="detail-value">{{
+              formatDate(selectedFactura.fecha)
+            }}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Fecha Registro:</span>
-            <span class="detail-value">{{ formatDate(selectedFactura.fechaAdd) }}</span>
+            <span class="detail-value">{{
+              formatDate(selectedFactura.fechaAdd)
+            }}</span>
           </div>
           <div class="detail-row" *ngIf="selectedFactura.fechaExpiraCF">
             <span class="detail-label">Fecha Expiración CF:</span>
-            <span class="detail-value">{{ formatDate(selectedFactura.fechaExpiraCF) }}</span>
+            <span class="detail-value">{{
+              formatDate(selectedFactura.fechaExpiraCF)
+            }}</span>
           </div>
         </div>
 
@@ -289,26 +357,45 @@
           <h3>Estado de Aprobación</h3>
           <div class="detail-row">
             <span class="detail-label">Estatus:</span>
-            <span [class]="'badge ' + getEstatusClass(selectedFactura.estatusAprobacion)">
+            <span
+              [class]="
+                'badge ' + getEstatusClass(selectedFactura.estatusAprobacion)
+              "
+            >
               {{ selectedFactura.estatusAprobacion }}
             </span>
           </div>
           <div class="detail-row" *ngIf="selectedFactura.mensajeAprobacion">
             <span class="detail-label">Mensaje:</span>
-            <span class="detail-value">{{ selectedFactura.mensajeAprobacion }}</span>
+            <span class="detail-value">{{
+              selectedFactura.mensajeAprobacion
+            }}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Fuente:</span>
-            <span class="detail-value">{{ selectedFactura.tipoDeFuente === 'R' ? 'Recibida' : 'Otro' }}</span>
+            <span class="detail-value">{{
+              selectedFactura.tipoDeFuente === "R" ? "Recibida" : "Otro"
+            }}</span>
           </div>
-          <div class="detail-row" *ngIf="selectedFactura.facturaAprobadaPorPortal !== null">
+          <div
+            class="detail-row"
+            *ngIf="selectedFactura.facturaAprobadaPorPortal !== null"
+          >
             <span class="detail-label">Aprobada por Portal:</span>
-            <span class="detail-value">{{ selectedFactura.facturaAprobadaPorPortal ? 'Sí' : 'No' }}</span>
+            <span class="detail-value">{{
+              selectedFactura.facturaAprobadaPorPortal ? "Sí" : "No"
+            }}</span>
           </div>
         </div>
       </div>
 
-      <div class="detail-section full-width" *ngIf="selectedFactura.documentosDetalles && selectedFactura.documentosDetalles.length > 0">
+      <div
+        class="detail-section full-width"
+        *ngIf="
+          selectedFactura.documentosDetalles &&
+          selectedFactura.documentosDetalles.length > 0
+        "
+      >
         <h3>Detalles de Productos/Servicios</h3>
         <div class="table-container">
           <table class="detail-table">
@@ -325,7 +412,12 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let detalle of selectedFactura.documentosDetalles; let i = index">
+              <tr
+                *ngFor="
+                  let detalle of selectedFactura.documentosDetalles;
+                  let i = index
+                "
+              >
                 <td>{{ i + 1 }}</td>
                 <td>{{ detalle.item }}</td>
                 <td>{{ detalle.cantidad }}</td>
@@ -333,7 +425,9 @@
                 <td>{{ formatCurrency(detalle.totalBruto) }}</td>
                 <td>{{ formatCurrency(detalle.totalDescuentos) }}</td>
                 <td>{{ formatCurrency(detalle.totalImpuestos) }}</td>
-                <td class="font-bold">{{ formatCurrency(detalle.totalNeto) }}</td>
+                <td class="font-bold">
+                  {{ formatCurrency(detalle.totalNeto) }}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -347,7 +441,11 @@
   </div>
 </div>
 
-<div class="modal-overlay" *ngIf="showRechazarModal" (click)="closeRechazarModal()">
+<div
+  class="modal-overlay"
+  *ngIf="showRechazarModal"
+  (click)="closeRechazarModal()"
+>
   <div class="modal-content modal-small" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h2>Rechazar Factura</h2>
@@ -360,12 +458,17 @@
           [(ngModel)]="motivoRechazo"
           class="form-textarea"
           rows="4"
-          placeholder="Indique el motivo por el cual rechaza esta factura..."></textarea>
+          placeholder="Indique el motivo por el cual rechaza esta factura..."
+        ></textarea>
       </div>
     </div>
     <div class="modal-footer">
-      <button (click)="closeRechazarModal()" class="btn-secondary">Cancelar</button>
-      <button (click)="rechazarFactura()" class="btn-primary btn-danger">Rechazar</button>
+      <button (click)="closeRechazarModal()" class="btn-secondary">
+        Cancelar
+      </button>
+      <button (click)="rechazarFactura()" class="btn-primary btn-danger">
+        Rechazar
+      </button>
     </div>
   </div>
 </div>

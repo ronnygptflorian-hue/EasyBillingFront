@@ -1,21 +1,35 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule, ActivatedRoute } from '@angular/router';
-import { TipoEcf, Moneda, TipoIngreso, CondicionPago, TipoImpuesto } from '../../models/common-data.model';
-import { FacturaRequest, FacturaDetailRequest } from './model/factura-request.model';
-import { Customer } from '../clientes/model/customer.model';
-import { Product } from '../productos/model/products.model';
-import { CustomerService } from '../clientes/service/customer.service';
-import { ProductService } from '../productos/service/products.service';
-import { CommonService } from '../../services/common-data.service';
-import { FacturaService } from './service/facturas.service';
-import { NotificationService } from '../../services/notification.service';
-import { LoadingComponent } from '../shared/loading.component/loading.component'
-import { ConfigutionService } from '../configuraciones/service/configuracion.service';
-import { SecuenciaEcf } from '../configuraciones/model/secuencia-ecf.model';
-import { CustomDatepickerComponent } from '../shared/custom-datepicker/custom-datepicker.component';
-
+import { Component, OnInit } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  FormsModule,
+  Validators,
+} from "@angular/forms";
+import { Router, RouterModule, ActivatedRoute } from "@angular/router";
+import {
+  TipoEcf,
+  Moneda,
+  TipoIngreso,
+  CondicionPago,
+  TipoImpuesto,
+} from "../../models/common-data.model";
+import {
+  FacturaRequest,
+  FacturaDetailRequest,
+} from "./model/factura-request.model";
+import { Customer } from "../clientes/model/customer.model";
+import { Product } from "../productos/model/products.model";
+import { CustomerService } from "../clientes/service/customer.service";
+import { ProductService } from "../productos/service/products.service";
+import { CommonService } from "../../services/common-data.service";
+import { FacturaService } from "./service/facturas.service";
+import { NotificationService } from "../../services/notification.service";
+import { LoadingComponent } from "../shared/loading.component/loading.component";
+import { ConfigutionService } from "../configuraciones/service/configuracion.service";
+import { SecuenciaEcf } from "../configuraciones/model/secuencia-ecf.model";
+import { CustomDatepickerComponent } from "../shared/custom-datepicker/custom-datepicker.component";
 
 interface InvoiceItem extends Product {
   discountError?: string;
@@ -40,15 +54,22 @@ interface InvoiceItem extends Product {
 }
 
 @Component({
-  selector: 'app-crear-factura',
+  selector: "app-crear-factura",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, LoadingComponent,CustomDatepickerComponent],
-  templateUrl: './crear-factura.component.html',
-  styleUrls: ['./crear-factura.component.scss']
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    RouterModule,
+    LoadingComponent,
+    CustomDatepickerComponent,
+  ],
+  templateUrl: "./crear-factura.component.html",
+  styleUrls: ["./crear-factura.component.scss"],
 })
 export class CrearFacturaComponent implements OnInit {
   form!: FormGroup;
-tiposImpuestoPrincipales: TipoImpuesto[] = [];
+  tiposImpuestoPrincipales: TipoImpuesto[] = [];
   tiposEcf: SecuenciaEcf[] = [];
   monedas: Moneda[] = [];
   tiposIngreso: TipoIngreso[] = [];
@@ -65,18 +86,18 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
   clientResults: Customer[] = [];
   showClientDropdown = false;
   isSearchingClient = false;
-  clientError = '';
+  clientError = "";
   clientLocked = false;
 
   productResults: Product[] = [];
   showProductDropdown = false;
   isSearchingProduct = false;
-  productError = '';
+  productError = "";
   fechaEmisionEcf: Date = new Date();
-  referencia: string = '';
+  referencia: string = "";
   items: InvoiceItem[] = [];
   loading = false;
-  referenciaCode: string = '';
+  referenciaCode: string = "";
   activeTaxDropdownIndex: number | null = null;
 
   isNotaCredito = false;
@@ -95,32 +116,31 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
     private facturasService: FacturaService,
     private notificationService: NotificationService,
     private configutionService: ConfigutionService
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.form = this.fb.group({
       idTipoEcf: [null, Validators.required],
-      clientSearch: ['', Validators.required],
+      clientSearch: ["", Validators.required],
       selectedClient: [null],
-      productSearch: [''],
+      productSearch: [""],
       referencia: [this.referencia],
-      comentario: [''],
+      comentario: [""],
       idMoneda: [1, Validators.required],
       tasaCambio: [1.0, Validators.required],
       fechaEmisionEcf: [this.fechaEmisionEcf, Validators.required],
       idTipoIngreso: [1, Validators.required],
-      idCondicionPago: [1, Validators.required]
+      idCondicionPago: [1, Validators.required],
     });
 
+    this.form.get("idTipoEcf")!.valueChanges.subscribe(() => {
+      this.aplicarReglasPorTipoEcf();
+    });
 
-      this.form.get('idTipoEcf')!.valueChanges.subscribe(() => {
-    this.aplicarReglasPorTipoEcf();
-  });
-
-    this.route.queryParams.subscribe(params => {
-      if (params['tipo'] === '34' && params['facturaOriginal']) {
+    this.route.queryParams.subscribe((params) => {
+      if (params["tipo"] === "34" && params["facturaOriginal"]) {
         this.isNotaCredito = true;
-        this.facturaOriginalId = +params['facturaOriginal'];
+        this.facturaOriginalId = +params["facturaOriginal"];
         this.loadFacturaOriginal(this.facturaOriginalId);
       }
     });
@@ -132,104 +152,126 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
   }
 
   aplicarReglasPorTipoEcf() {
-  const tipo = this.form.value.idTipoEcf;
-  const sec = this.tiposEcf.find(x => x.idTipoEcf === tipo);
-  if (!sec) return;
+    const tipo = this.form.value.idTipoEcf;
+    const sec = this.tiposEcf.find((x) => x.idTipoEcf === tipo);
+    if (!sec) return;
 
-  const codigo = sec.codigoTipoEcf;
+    const codigo = sec.codigoTipoEcf;
 
-  // Reset básicos antes de aplicar reglas
-  this.form.get('clientSearch')?.clearValidators();
-  this.tieneRetencion = false;
+    // Reset básicos antes de aplicar reglas
+    this.form.get("clientSearch")?.clearValidators();
+    this.tieneRetencion = false;
 
-  // REGLAS POR CÓDIGO
-  switch (codigo) {
+    // REGLAS POR CÓDIGO
+    switch (codigo) {
+      // ------------------------------
+      // 32 → FACTURA DE CONSUMO
+      // ------------------------------
+      case "32":
+        // Cliente opcional
+        this.form.get("clientSearch")?.setValidators([]);
+        break;
 
-    // ------------------------------
-    // 32 → FACTURA DE CONSUMO
-    // ------------------------------
-    case "32":
-      // Cliente opcional
-      this.form.get('clientSearch')?.setValidators([]);
-      break;
+      // ------------------------------
+      // 31 → CRÉDITO FISCAL
+      // Cliente siempre obligatorio
+      // ------------------------------
+      case "31":
+        this.form.get("clientSearch")?.setValidators([Validators.required]);
+        break;
 
-    // ------------------------------
-    // 31 → CRÉDITO FISCAL
-    // Cliente siempre obligatorio
-    // ------------------------------
-    case "31":
-      this.form.get('clientSearch')?.setValidators([Validators.required]);
-      break;
+      // ------------------------------
+      // 34 → NOTA DE CRÉDITO
+      // ------------------------------
+      case "34":
+        this.form.get("clientSearch")?.setValidators([Validators.required]);
+        this.tieneRetencion = false;
+        break;
 
-    // ------------------------------
-    // 34 → NOTA DE CRÉDITO
-    // ------------------------------
-    case "34":
-      this.form.get('clientSearch')?.setValidators([Validators.required]);
-      this.tieneRetencion = false;
-      break;
+      // ------------------------------
+      // 33 → NOTA DE DÉBITO
+      // ------------------------------
+      case "33":
+        this.form.get("clientSearch")?.setValidators([Validators.required]);
+        break;
 
-    // ------------------------------
-    // 33 → NOTA DE DÉBITO
-    // ------------------------------
-    case "33":
-      this.form.get('clientSearch')?.setValidators([Validators.required]);
-      break;
+      // ------------------------------
+      // 43 → GASTOS MENORES
+      // ------------------------------
+      case "43":
+        this.form.get("clientSearch")?.clearValidators();
+        this.form.patchValue({ selectedClient: null, clientSearch: "" });
+        this.clientLocked = true; // para que no permitan digitar cliente
 
-    // ------------------------------
-    // 43 → GASTOS MENORES
-    // ------------------------------
-    case "43":
-      this.form.get('clientSearch')?.clearValidators();
-      this.tieneRetencion = false;
-      break;
+        // No retenciones
+        this.tieneRetencion = false;
 
-    // ------------------------------
-    // 41 → COMPRAS ELECTRÓNICO
-    // RNC obligatorio
-    // ------------------------------
-    case "41":
-      this.form.get('clientSearch')?.setValidators([Validators.required]);
-      this.tieneRetencion = true;
-      break;
+        // No requiere tipo de ingreso
+        this.form.get("idTipoIngreso")?.clearValidators();
+        this.form.patchValue({ idTipoIngreso: null });
 
-    // ------------------------------
-    // 46 → EXPORTACIONES
-    // Cliente obligatorio y ITBIS = 0
-    // ------------------------------
-    case "46":
-      this.form.get('clientSearch')?.setValidators([Validators.required]);
+        // Tipo de ITBIS obligatorio = EXENTO (idTipoImpuesto = 4)
+        this.items.forEach((it, idx) => {
+          it.idTipoImpuesto = 4;
+          it.itbisPct = 0;
+          this.calculateItem(idx);
+        });
+        break;
 
-      // ITBIS siempre 0
-      this.items.forEach(it => {
-        it.itbisPct = 0;
-        this.calculateItem(this.items.indexOf(it));
-      });
-      break;
+      // ------------------------------
+      // 41 → COMPRAS ELECTRÓNICO
+      // RNC obligatorio
+      // ------------------------------
+      case "41":
+        this.form.get("clientSearch")?.setValidators([Validators.required]);
+        this.tieneRetencion = true;
+        break;
 
-    default:
-      break;
+      // ------------------------------
+      // 46 → EXPORTACIONES
+      // Cliente obligatorio y ITBIS = 0
+      // ------------------------------
+      case "46":
+        this.form.get("clientSearch")?.setValidators([Validators.required]);
+
+        // ITBIS siempre 0
+        this.items.forEach((it) => {
+          it.itbisPct = 0;
+          this.calculateItem(this.items.indexOf(it));
+        });
+        break;
+
+      default:
+        break;
+    }
+
+    this.form.get("clientSearch")?.updateValueAndValidity();
   }
-
-  this.form.get('clientSearch')?.updateValueAndValidity();
-}
-
 
   loadCommonData() {
     this.loading = true;
     this.commonService.getAllListDocument().subscribe({
       next: (resp) => {
-        this.additionalTaxes = (resp.data.tiposImpuestos || []).filter(t => t.adicional === true);
+        this.additionalTaxes = (resp.data.tiposImpuestos || []).filter(
+          (t) => t.adicional === true
+        );
         this.monedas = resp.data.moneda;
         this.condicionesPago = resp.data.condicionesPago;
         this.tiposIngreso = resp.data.tiposIngreso;
         this.tiposImpuesto = resp.data.tiposImpuestos;
-        this.tiposImpuestoPrincipales = this.tiposImpuesto.filter(t => !t.adicional);
+        this.tiposImpuestoPrincipales = this.tiposImpuesto.filter(
+          (t) => !t.adicional
+        );
 
         this.impuestosAdicionales = resp.data.tiposImpuestos || [];
 
         if (this.isNotaCredito) {
-          const tipoNotaCredito = this.tiposEcf.find(t => t.id === 34 || (t.descripcionTipoEcf.toLowerCase().includes('nota') && t.descripcionTipoEcf.toLowerCase().includes('crédito')));
+          const tipoNotaCredito = this.tiposEcf.find(
+            (t) =>
+              t.id === 34 ||
+              (t.descripcionTipoEcf.toLowerCase().includes("nota") &&
+                t.descripcionTipoEcf.toLowerCase().includes("crédito"))
+          );
           if (tipoNotaCredito) {
             this.form.patchValue({ idTipoEcf: tipoNotaCredito.id });
           }
@@ -240,27 +282,35 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
       error: (err) => {
         this.additionalTaxes = [];
       },
-      complete: () => this.loading = false
+      complete: () => (this.loading = false),
     });
   }
   loadSecuencias() {
     try {
       this.loading = true;
-      this.configutionService.getSecuencia({ pageIndex: 1, pageSize: 100 }).subscribe({
-        next: (result) => {
-          this.tiposEcf = result.data;
-          this.loading = false;
-
-        }
-      });
-
+      this.configutionService
+        .getSecuencia({ pageIndex: 1, pageSize: 100 })
+        .subscribe({
+          next: (result) => {
+            this.tiposEcf = result.data;
+            if (this.isNotaCredito) {
+              this.tiposEcf = this.tiposEcf.filter(
+                (x) => x.codigoTipoEcf == "34" || x.codigoTipoEcf == "33"
+              );
+            } else {
+              this.tiposEcf = this.tiposEcf.filter(
+                (x) => x.codigoTipoEcf != "34" && x.codigoTipoEcf != "33"
+              );
+            }
+            this.loading = false;
+          },
+        });
     } catch (error) {
-      console.error('Error cargando secuencias:', error);
+      console.error("Error cargando secuencias:", error);
     } finally {
       this.loading = false;
     }
   }
-
 
   loadFacturaOriginal(id: number) {
     this.loading = true;
@@ -273,7 +323,7 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
             next: (clientResp: any) => {
               this.selectClient(clientResp);
             },
-            error: (err: any) => console.error('Error al cargar cliente', err)
+            error: (err: any) => console.error("Error al cargar cliente", err),
           });
         }
 
@@ -283,19 +333,23 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
           tasaCambio: factura.tasaCambio || 1.0,
           idTipoIngreso: factura.idTipoIngreso || 1,
           idCondicionPago: factura.idCondicionPago || 1,
-          comentario: `Nota de crédito para factura ${factura.ecf || factura.id}`
+          comentario: `Nota de crédito para factura ${
+            factura.ecf || factura.id
+          }`,
         });
 
         if (factura.detalles && factura.detalles.length > 0) {
           this.items = factura.detalles.map((detalle: any) => {
-            const tipoImpuesto = this.tiposImpuesto.find(t => t.id === detalle.idTipoImpuesto);
+            const tipoImpuesto = this.tiposImpuesto.find(
+              (t) => t.id === detalle.idTipoImpuesto
+            );
             const tasaImpuesto = tipoImpuesto ? tipoImpuesto.impuestoP : 18;
 
             const productData: Product = {
               id: detalle.idProducto,
               idEmpresa: detalle.idEmpresa,
               descripcion: detalle.descripcionProducto,
-              codigo: detalle.codigoUnidad || '',
+              codigo: detalle.codigoUnidad || "",
               precio: detalle.precio,
               idMedida: 0,
               idTipoImpuesto: detalle.idTipoImpuesto,
@@ -303,9 +357,9 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
               fechaAdd: detalle.fechaAdd,
               bloqueado: detalle.bloqueado,
               aplicaDescuento: true,
-              descripcionUnidad: detalle.descripcionMedida || '',
-              descripcionTipoImpuesto: detalle.descripcionItbi || '',
-              tipoProducto: 1
+              descripcionUnidad: detalle.descripcionMedida || "",
+              descripcionTipoImpuesto: detalle.descripcionItbi || "",
+              tipoProducto: 1,
             };
 
             const item: InvoiceItem = {
@@ -313,7 +367,7 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
               product: productData,
               quantity: detalle.cantidad,
               price: detalle.precio,
-              discountStr: detalle.porcientoDescuento?.toString() || '0',
+              discountStr: detalle.porcientoDescuento?.toString() || "0",
               porcientoDescuento: detalle.porcientoDescuento || 0,
               porcientoRecargo: detalle.porcientoRecargo || 0,
               valorDescuento: detalle.valorDescuento || 0,
@@ -327,7 +381,7 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
               total: detalle.totalDetalle || 0,
               totalDetalle: detalle.totalDetalle || 0,
               showAdditionalTaxes: false,
-              additionalTaxesSelected: new Set()
+              additionalTaxesSelected: new Set(),
             };
 
             return item;
@@ -341,25 +395,29 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
         this.loading = false;
       },
       error: (err: any) => {
-        console.error('Error al cargar factura original', err);
-        this.notificationService.error('No se pudo cargar la factura original');
+        console.error("Error al cargar factura original", err);
+        this.notificationService.error("No se pudo cargar la factura original");
         this.loading = false;
-      }
+      },
     });
   }
 
-  
-
   get hasNoResults(): boolean {
-    return !this.isSearchingClient && !this.clientError &&
+    return (
+      !this.isSearchingClient &&
+      !this.clientError &&
       this.clientResults.length === 0 &&
-      this.form.value.clientSearch?.length >= 2;
+      this.form.value.clientSearch?.length >= 2
+    );
   }
 
   get hasNoProductResults(): boolean {
-    return !this.isSearchingProduct && !this.productError &&
+    return (
+      !this.isSearchingProduct &&
+      !this.productError &&
       this.productResults.length === 0 &&
-      this.form.value.productSearch?.length >= 2;
+      this.form.value.productSearch?.length >= 2
+    );
   }
 
   get visibleColumnsCount(): number {
@@ -381,7 +439,7 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
 
   loadInitialClients() {
     this.isSearchingClient = true;
-    this.clientError = '';
+    this.clientError = "";
     this.showClientDropdown = true;
 
     this.customerService.getClientes(1, 2, {}).subscribe({
@@ -390,9 +448,9 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
         this.isSearchingClient = false;
       },
       error: (error) => {
-        this.clientError = 'Error al cargar clientes';
+        this.clientError = "Error al cargar clientes";
         this.isSearchingClient = false;
-      }
+      },
     });
   }
 
@@ -407,7 +465,7 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
     }
 
     this.isSearchingClient = true;
-    this.clientError = '';
+    this.clientError = "";
     this.showClientDropdown = true;
 
     this.clientSearchTimeout = setTimeout(() => {
@@ -419,12 +477,12 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
             this.isSearchingClient = false;
           },
           error: (error) => {
-            this.clientError = 'Error al buscar clientes';
+            this.clientError = "Error al buscar clientes";
             this.isSearchingClient = false;
-          }
+          },
         });
       } catch (error) {
-        this.clientError = 'Error al buscar clientes';
+        this.clientError = "Error al buscar clientes";
         this.isSearchingClient = false;
       }
     }, 300);
@@ -432,7 +490,7 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
   selectClient(client: Customer) {
     this.form.patchValue({
       selectedClient: client,
-      clientSearch: client.razonSocial
+      clientSearch: client.razonSocial,
     });
     this.clientLocked = true;
     this.showClientDropdown = false;
@@ -443,7 +501,7 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
     this.clientLocked = false;
     this.form.patchValue({
       selectedClient: null,
-      clientSearch: ''
+      clientSearch: "",
     });
   }
 
@@ -457,7 +515,7 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
 
   loadInitialProducts() {
     this.isSearchingProduct = true;
-    this.productError = '';
+    this.productError = "";
     this.showProductDropdown = true;
 
     this.productService.getProducts(1, 2, {}).subscribe({
@@ -466,9 +524,9 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
         this.isSearchingProduct = false;
       },
       error: (error) => {
-        this.productError = 'Error al cargar productos';
+        this.productError = "Error al cargar productos";
         this.isSearchingProduct = false;
-      }
+      },
     });
   }
 
@@ -483,7 +541,7 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
     }
 
     this.isSearchingProduct = true;
-    this.productError = '';
+    this.productError = "";
     this.showProductDropdown = true;
 
     this.productSearchTimeout = setTimeout(() => {
@@ -495,19 +553,21 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
             this.isSearchingProduct = false;
           },
           error: (error) => {
-            this.productError = 'Error al buscar productos';
+            this.productError = "Error al buscar productos";
             this.isSearchingProduct = false;
-          }
+          },
         });
       } catch (error) {
-        this.productError = 'Error al buscar productos';
+        this.productError = "Error al buscar productos";
         this.isSearchingProduct = false;
       }
     }, 300);
   }
 
   selectProduct(product: Product) {
-    const tipoImpuesto = this.tiposImpuesto.find(t => t.id === product.idTipoImpuesto);
+    const tipoImpuesto = this.tiposImpuesto.find(
+      (t) => t.id === product.idTipoImpuesto
+    );
     const tasaImpuesto = tipoImpuesto ? tipoImpuesto.impuestoP : 18;
 
     const newItem: InvoiceItem = {
@@ -515,7 +575,7 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
       product: product,
       quantity: 1,
       price: product.precio,
-      discountStr: '0',
+      discountStr: "0",
       porcientoDescuento: 0,
       porcientoRecargo: 0,
       valorDescuento: 0,
@@ -529,11 +589,11 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
       total: 0,
       totalDetalle: 0,
       showAdditionalTaxes: false,
-      additionalTaxesSelected: new Set()
+      additionalTaxesSelected: new Set(),
     };
 
     this.items.push(newItem);
-    this.form.patchValue({ productSearch: '' });
+    this.form.patchValue({ productSearch: "" });
     this.showProductDropdown = false;
     this.productResults = [];
     this.calculateItem(this.items.length - 1);
@@ -550,43 +610,40 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
     this.calculateItem(index);
   }
 
-onDiscountModelChange(index: number) {
-  let str = this.items[index].discountStr;
-  let val = parseFloat(str);
+  onDiscountModelChange(index: number) {
+    let str = this.items[index].discountStr;
+    let val = parseFloat(str);
 
-  if (isNaN(val)) val = 0;
+    if (isNaN(val)) val = 0;
 
-  if (val < 1) val = 1;
-  if (val > 100) val = 100;
+    if (val < 1) val = 1;
+    if (val > 100) val = 100;
 
-  this.items[index].discountStr = val.toString();
-  this.items[index].porcientoDescuento = val;
+    this.items[index].discountStr = val.toString();
+    this.items[index].porcientoDescuento = val;
 
-  this.calculateItem(index);
-}
-
-
-
-  onChangeTipoImpuesto(index: number) {
-  const item = this.items[index];
-  const tipo = this.tiposImpuesto.find(t => t.id === item.idTipoImpuesto);
-
-  if (tipo) {
-    item.itbisPct = tipo.impuestoP;
+    this.calculateItem(index);
   }
 
-  this.calculateItem(index);
-}
+  onChangeTipoImpuesto(index: number) {
+    const item = this.items[index];
+    const tipo = this.tiposImpuesto.find((t) => t.id === item.idTipoImpuesto);
 
+    if (tipo) {
+      item.itbisPct = tipo.impuestoP;
+    }
 
-
+    this.calculateItem(index);
+  }
 
   calculateItem(index: number) {
     const item = this.items[index];
     let baseAmount = item.quantity * item.price;
 
     if (this.precioIncluyeImpuestos) {
-      const tipoImpuesto = this.tiposImpuesto.find(t => t.id === item.idTipoImpuesto);
+      const tipoImpuesto = this.tiposImpuesto.find(
+        (t) => t.id === item.idTipoImpuesto
+      );
       const tasaImpuesto = tipoImpuesto ? tipoImpuesto.impuestoP : 18;
       baseAmount = baseAmount / (1 + tasaImpuesto / 100);
     }
@@ -601,14 +658,16 @@ onDiscountModelChange(index: number) {
 
     const baseConAjustes = baseAmount - item.valorDescuento + item.valorRecargo;
 
-    const tipoImpuesto = this.tiposImpuesto.find(t => t.id === item.idTipoImpuesto);
+    const tipoImpuesto = this.tiposImpuesto.find(
+      (t) => t.id === item.idTipoImpuesto
+    );
     const tasaImpuesto = tipoImpuesto ? tipoImpuesto.impuestoP : 18;
     item.valorItbis = baseConAjustes * (tasaImpuesto / 100);
 
     item.valorImpuesto = 0;
     if (item.additionalTaxesSelected.size > 0) {
-      item.additionalTaxesSelected.forEach(taxId => {
-        const impuesto = this.impuestosAdicionales.find(i => i.id === taxId);
+      item.additionalTaxesSelected.forEach((taxId) => {
+        const impuesto = this.impuestosAdicionales.find((i) => i.id === taxId);
         if (impuesto) {
           item.valorImpuesto += baseConAjustes * (impuesto.impuestoP / 100);
         }
@@ -618,7 +677,7 @@ onDiscountModelChange(index: number) {
     let total = baseConAjustes + item.valorItbis + item.valorImpuesto;
 
     if (this.tieneRetencion) {
-      total -= (item.valorItbisRetencion + item.valorIsrRetencion);
+      total -= item.valorItbisRetencion + item.valorIsrRetencion;
     }
 
     item.totalDetalle = total;
@@ -626,11 +685,10 @@ onDiscountModelChange(index: number) {
   }
 
   onToggleItbisInclusive(event: any) {
-  this.precioIncluyeImpuestos = event.target.checked;
+    this.precioIncluyeImpuestos = event.target.checked;
 
-  this.items.forEach((_, index) => this.calculateItem(index));
-}
-
+    this.items.forEach((_, index) => this.calculateItem(index));
+  }
 
   onToggleDescuento(event: any) {
     this.aplicaDescuento = event.target.checked;
@@ -655,30 +713,31 @@ onDiscountModelChange(index: number) {
     this.activeTaxDropdownIndex = null;
   }
 
-onToggleTax(itemIndex: number, taxId: number, checked: boolean) {
-  const item = this.items[itemIndex];
+  onToggleTax(itemIndex: number, taxId: number, checked: boolean) {
+    const item = this.items[itemIndex];
 
-  if (!item.additionalTaxesSelected) {
-    item.additionalTaxesSelected = new Set<number>();
+    if (!item.additionalTaxesSelected) {
+      item.additionalTaxesSelected = new Set<number>();
+    }
+
+    if (checked && item.additionalTaxesSelected.size >= 2) {
+      this.notificationService.error(
+        "Solo puedes seleccionar máximo 2 impuestos adicionales."
+      );
+      return;
+    }
+
+    if (checked) {
+      item.additionalTaxesSelected.add(taxId);
+    } else {
+      item.additionalTaxesSelected.delete(taxId);
+    }
+
+    this.calculateItem(itemIndex);
   }
-
-  if (checked && item.additionalTaxesSelected.size >= 2) {
-    this.notificationService.error("Solo puedes seleccionar máximo 2 impuestos adicionales.");
-    return;
-  }
-
-  if (checked) {
-    item.additionalTaxesSelected.add(taxId);
-  } else {
-    item.additionalTaxesSelected.delete(taxId);
-  }
-
-  this.calculateItem(itemIndex);
-}
-
 
   focusProductSearch() {
-    const input = document.getElementById('productSearch') as HTMLInputElement;
+    const input = document.getElementById("productSearch") as HTMLInputElement;
     if (input) input.focus();
   }
 
@@ -686,7 +745,9 @@ onToggleTax(itemIndex: number, taxId: number, checked: boolean) {
     return this.items.reduce((sum, item) => {
       let base = item.quantity * item.price;
       if (this.precioIncluyeImpuestos && item.itbisIncluido) {
-        const tipoImpuesto = this.tiposImpuesto.find(t => t.id === item.idTipoImpuesto);
+        const tipoImpuesto = this.tiposImpuesto.find(
+          (t) => t.id === item.idTipoImpuesto
+        );
         const tasaImpuesto = tipoImpuesto ? tipoImpuesto.impuestoP : 18;
         base = base / (1 + tasaImpuesto / 100);
       }
@@ -728,35 +789,33 @@ onToggleTax(itemIndex: number, taxId: number, checked: boolean) {
     return this.items.reduce((sum, item) => sum + item.valorIsrRetencion, 0);
   }
 
-
   validateDiscount(index: number) {
-  const item = this.items[index];
-  const value = Number(item.discountStr);
+    const item = this.items[index];
+    const value = Number(item.discountStr);
 
-  // Reset error
-  item.discountError = '';
+    // Reset error
+    item.discountError = "";
 
-  if (isNaN(value)) {
-    item.discountError = 'Debe introducir un número válido.';
-    return;
+    if (isNaN(value)) {
+      item.discountError = "Debe introducir un número válido.";
+      return;
+    }
+
+    if (value < 1) {
+      item.discountError = "El descuento no puede ser menor que 1%.";
+      return;
+    }
+
+    if (value > 100) {
+      item.discountError = "El descuento no puede exceder 100%.";
+      return;
+    }
+
+    // Si no hay error → guardamos el valor real
+    item.porcientoDescuento = value;
+
+    this.calculateItem(index);
   }
-
-  if (value < 1) {
-    item.discountError = 'El descuento no puede ser menor que 1%.';
-    return;
-  }
-
-  if (value > 100) {
-    item.discountError = 'El descuento no puede exceder 100%.';
-    return;
-  }
-
-  // Si no hay error → guardamos el valor real
-  item.porcientoDescuento = value;
-
-  this.calculateItem(index);
-}
-
 
   buildFacturaRequest(): FacturaRequest | null {
     const formValue = this.form.value;
@@ -766,7 +825,7 @@ onToggleTax(itemIndex: number, taxId: number, checked: boolean) {
       return null;
     }
 
-    const detail: FacturaDetailRequest[] = this.items.map(item => ({
+    const detail: FacturaDetailRequest[] = this.items.map((item) => ({
       idProducto: item.id,
       cantidad: item.quantity,
       precio: item.precio,
@@ -780,28 +839,35 @@ onToggleTax(itemIndex: number, taxId: number, checked: boolean) {
       ...(this.tieneRetencion && {
         TipoRetencion: item.tipoRetencion,
         ValorItbisRetencion: item.valorItbisRetencion,
-        ValorIsrRetencion: item.valorIsrRetencion
+        ValorIsrRetencion: item.valorIsrRetencion,
       }),
       totalDetalle: item.totalDetalle,
       ...(item.additionalTaxesSelected.size > 0 && {
-        impuestosAdicionales: Array.from(item.additionalTaxesSelected).map(taxId => {
-          const impuesto = this.impuestosAdicionales.find(i => i.id === taxId);
-          const baseAmount = item.quantity * item.precio - item.valorDescuento + item.valorRecargo;
-          return {
-            idImpuestoAdicional: taxId,
-            porcientoImpuesto: impuesto?.impuestoP || 0,
-            valorImpuesto: baseAmount * ((impuesto?.impuestoP || 0) / 100)
-          };
-        })
-      })
+        impuestosAdicionales: Array.from(item.additionalTaxesSelected).map(
+          (taxId) => {
+            const impuesto = this.impuestosAdicionales.find(
+              (i) => i.id === taxId
+            );
+            const baseAmount =
+              item.quantity * item.precio -
+              item.valorDescuento +
+              item.valorRecargo;
+            return {
+              idImpuestoAdicional: taxId,
+              porcientoImpuesto: impuesto?.impuestoP || 0,
+              valorImpuesto: baseAmount * ((impuesto?.impuestoP || 0) / 100),
+            };
+          }
+        ),
+      }),
     }));
 
     const request: FacturaRequest = {
       idEmpresa: this.facturasService.EMPRESA?.userCompanies[0].id || 0,
       idCliente: selectedClient.id,
-      comentario: formValue.comentario || '',
-      tipoVenta: 'CO',
-      referencia: formValue.referencia || '',
+      comentario: formValue.comentario || "",
+      tipoVenta: "CO",
+      referencia: formValue.referencia || "",
       idTipoEcf: formValue.idTipoEcf,
       idMoneda: formValue.idMoneda,
       tasaCambio: formValue.tasaCambio,
@@ -811,85 +877,128 @@ onToggleTax(itemIndex: number, taxId: number, checked: boolean) {
       tieneRetencion: this.tieneRetencion,
       montoTotal: this.montoTotal,
       totalImpuestos: this.totalImpuestos,
-      estadoFactura: 'Borrador',
+      estadoFactura: "Borrador",
       AplicaDescuento: this.aplicaDescuento,
       PrecioIncluyeImpuestos: this.precioIncluyeImpuestos,
-      detail
+      detail,
     };
     return request;
   }
 
-  toIsoDate(dateStr: string): string {
-  if (!dateStr) return '';
+  toIsoDate(dateInput: any): string {
+    if (!dateInput) return "";
 
-  // Detectar si viene en formato DD-MM-YYYY
-  const dashed = dateStr.match(/^(\d{2})-(\d{2})-(\d{4})$/);
-  if (dashed) {
-    const [_, dd, mm, yyyy] = dashed;
-    return `${yyyy}-${mm}-${dd}`;
-  }
-
-  // Detectar si viene en formato DD/MM/YYYY
-  const slashed = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-  if (slashed) {
-    const [_, dd, mm, yyyy] = slashed;
-    return `${yyyy}-${mm}-${dd}`;
-  }
-
-  // Si ya viene en formato ISO, devuélvelo tal cual
-  return dateStr;
-}
-
-
-async guardarFactura() {
-  this.loading = true;
-
-  // 💡 REGLA ESPECIAL PARA FACTURA 32
-  if (this.esFacturaConsumoMontoAlto() && !this.form.value.selectedClient) {
-    this.notificationService.error(
-      "Para Factura de Consumo (32) igual o mayor a RD$250,000 el cliente es obligatorio."
-    );
-    this.loading = false;
-    return;
-  }
-
-  if (this.form.invalid || this.items.length === 0) {
-    this.loading = false;
-    return;
-  }
-
-  const facturaRequest = this.buildFacturaRequest();
-  if (!facturaRequest) {
-    this.loading = false;
-    return;
-  }
-
-  this.facturasService.post('Invoice/Add', facturaRequest).subscribe({
-    next: (resp) => {
-      this.loading = false;
-      const mensaje = this.isNotaCredito ? 'Nota de crédito creada exitosamente' : 'Factura creada exitosamente';
-      this.notificationService.success(mensaje);
-      this.router.navigate(['/facturas']);
-    },
-    error: (error) => {
-      this.loading = false;
-      const mensaje = this.isNotaCredito ? 'Error al crear la nota de crédito' : 'Error al crear la factura';
-      this.notificationService.error(mensaje);
+    // Si ya es Date → convertir a ISO directo
+    if (dateInput instanceof Date) {
+      return dateInput.toISOString().substring(0, 10); // YYYY-MM-DD
     }
-  });
-}
 
-esFacturaConsumoMontoAlto(): boolean {
-  const tipo = this.form.value.idTipoEcf;
-  const sec = this.tiposEcf.find(x => x.idTipoEcf === tipo);
-  if (!sec) return false;
+    // Si NO es string → devolver vacío
+    if (typeof dateInput !== "string") {
+      return "";
+    }
 
-  return sec.codigoTipoEcf === "32" && this.montoTotal >= 250000;
-}
+    const dateStr = dateInput;
 
+    // Detectar formato DD-MM-YYYY
+    const dashed = dateStr.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+    if (dashed) {
+      const [_, dd, mm, yyyy] = dashed;
+      return `${yyyy}-${mm}-${dd}`;
+    }
 
+    // Detectar formato DD/MM/YYYY
+    const slashed = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (slashed) {
+      const [_, dd, mm, yyyy] = slashed;
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    // Detectar formato ISO ya válido
+    const iso = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (iso) {
+      return dateStr;
+    }
+
+    return "";
+  }
+
+  async guardarFactura() {
+    this.loading = true;
+
+    // 💡 REGLA ESPECIAL PARA FACTURA 32
+    if (this.esFacturaConsumoMontoAlto() && !this.form.value.selectedClient) {
+      this.notificationService.error(
+        "Para Factura de Consumo (32) igual o mayor a RD$250,000 el cliente es obligatorio."
+      );
+      this.loading = false;
+      return;
+    }
+
+    if (this.form.invalid || this.items.length === 0) {
+      this.loading = false;
+      return;
+    }
+
+    const facturaRequest = this.buildFacturaRequest();
+    if (!facturaRequest) {
+      this.loading = false;
+      return;
+    }
+
+    this.facturasService.post("Invoice/Add", facturaRequest).subscribe({
+      next: (resp) => {
+        this.loading = false;
+        const mensaje = this.isNotaCredito
+          ? "Nota de crédito creada exitosamente"
+          : "Factura creada exitosamente";
+        this.notificationService.success(mensaje);
+        this.router.navigate(["/facturas"]);
+      },
+      error: (error) => {
+        this.loading = false;
+
+        const mensaje = this.isNotaCredito
+          ? "Error al crear la nota de crédito"
+          : "Error al crear la factura";
+
+        const backend = error?.error;
+
+        // 1️⃣ Si existe backend.messages (lista)
+        if (backend?.messages && Array.isArray(backend.messages)) {
+          backend.messages.forEach((m: any) => {
+            this.notificationService.error(
+              m.msg || m.message || JSON.stringify(m)
+            );
+          });
+        }
+
+        // 2️⃣ Si backend trae solo un message
+        else if (backend?.message) {
+          this.notificationService.error(backend.message);
+        }
+
+        // 3️⃣ Si no se reconoce la estructura → imprimir error general
+        else {
+          this.notificationService.error("Ocurrió un error inesperado.");
+          console.error("Error no reconocido del backend:", error);
+        }
+
+        // 4️⃣ Mensaje final del proceso
+        this.notificationService.error(mensaje);
+      },
+    });
+  }
+
+  esFacturaConsumoMontoAlto(): boolean {
+    const tipo = this.form.value.idTipoEcf;
+    const sec = this.tiposEcf.find((x) => x.idTipoEcf === tipo);
+    if (!sec) return false;
+
+    return sec.codigoTipoEcf === "32" && this.montoTotal >= 250000;
+  }
 
   formatCurrency(amount: number): string {
-    return 'RD$ ' + amount.toFixed(2);
+    return "RD$ " + amount.toFixed(2);
   }
 }
