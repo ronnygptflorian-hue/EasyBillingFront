@@ -40,6 +40,7 @@
             <label for="fechaEmisionEcf">📅 Fecha de Emisión *</label>
             <app-custom-datepicker
               [(ngModel)]="fechaEmisionEcf"
+              formControlName="fechaEmisionEcf"
               placeholder="Seleccionar fecha"
             >
             </app-custom-datepicker>
@@ -115,7 +116,6 @@
                 <input
                   type="checkbox"
                   id="PrecioIncluyeImpuestos"
-                  checked
                   (change)="onToggleItbisInclusive($event)"
                 />
                 <span class="toggle-slider"></span>

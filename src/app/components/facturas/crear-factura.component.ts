@@ -60,7 +60,7 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
 
   aplicaDescuento = false;
   tieneRetencion = false;
-  precioIncluyeImpuestos = true;
+  precioIncluyeImpuestos = false;
 
   clientResults: Customer[] = [];
   showClientDropdown = false;
@@ -72,7 +72,7 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
   showProductDropdown = false;
   isSearchingProduct = false;
   productError = '';
-  fechaEmisionEcf: string = new Date().toLocaleDateString('en-CA');
+  fechaEmisionEcf: Date = new Date();
   referencia: string = '';
   items: InvoiceItem[] = [];
   loading = false;
@@ -107,10 +107,15 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
       comentario: [''],
       idMoneda: [1, Validators.required],
       tasaCambio: [1.0, Validators.required],
-      fechaEmisionEcf: [new Date().toLocaleDateString('en-CA'), Validators.required],
+      fechaEmisionEcf: [this.fechaEmisionEcf, Validators.required],
       idTipoIngreso: [1, Validators.required],
       idCondicionPago: [1, Validators.required]
     });
+
+
+      this.form.get('idTipoEcf')!.valueChanges.subscribe(() => {
+    this.aplicarReglasPorTipoEcf();
+  });
 
     this.route.queryParams.subscribe(params => {
       if (params['tipo'] === '34' && params['facturaOriginal']) {
@@ -125,6 +130,90 @@ tiposImpuestoPrincipales: TipoImpuesto[] = [];
     const random3 = Math.random().toString(36).substring(2, 5).toUpperCase();
     this.referenciaCode = `FCT-${random3}`;
   }
+
+  aplicarReglasPorTipoEcf() {
+  const tipo = this.form.value.idTipoEcf;
+  const sec = this.tiposEcf.find(x => x.idTipoEcf === tipo);
+  if (!sec) return;
+
+  const codigo = sec.codigoTipoEcf;
+
+  // Reset básicos antes de aplicar reglas
+  this.form.get('clientSearch')?.clearValidators();
+  this.tieneRetencion = false;
+
+  // REGLAS POR CÓDIGO
+  switch (codigo) {
+
+    // ------------------------------
+    // 32 → FACTURA DE CONSUMO
+    // ------------------------------
+    case "32":
+      // Cliente opcional
+      this.form.get('clientSearch')?.setValidators([]);
+      break;
+
+    // ------------------------------
+    // 31 → CRÉDITO FISCAL
+    // Cliente siempre obligatorio
+    // ------------------------------
+    case "31":
+      this.form.get('clientSearch')?.setValidators([Validators.required]);
+      break;
+
+    // ------------------------------
+    // 34 → NOTA DE CRÉDITO
+    // ------------------------------
+    case "34":
+      this.form.get('clientSearch')?.setValidators([Validators.required]);
+      this.tieneRetencion = false;
+      break;
+
+    // ------------------------------
+    // 33 → NOTA DE DÉBITO
+    // ------------------------------
+    case "33":
+      this.form.get('clientSearch')?.setValidators([Validators.required]);
+      break;
+
+    // ------------------------------
+    // 43 → GASTOS MENORES
+    // ------------------------------
+    case "43":
+      this.form.get('clientSearch')?.clearValidators();
+      this.tieneRetencion = false;
+      break;
+
+    // ------------------------------
+    // 41 → COMPRAS ELECTRÓNICO
+    // RNC obligatorio
+    // ------------------------------
+    case "41":
+      this.form.get('clientSearch')?.setValidators([Validators.required]);
+      this.tieneRetencion = true;
+      break;
+
+    // ------------------------------
+    // 46 → EXPORTACIONES
+    // Cliente obligatorio y ITBIS = 0
+    // ------------------------------
+    case "46":
+      this.form.get('clientSearch')?.setValidators([Validators.required]);
+
+      // ITBIS siempre 0
+      this.items.forEach(it => {
+        it.itbisPct = 0;
+        this.calculateItem(this.items.indexOf(it));
+      });
+      break;
+
+    default:
+      break;
+  }
+
+  this.form.get('clientSearch')?.updateValueAndValidity();
+}
+
 
   loadCommonData() {
     this.loading = true;
@@ -675,7 +764,7 @@ onToggleTax(itemIndex: number, taxId: number, checked: boolean) {
       idTipoEcf: formValue.idTipoEcf,
       idMoneda: formValue.idMoneda,
       tasaCambio: formValue.tasaCambio,
-      fechaEmisionEcf: formValue.fechaEmisionEcf,
+      fechaEmisionEcf: this.toIsoDate(formValue.fechaEmisionEcf),
       idTipoIngreso: formValue.idTipoIngreso,
       idCondicionPago: formValue.idCondicionPago,
       tieneRetencion: this.tieneRetencion,
@@ -689,33 +778,75 @@ onToggleTax(itemIndex: number, taxId: number, checked: boolean) {
     return request;
   }
 
-  async guardarFactura() {
-    this.loading = true;
-    if (this.form.invalid || this.items.length === 0) {
-      return;
-    }
+  toIsoDate(dateStr: string): string {
+  if (!dateStr) return '';
 
-    const facturaRequest = this.buildFacturaRequest();
-    if (!facturaRequest) {
-      return;
-    }
-
-    this.facturasService.post('Invoice/Add', facturaRequest).subscribe({
-      next: (resp) => {
-        console.log(resp);
-        this.loading = false;
-        const mensaje = this.isNotaCredito ? 'Nota de crédito creada exitosamente' : 'Factura creada exitosamente';
-        this.notificationService.success(mensaje);
-        this.router.navigate(['/facturas']);
-      },
-      error: (error) => {
-        console.error(error);
-        const mensaje = this.isNotaCredito ? 'Error al crear la nota de crédito' : 'Error al crear la factura';
-        this.notificationService.error(mensaje);
-        this.loading = false;
-      }
-    });
+  // Detectar si viene en formato DD-MM-YYYY
+  const dashed = dateStr.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+  if (dashed) {
+    const [_, dd, mm, yyyy] = dashed;
+    return `${yyyy}-${mm}-${dd}`;
   }
+
+  // Detectar si viene en formato DD/MM/YYYY
+  const slashed = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (slashed) {
+    const [_, dd, mm, yyyy] = slashed;
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  // Si ya viene en formato ISO, devuélvelo tal cual
+  return dateStr;
+}
+
+
+async guardarFactura() {
+  this.loading = true;
+
+  // 💡 REGLA ESPECIAL PARA FACTURA 32
+  if (this.esFacturaConsumoMontoAlto() && !this.form.value.selectedClient) {
+    this.notificationService.error(
+      "Para Factura de Consumo (32) igual o mayor a RD$250,000 el cliente es obligatorio."
+    );
+    this.loading = false;
+    return;
+  }
+
+  if (this.form.invalid || this.items.length === 0) {
+    this.loading = false;
+    return;
+  }
+
+  const facturaRequest = this.buildFacturaRequest();
+  if (!facturaRequest) {
+    this.loading = false;
+    return;
+  }
+
+  this.facturasService.post('Invoice/Add', facturaRequest).subscribe({
+    next: (resp) => {
+      this.loading = false;
+      const mensaje = this.isNotaCredito ? 'Nota de crédito creada exitosamente' : 'Factura creada exitosamente';
+      this.notificationService.success(mensaje);
+      this.router.navigate(['/facturas']);
+    },
+    error: (error) => {
+      this.loading = false;
+      const mensaje = this.isNotaCredito ? 'Error al crear la nota de crédito' : 'Error al crear la factura';
+      this.notificationService.error(mensaje);
+    }
+  });
+}
+
+esFacturaConsumoMontoAlto(): boolean {
+  const tipo = this.form.value.idTipoEcf;
+  const sec = this.tiposEcf.find(x => x.idTipoEcf === tipo);
+  if (!sec) return false;
+
+  return sec.codigoTipoEcf === "32" && this.montoTotal >= 250000;
+}
+
+
 
   formatCurrency(amount: number): string {
     return 'RD$ ' + amount.toFixed(2);
