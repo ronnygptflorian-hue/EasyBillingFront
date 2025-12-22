@@ -81,7 +81,12 @@ export class ClientesComponent implements OnInit {
     const filters: any = {};
 
     if (this.searchQuery) {
-      filters.searchQuery = this.searchQuery;
+      const isNumeric = /^\d+$/.test(this.searchQuery);
+      if (isNumeric) {
+        filters.rnc = this.searchQuery;
+      } else {
+        filters.razonSocial = this.searchQuery;
+      }
     }
 
     if (this.filterTipoId !== 'all') {
