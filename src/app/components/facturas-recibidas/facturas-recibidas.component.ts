@@ -26,6 +26,7 @@ export class FacturasRecibidasComponent implements OnInit {
   selectedFactura: FacturaRecibidaDetalle | null = null;
   motivoRechazo = '';
   Math = Math;
+  aproval = true
 
   filtroRazonSocialEmisor = '';
   filtroRncEmisor = '';
@@ -149,6 +150,11 @@ export class FacturasRecibidasComponent implements OnInit {
     this.facturasRecibidasService.getFacturaRecibidaById(factura.idDocumento).subscribe({
       next: (detalle) => {
         this.selectedFactura = detalle;
+        if(this.selectedFactura.facturaAprobadaPorPortal == true || this.selectedFactura.facturaAprobadaPorPortal == false ){
+             this.aproval = false;
+        }else{
+           this.aproval = true
+        }
         this.loadingDetail = false;
       },
       error: (error) => {

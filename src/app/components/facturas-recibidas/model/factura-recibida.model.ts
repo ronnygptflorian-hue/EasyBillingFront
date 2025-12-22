@@ -22,7 +22,7 @@ export interface FacturaRecibida {
   razonSocialEmisor: string | null;
   razonSocialReceptor: string;
   fechaAdd: string;
-  facturaAprobadaPorPortal: boolean | null;
+  facturaAprobadaPorPortal?: boolean | null;
   tipoDeFuente: string;
   idMotivoModificacion: number | null;
   indicadorNotaCredito: string | null;
