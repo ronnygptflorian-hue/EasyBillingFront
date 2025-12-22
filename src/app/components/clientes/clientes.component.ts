@@ -22,12 +22,15 @@ export class ClientesComponent implements OnInit {
   isEditing = false;
   loading = true;
   searchQuery = '';
+  filterTipoId: string = 'all';
 
   currentPage = 1;
   pageSize = 10;
   totalRecords = 0;
   totalPages = 0;
   pageSizeOptions = [5, 10, 20, 50];
+
+  private searchTimeout: any;
 
   currentCliente: Customer = {
     nombreComercial: '',
@@ -75,7 +78,22 @@ export class ClientesComponent implements OnInit {
   loadClientes() {
     this.loading = true;
 
-    this.customerService.getClientes(this.currentPage, this.pageSize, this.searchQuery).subscribe({
+    const filters: any = {};
+
+    if (this.searchQuery) {
+      const isNumeric = /^\d+$/.test(this.searchQuery);
+      if (isNumeric) {
+        filters.rnc = this.searchQuery;
+      } else {
+        filters.razonSocial = this.searchQuery;
+      }
+    }
+
+    if (this.filterTipoId !== 'all') {
+      filters.tipoId = this.filterTipoId;
+    }
+
+    this.customerService.getClientes(this.currentPage, this.pageSize, filters).subscribe({
       next: (res) => {
         this.clientes = res.data;
         this.totalRecords = res.pagination?.totalCount || 0;
@@ -112,6 +130,29 @@ export class ClientesComponent implements OnInit {
 
     for (let i = start; i <= end; i++) pages.push(i);
     return pages;
+  }
+
+  onSearchChange() {
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+
+    this.searchTimeout = setTimeout(() => {
+      this.currentPage = 1;
+      this.loadClientes();
+    }, 500);
+  }
+
+  onFilterChange() {
+    this.currentPage = 1;
+    this.loadClientes();
+  }
+
+  clearFilters() {
+    this.searchQuery = '';
+    this.filterTipoId = 'all';
+    this.currentPage = 1;
+    this.loadClientes();
   }
 
 

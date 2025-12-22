@@ -70,6 +70,62 @@
   }
 }
 
+.filter-group {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.filter-select {
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--gray-300);
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: white;
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 180px;
+
+  &:focus {
+    outline: none;
+    border-color: var(--blue-500);
+    box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.1);
+  }
+
+  &:hover {
+    border-color: var(--blue-400);
+  }
+}
+
+.btn-clear-filters {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border: 2px solid var(--red-300);
+  background: white;
+  color: var(--red-600);
+  border-radius: 0.75rem;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: var(--red-500);
+    color: white;
+    border-color: var(--red-500);
+    transform: rotate(90deg);
+  }
+
+  &:active {
+    transform: rotate(90deg) scale(0.95);
+  }
+}
+
 .results-count {
   color: var(--gray-600);
   font-size: 0.875rem;
@@ -722,6 +778,20 @@ textarea.input-beautiful {
 
   .search-box-container {
     max-width: none;
+  }
+
+  .filter-group {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .filter-select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .btn-clear-filters {
+    width: 100%;
   }
 
   .toolbar-right {

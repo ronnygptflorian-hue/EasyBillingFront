@@ -15,9 +15,24 @@
   <div class="toolbar">
     <div class="search-box-container">
       <div class="search-icon">🔍</div>
-      <input type="text" class="search-input" placeholder="Buscar por nombre, RNC, razón social..."
-        [(ngModel)]="searchQuery" />
+      <input type="text" class="search-input" placeholder="Buscar por nombre o razón social..."
+        [(ngModel)]="searchQuery" (input)="onSearchChange()" />
     </div>
+
+    <div class="filter-group">
+      <select [(ngModel)]="filterTipoId" (ngModelChange)="onFilterChange()" class="filter-select">
+        <option value="all">Todos los tipos</option>
+        <option value="C">Cédula (11 dígitos)</option>
+        <option value="R">RNC (9 dígitos)</option>
+        <option value="P">Pasaporte</option>
+      </select>
+
+      <button *ngIf="searchQuery || filterTipoId !== 'all'"
+        (click)="clearFilters()" class="btn-clear-filters" title="Limpiar filtros">
+        ✕
+      </button>
+    </div>
+
     <div class="page-size-selector">
       <label>Mostrar:</label>
       <select [(ngModel)]="pageSize" (ngModelChange)="changePageSize()" class="page-size-select">
