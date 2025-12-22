@@ -255,6 +255,8 @@ export class CrearFacturaComponent implements OnInit {
     });
   }
 
+  
+
   get hasNoResults(): boolean {
     return !this.isSearchingClient && !this.clientError &&
       this.clientResults.length === 0 &&
@@ -275,9 +277,30 @@ export class CrearFacturaComponent implements OnInit {
   }
 
   onClientInputFocus() {
-    if (!this.clientLocked && this.form.value.clientSearch?.length >= 2) {
-      this.showClientDropdown = true;
+    if (!this.clientLocked) {
+      if (this.form.value.clientSearch?.length >= 2) {
+        this.showClientDropdown = true;
+      } else {
+        this.loadInitialClients();
+      }
     }
+  }
+
+  loadInitialClients() {
+    this.isSearchingClient = true;
+    this.clientError = '';
+    this.showClientDropdown = true;
+
+    this.customerService.getClientes(1, 2, {}).subscribe({
+      next: (resp) => {
+        this.clientResults = resp.data;
+        this.isSearchingClient = false;
+      },
+      error: (error) => {
+        this.clientError = 'Error al cargar clientes';
+        this.isSearchingClient = false;
+      }
+    });
   }
 
   onClientTyping() {
@@ -313,7 +336,6 @@ export class CrearFacturaComponent implements OnInit {
       }
     }, 300);
   }
-
   selectClient(client: Customer) {
     this.form.patchValue({
       selectedClient: client,
@@ -335,7 +357,26 @@ export class CrearFacturaComponent implements OnInit {
   onProductInputFocus() {
     if (this.form.value.productSearch?.length >= 2) {
       this.showProductDropdown = true;
+    } else {
+      this.loadInitialProducts();
     }
+  }
+
+  loadInitialProducts() {
+    this.isSearchingProduct = true;
+    this.productError = '';
+    this.showProductDropdown = true;
+
+    this.productService.getProducts(1, 2, {}).subscribe({
+      next: (resp) => {
+        this.productResults = resp.data;
+        this.isSearchingProduct = false;
+      },
+      error: (error) => {
+        this.productError = 'Error al cargar productos';
+        this.isSearchingProduct = false;
+      }
+    });
   }
 
   onProductTyping() {
