@@ -16,8 +16,27 @@
     <div class="search-box-container">
       <div class="search-icon">🔍</div>
       <input type="text" class="search-input" placeholder="Buscar por nombre, RNC, razón social..."
-        [(ngModel)]="searchQuery" />
+        [(ngModel)]="searchQuery" (input)="onSearchChange()" />
     </div>
+
+    <div class="filter-group">
+      <select [(ngModel)]="filterStatus" (ngModelChange)="onFilterChange()" class="filter-select">
+        <option value="all">Todos los estados</option>
+        <option value="active">Activos</option>
+        <option value="blocked">Bloqueados</option>
+      </select>
+
+      <select [(ngModel)]="filterProvincia" (ngModelChange)="onFilterChange()" class="filter-select">
+        <option value="all">Todas las provincias</option>
+        <option *ngFor="let prov of provincias" [value]="prov">{{ prov }}</option>
+      </select>
+
+      <button *ngIf="searchQuery || filterStatus !== 'all' || filterProvincia !== 'all'"
+        (click)="clearFilters()" class="btn-clear-filters" title="Limpiar filtros">
+        ✕
+      </button>
+    </div>
+
     <div class="page-size-selector">
       <label>Mostrar:</label>
       <select [(ngModel)]="pageSize" (ngModelChange)="changePageSize()" class="page-size-select">
