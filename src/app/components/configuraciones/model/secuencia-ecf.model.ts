@@ -4,8 +4,8 @@ export interface SecuenciaEcf {
   idTipoEcf: number;
   inicioSecuencia: number | null;
   finSecuencia: number | null;
-  fechaExpiracion: string | Date;
-  fechaAdd: string ;
+  fechaExpiracion: string;
+  fechaAdd: string;
   bloqueado: boolean;
   descripcionTipoEcf: string;
   codigoTipoEcf: string;

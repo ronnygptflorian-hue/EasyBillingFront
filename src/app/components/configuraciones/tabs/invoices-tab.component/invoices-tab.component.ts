@@ -1,19 +1,18 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ConfigutionService } from '../../service/configuracion.service';
-import { SecuenciaEcf } from '../../model/secuencia-ecf.model';
-import { TipoEcf } from '../../../../models/common-data.model'
-import { NotificationService } from '../../../../services/notification.service';
-import { CustomDatepickerComponent } from '../../../shared/custom-datepicker/custom-datepicker.component';
-
+import { Component, OnInit } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
+import { ConfigutionService } from "../../service/configuracion.service";
+import { SecuenciaEcf } from "../../model/secuencia-ecf.model";
+import { TipoEcf } from "../../../../models/common-data.model";
+import { NotificationService } from "../../../../services/notification.service";
+import { CustomDatepickerComponent } from "../../../shared/custom-datepicker/custom-datepicker.component";
 
 @Component({
-  selector: 'app-invoices-tab',
+  selector: "app-invoices-tab",
   standalone: true,
-  imports: [CommonModule, FormsModule,CustomDatepickerComponent],
-  templateUrl: './invoices-tab.component.html',
-  styleUrls: ['./invoices-tab.component.scss']
+  imports: [CommonModule, FormsModule, CustomDatepickerComponent],
+  templateUrl: "./invoices-tab.component.html",
+  styleUrls: ["./invoices-tab.component.scss"],
 })
 export class InvoicesTabComponent implements OnInit {
   loading = false;
@@ -30,12 +29,12 @@ export class InvoicesTabComponent implements OnInit {
 
   currentSecuencia: Partial<SecuenciaEcf> = {
     idTipoEcf: 1,
-    descripcionTipoEcf: '',
+    descripcionTipoEcf: "",
     inicioSecuencia: 0,
     finSecuencia: 0,
-    fechaExpiracion: '',
+    fechaExpiracion: "",
     bloqueado: false,
-    idEmpresa: this.configutionService.EMPRESA?.userCompanies[0]?.id || 0
+    idEmpresa: this.configutionService.EMPRESA?.userCompanies[0]?.id || 0,
   };
 
   tiposEcf: TipoEcf[] = [];
@@ -48,8 +47,8 @@ export class InvoicesTabComponent implements OnInit {
 
   constructor(
     private configutionService: ConfigutionService,
-    private notificationService: NotificationService,
-  ) { }
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit() {
     this.loadSecuencias();
@@ -59,20 +58,20 @@ export class InvoicesTabComponent implements OnInit {
   loadSecuencias() {
     try {
       this.loading = true;
-      this.configutionService.getSecuencia({ pageIndex: this.pageIndex, pageSize: this.pageSize }).subscribe({
-        next: (result) => {
-          this.secuencias = result.data;
-          this.totalRecords = result.pagination?.totalCount ?? 0;
-          this.totalPages = result.pagination?.totalPages ?? 0;
-          this.hasNextPage = result.pagination?.hasNextPage ?? false;
-          this.hasPreviousPage = result.pagination?.hasPreviousPage ?? false;
-          this.loading = false;
-
-        }
-      });
-
+      this.configutionService
+        .getSecuencia({ pageIndex: this.pageIndex, pageSize: this.pageSize })
+        .subscribe({
+          next: (result) => {
+            this.secuencias = result.data;
+            this.totalRecords = result.pagination?.totalCount ?? 0;
+            this.totalPages = result.pagination?.totalPages ?? 0;
+            this.hasNextPage = result.pagination?.hasNextPage ?? false;
+            this.hasPreviousPage = result.pagination?.hasPreviousPage ?? false;
+            this.loading = false;
+          },
+        });
     } catch (error) {
-      console.error('Error cargando secuencias:', error);
+      console.error("Error cargando secuencias:", error);
     } finally {
       this.loading = false;
     }
@@ -82,10 +81,10 @@ export class InvoicesTabComponent implements OnInit {
     this.loading = true;
     this.configutionService.getTipoECF().subscribe({
       next: (resp) => {
-        this.tiposEcf = resp.data.filter(t => t.descripcion !== "Todos...");
+        this.tiposEcf = resp.data.filter((t) => t.descripcion !== "Todos...");
         this.loading = false;
-      }
-    })
+      },
+    });
   }
 
   goToPage(page: number) {
@@ -138,12 +137,12 @@ export class InvoicesTabComponent implements OnInit {
     this.isEditing = false;
     this.currentSecuencia = {
       idTipoEcf: 1,
-      descripcionTipoEcf: '',
-      inicioSecuencia:  null,
-      finSecuencia:  null,
-      fechaExpiracion: new Date().toLocaleDateString('es-DO'),
+      descripcionTipoEcf: "",
+      inicioSecuencia: null,
+      finSecuencia: null,
+      fechaExpiracion: new Date().toLocaleDateString("es-DO"),
       bloqueado: false,
-      idEmpresa: this.configutionService.EMPRESA?.userCompanies[0]?.id || 0
+      idEmpresa: this.configutionService.EMPRESA?.userCompanies[0]?.id || 0,
     };
     this.showModal = true;
   }
@@ -153,18 +152,24 @@ export class InvoicesTabComponent implements OnInit {
   }
 
   editSecuencia(secuencia: SecuenciaEcf) {
-  this.isEditing = true;
-  this.currentSecuencia = {
-    ...secuencia,
-    fechaExpiracion: new Date(secuencia.fechaExpiracion)
-  };
-  this.showModal = true;
-}
+    this.isEditing = true;
+    this.currentSecuencia = {
+      ...secuencia,
+      fechaExpiracion: new Date(secuencia.fechaExpiracion).toISOString(),
+    };
+    this.showModal = true;
+  }
 
   saveSecuencia() {
     const request$ = this.isEditing
-      ? this.configutionService.update('common/UpdateSecuenciaEcf', this.currentSecuencia)
-      : this.configutionService.post('common/AddSecuenciaEcf', this.currentSecuencia);
+      ? this.configutionService.update(
+          "common/UpdateSecuenciaEcf",
+          this.currentSecuencia
+        )
+      : this.configutionService.post(
+          "common/AddSecuenciaEcf",
+          this.currentSecuencia
+        );
 
     request$.subscribe({
       next: () => {
@@ -172,15 +177,15 @@ export class InvoicesTabComponent implements OnInit {
         this.loadSecuencias();
 
         const msg = this.isEditing
-          ? 'Secuencia actualizada exitosamente'
-          : 'Secuencia creada exitosamente';
+          ? "Secuencia actualizada exitosamente"
+          : "Secuencia creada exitosamente";
         this.notificationService.success(msg);
       },
       error: (err) => {
         this.notificationService.error(
-          err?.message || 'Ocurrió un error al guardar el cliente'
+          err?.message || "Ocurrió un error al guardar el cliente"
         );
-      }
+      },
     });
   }
 
@@ -191,18 +196,18 @@ export class InvoicesTabComponent implements OnInit {
       // });
       await this.loadSecuencias();
     } catch (error) {
-      console.error('Error actualizando secuencia:', error);
+      console.error("Error actualizando secuencia:", error);
     }
   }
 
   getTipoCodigo(idTipo: number): string {
-    return this.tiposEcf.find(t => t.id === idTipo)?.codigo || '';
+    return this.tiposEcf.find((t) => t.id === idTipo)?.codigo || "";
   }
 
   formatSecuencia(sec: SecuenciaEcf): string {
     const codigo = this.getTipoCodigo(sec.idTipoEcf);
     const secuenciaActual = sec.inicioSecuencia;
-    return `${codigo}${String(secuenciaActual).padStart(8, '0')}`;
+    return `${codigo}${String(secuenciaActual).padStart(8, "0")}`;
   }
 
   getPorcentajeUsado(sec: SecuenciaEcf): number {
@@ -232,20 +237,20 @@ export class InvoicesTabComponent implements OnInit {
   }
 
   formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('es-DO', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return new Date(date).toLocaleDateString("es-DO", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   }
 
   getEstado(sec: SecuenciaEcf): string {
-    if (sec.bloqueado) return 'Bloqueada';
-    if (this.isExpired(sec)) return 'Expirada';
-    return 'Activa';
+    if (sec.bloqueado) return "Bloqueada";
+    if (this.isExpired(sec)) return "Expirada";
+    return "Activa";
   }
 
   saveSettings() {
-    console.log('Guardando configuración general...');
+    console.log("Guardando configuración general...");
   }
 }
