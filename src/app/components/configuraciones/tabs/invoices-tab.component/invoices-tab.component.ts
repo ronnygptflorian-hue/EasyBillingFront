@@ -153,10 +153,13 @@ export class InvoicesTabComponent implements OnInit {
   }
 
   editSecuencia(secuencia: SecuenciaEcf) {
-    this.isEditing = true;
-    this.currentSecuencia = { ...secuencia };
-    this.showModal = true;
-  }
+  this.isEditing = true;
+  this.currentSecuencia = {
+    ...secuencia,
+    fechaExpiracion: new Date(secuencia.fechaExpiracion)
+  };
+  this.showModal = true;
+}
 
   saveSecuencia() {
     const request$ = this.isEditing
