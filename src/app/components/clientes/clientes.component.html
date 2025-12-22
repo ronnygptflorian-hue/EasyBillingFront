@@ -15,23 +15,19 @@
   <div class="toolbar">
     <div class="search-box-container">
       <div class="search-icon">🔍</div>
-      <input type="text" class="search-input" placeholder="Buscar por nombre, RNC, razón social..."
+      <input type="text" class="search-input" placeholder="Buscar por nombre o razón social..."
         [(ngModel)]="searchQuery" (input)="onSearchChange()" />
     </div>
 
     <div class="filter-group">
-      <select [(ngModel)]="filterStatus" (ngModelChange)="onFilterChange()" class="filter-select">
-        <option value="all">Todos los estados</option>
-        <option value="active">Activos</option>
-        <option value="blocked">Bloqueados</option>
+      <select [(ngModel)]="filterTipoId" (ngModelChange)="onFilterChange()" class="filter-select">
+        <option value="all">Todos los tipos</option>
+        <option value="C">Cédula (11 dígitos)</option>
+        <option value="R">RNC (9 dígitos)</option>
+        <option value="P">Pasaporte</option>
       </select>
 
-      <select [(ngModel)]="filterProvincia" (ngModelChange)="onFilterChange()" class="filter-select">
-        <option value="all">Todas las provincias</option>
-        <option *ngFor="let prov of provincias" [value]="prov">{{ prov }}</option>
-      </select>
-
-      <button *ngIf="searchQuery || filterStatus !== 'all' || filterProvincia !== 'all'"
+      <button *ngIf="searchQuery || filterTipoId !== 'all'"
         (click)="clearFilters()" class="btn-clear-filters" title="Limpiar filtros">
         ✕
       </button>

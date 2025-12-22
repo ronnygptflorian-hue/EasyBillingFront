@@ -22,8 +22,7 @@ export class ClientesComponent implements OnInit {
   isEditing = false;
   loading = true;
   searchQuery = '';
-  filterStatus: string = 'all';
-  filterProvincia: string = 'all';
+  filterTipoId: string = 'all';
 
   currentPage = 1;
   pageSize = 10;
@@ -85,12 +84,8 @@ export class ClientesComponent implements OnInit {
       filters.searchQuery = this.searchQuery;
     }
 
-    if (this.filterStatus !== 'all') {
-      filters.bloqueado = this.filterStatus === 'blocked';
-    }
-
-    if (this.filterProvincia !== 'all') {
-      filters.provincia = this.filterProvincia;
+    if (this.filterTipoId !== 'all') {
+      filters.tipoId = this.filterTipoId;
     }
 
     this.customerService.getClientes(this.currentPage, this.pageSize, filters).subscribe({
@@ -150,8 +145,7 @@ export class ClientesComponent implements OnInit {
 
   clearFilters() {
     this.searchQuery = '';
-    this.filterStatus = 'all';
-    this.filterProvincia = 'all';
+    this.filterTipoId = 'all';
     this.currentPage = 1;
     this.loadClientes();
   }
