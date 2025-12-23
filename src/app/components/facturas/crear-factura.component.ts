@@ -81,6 +81,7 @@ export class CrearFacturaComponent implements OnInit {
 
   aplicaDescuento = false;
   tieneRetencion = false;
+  permiteRetencion = false;
   precioIncluyeImpuestos = false;
   mostrarTasaCambio = false;
   cargandoTasaCambio = false;
@@ -210,12 +211,13 @@ export class CrearFacturaComponent implements OnInit {
       return;
     }
 
-    const codigo = sec.codigoTipoEcf;
-    console.log('Aplicando reglas para tipo de comprobante:', codigo);
+    const codigo = String(sec.codigoTipoEcf).trim();
+    console.log('Aplicando reglas para tipo de comprobante:', codigo, 'ID:', tipo, 'Secuencia:', sec);
 
     this.form.get("clientSearch")?.clearValidators();
     this.form.get("idTipoIngreso")?.clearValidators();
     this.tieneRetencion = false;
+    this.permiteRetencion = false;
     this.clientLocked = false;
     this.mostrarCliente = true;
     this.mostrarTipoIngreso = true;
@@ -252,6 +254,7 @@ export class CrearFacturaComponent implements OnInit {
       case "41":
         console.log('→ Tipo 41: Gastos Menores');
         this.form.get("clientSearch")?.setValidators([Validators.required]);
+        this.permiteRetencion = true;
         this.tieneRetencion = true;
         this.form.get("idTipoIngreso")?.clearValidators();
         this.form.patchValue({ idTipoIngreso: null });
@@ -317,6 +320,7 @@ export class CrearFacturaComponent implements OnInit {
 
       case "47":
         console.log('→ Tipo 47: Pagos al Exterior');
+        this.permiteRetencion = true;
         this.tieneRetencion = true;
         this.clienteObligatorio = false;
         this.mostrarCliente = true;
@@ -337,6 +341,7 @@ export class CrearFacturaComponent implements OnInit {
     this.form.get("idTipoIngreso")?.updateValueAndValidity();
 
     console.log('Estado después de aplicar reglas:', {
+      permiteRetencion: this.permiteRetencion,
       tieneRetencion: this.tieneRetencion,
       mostrarCliente: this.mostrarCliente,
       mostrarTipoIngreso: this.mostrarTipoIngreso,
