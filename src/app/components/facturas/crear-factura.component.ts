@@ -82,6 +82,8 @@ export class CrearFacturaComponent implements OnInit {
   aplicaDescuento = false;
   tieneRetencion = false;
   precioIncluyeImpuestos = false;
+  mostrarTasaCambio = false;
+  cargandoTasaCambio = false;
 
   clientResults: Customer[] = [];
   showClientDropdown = false;
@@ -137,6 +139,10 @@ export class CrearFacturaComponent implements OnInit {
       this.aplicarReglasPorTipoEcf();
     });
 
+    this.form.get("idMoneda")!.valueChanges.subscribe((idMoneda) => {
+      this.onMonedaChange(idMoneda);
+    });
+
     this.route.queryParams.subscribe((params) => {
       if (params["tipo"] === "34" && params["facturaOriginal"]) {
         this.isNotaCredito = true;
@@ -151,6 +157,47 @@ export class CrearFacturaComponent implements OnInit {
     this.referenciaCode = `FCT-${random3}`;
   }
 
+  onMonedaChange(idMoneda: number | null) {
+    if (!idMoneda) return;
+
+    const moneda = this.monedas.find((m) => m.id === idMoneda);
+    if (!moneda) return;
+
+    const codigoMoneda = moneda.codigoIso || moneda.descripcion;
+
+    if (codigoMoneda === "DOP" || codigoMoneda === "Peso Dominicano") {
+      this.mostrarTasaCambio = false;
+      this.form.patchValue({ tasaCambio: 1.0 });
+    } else {
+      this.mostrarTasaCambio = true;
+      this.obtenerTasaCambio(codigoMoneda);
+    }
+  }
+
+  obtenerTasaCambio(codigoMoneda: string) {
+    this.cargandoTasaCambio = true;
+    const url = `https://api.exchangerate-api.com/v4/latest/${codigoMoneda}`;
+
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        const tasaDOP = data.rates?.DOP;
+        if (tasaDOP) {
+          this.form.patchValue({ tasaCambio: tasaDOP });
+        } else {
+          this.notificationService.error(
+            "No se pudo obtener la tasa de cambio"
+          );
+        }
+        this.cargandoTasaCambio = false;
+      })
+      .catch((error) => {
+        console.error("Error al obtener tasa de cambio:", error);
+        this.notificationService.error("Error al obtener la tasa de cambio");
+        this.cargandoTasaCambio = false;
+      });
+  }
+
   aplicarReglasPorTipoEcf() {
     const tipo = this.form.value.idTipoEcf;
     const sec = this.tiposEcf.find((x) => x.idTipoEcf === tipo);
@@ -158,59 +205,42 @@ export class CrearFacturaComponent implements OnInit {
 
     const codigo = sec.codigoTipoEcf;
 
-    // Reset básicos antes de aplicar reglas
     this.form.get("clientSearch")?.clearValidators();
+    this.form.get("idTipoIngreso")?.clearValidators();
     this.tieneRetencion = false;
+    this.clientLocked = false;
 
-    // REGLAS POR CÓDIGO
     switch (codigo) {
-      // ------------------------------
-      // 32 → FACTURA DE CONSUMO
-      // ------------------------------
-      case "32":
-        // Cliente opcional
-        this.form.get("clientSearch")?.setValidators([]);
-        break;
-
-      // ------------------------------
-      // 31 → CRÉDITO FISCAL
-      // Cliente siempre obligatorio
-      // ------------------------------
       case "31":
         this.form.get("clientSearch")?.setValidators([Validators.required]);
+        this.form.get("idTipoIngreso")?.setValidators([Validators.required]);
         break;
 
-      // ------------------------------
-      // 34 → NOTA DE CRÉDITO
-      // ------------------------------
+      case "32":
+        this.form.get("idTipoIngreso")?.setValidators([Validators.required]);
+        break;
+
+      case "33":
       case "34":
         this.form.get("clientSearch")?.setValidators([Validators.required]);
-        this.tieneRetencion = false;
+        this.form.get("idTipoIngreso")?.setValidators([Validators.required]);
         break;
 
-      // ------------------------------
-      // 33 → NOTA DE DÉBITO
-      // ------------------------------
-      case "33":
+      case "41":
         this.form.get("clientSearch")?.setValidators([Validators.required]);
+        this.tieneRetencion = true;
+        this.form.get("idTipoIngreso")?.clearValidators();
+        this.form.patchValue({ idTipoIngreso: null });
         break;
 
-      // ------------------------------
-      // 43 → GASTOS MENORES
-      // ------------------------------
       case "43":
         this.form.get("clientSearch")?.clearValidators();
         this.form.patchValue({ selectedClient: null, clientSearch: "" });
-        this.clientLocked = true; // para que no permitan digitar cliente
-
-        // No retenciones
+        this.clientLocked = true;
         this.tieneRetencion = false;
-
-        // No requiere tipo de ingreso
         this.form.get("idTipoIngreso")?.clearValidators();
         this.form.patchValue({ idTipoIngreso: null });
 
-        // Tipo de ITBIS obligatorio = EXENTO (idTipoImpuesto = 4)
         this.items.forEach((it, idx) => {
           it.idTipoImpuesto = 4;
           it.itbisPct = 0;
@@ -218,26 +248,39 @@ export class CrearFacturaComponent implements OnInit {
         });
         break;
 
-      // ------------------------------
-      // 41 → COMPRAS ELECTRÓNICO
-      // RNC obligatorio
-      // ------------------------------
-      case "41":
-        this.form.get("clientSearch")?.setValidators([Validators.required]);
-        this.tieneRetencion = true;
+      case "44":
+        this.tieneRetencion = false;
+        this.items.forEach((it, idx) => {
+          it.idTipoImpuesto = 4;
+          it.itbisPct = 0;
+          this.calculateItem(idx);
+        });
         break;
 
-      // ------------------------------
-      // 46 → EXPORTACIONES
-      // Cliente obligatorio y ITBIS = 0
-      // ------------------------------
+      case "45":
+        this.tieneRetencion = false;
+        break;
+
       case "46":
         this.form.get("clientSearch")?.setValidators([Validators.required]);
+        this.tieneRetencion = false;
 
-        // ITBIS siempre 0
-        this.items.forEach((it) => {
+        this.items.forEach((it, idx) => {
+          const tipoImpuesto = this.tiposImpuesto.find((t) => t.impuestoP === 0);
+          if (tipoImpuesto) {
+            it.idTipoImpuesto = tipoImpuesto.id;
+            it.itbisPct = 0;
+          }
+          this.calculateItem(idx);
+        });
+        break;
+
+      case "47":
+        this.tieneRetencion = true;
+        this.items.forEach((it, idx) => {
+          it.idTipoImpuesto = 4;
           it.itbisPct = 0;
-          this.calculateItem(this.items.indexOf(it));
+          this.calculateItem(idx);
         });
         break;
 
@@ -246,6 +289,7 @@ export class CrearFacturaComponent implements OnInit {
     }
 
     this.form.get("clientSearch")?.updateValueAndValidity();
+    this.form.get("idTipoIngreso")?.updateValueAndValidity();
   }
 
   loadCommonData() {

@@ -77,6 +77,23 @@
               </select>
             </div>
 
+            <div class="form-group" *ngIf="mostrarTasaCambio">
+              <label for="tasaCambio">💱 Tasa de Cambio</label>
+              <input
+                type="number"
+                id="tasaCambio"
+                formControlName="tasaCambio"
+                class="modern-input"
+                placeholder="Tasa de cambio..."
+                step="0.01"
+                min="0"
+                [readonly]="cargandoTasaCambio"
+              />
+              <small class="text-muted" *ngIf="cargandoTasaCambio">
+                Obteniendo tasa de cambio...
+              </small>
+            </div>
+
             <div class="form-group">
               <label for="idCondicionPago">💳 Condición de Pago</label>
               <select
