@@ -1,33 +1,42 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { FacturaService } from './service/facturas.service';
-import { Factura, FacturaResponse, PaginationInfo } from './model/factura-request.model';
-import { LoadingComponent } from '../shared/loading.component/loading.component';
-import { CustomerService } from '../clientes/service/customer.service';
-import { Customer } from '../clientes/model/customer.model';
-import { CustomDatepickerComponent } from '../shared/custom-datepicker/custom-datepicker.component';
-
+import { Component, OnInit } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { RouterModule, Router } from "@angular/router";
+import { FormsModule } from "@angular/forms";
+import { FacturaService } from "./service/facturas.service";
+import {
+  Factura,
+  FacturaResponse,
+  PaginationInfo,
+} from "./model/factura-request.model";
+import { LoadingComponent } from "../shared/loading.component/loading.component";
+import { CustomerService } from "../clientes/service/customer.service";
+import { Customer } from "../clientes/model/customer.model";
+import { CustomDatepickerComponent } from "../shared/custom-datepicker/custom-datepicker.component";
 
 @Component({
-  selector: 'app-facturas-list',
+  selector: "app-facturas-list",
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule,LoadingComponent,CustomDatepickerComponent],
-  templateUrl: './facturas-list.component.html',
-  styleUrls: ['./facturas-list.component.scss']
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    LoadingComponent,
+    CustomDatepickerComponent,
+  ],
+  templateUrl: "./facturas-list.component.html",
+  styleUrls: ["./facturas-list.component.scss"],
 })
 export class FacturasListComponent implements OnInit {
   facturas: FacturaResponse[] = [];
   filteredFacturas: FacturaResponse[] = [];
   loading = true;
-  searchTerm = '';
-  filtroNcf = '';
-  selectedEstado = '';
-  filtroId = '';
-  filtroIdCliente = '';
-  filtroFechaDesde = '';
-  filtroFechaHasta = '';
+  searchTerm = "";
+  filtroNcf = "";
+  selectedEstado = "";
+  filtroId = "";
+  filtroIdCliente = "";
+  filtroFechaDesde = "";
+  filtroFechaHasta = "";
   showDetailModal = false;
   selectedFactura: Factura | null = null;
   showAdvancedFilters = false;
@@ -42,14 +51,14 @@ export class FacturasListComponent implements OnInit {
     pageSize: 10,
     totalPages: 0,
     hasNextPage: false,
-    hasPreviousPage: false
+    hasPreviousPage: false,
   };
 
   constructor(
     private facturasService: FacturaService,
     private router: Router,
     private customerService: CustomerService
-  ) { }
+  ) {}
 
   async ngOnInit() {
     await this.loadFacturas();
@@ -60,7 +69,7 @@ export class FacturasListComponent implements OnInit {
       this.loading = true;
       const params: any = {
         pageIndex: this.pagination.pageNumber,
-        pageSize: this.pagination.pageSize
+        pageSize: this.pagination.pageSize,
       };
 
       if (this.filtroId) {
@@ -70,28 +79,34 @@ export class FacturasListComponent implements OnInit {
         params.IdCliente = parseInt(this.filtroIdCliente);
       }
       if (this.filtroFechaDesde) {
-        params.FechaDesde = this.convertYYYYMMDDtoDDMMYYYY(this.filtroFechaDesde);
+        params.FechaDesde = this.convertYYYYMMDDtoDDMMYYYY(
+          this.filtroFechaDesde
+        );
       }
       if (this.filtroFechaHasta) {
-        params.FechaHasta = this.convertYYYYMMDDtoDDMMYYYY(this.filtroFechaHasta);
+        params.FechaHasta = this.convertYYYYMMDDtoDDMMYYYY(
+          this.filtroFechaHasta
+        );
       }
 
-      this.facturasService.getAllPagination('invoice/GetInvoice', params).subscribe({
-        next: (resp) => {
-          this.facturas = resp.data;
-          if (resp.pagination) {
-            this.pagination = resp.pagination;
-          }
-          this.filteredFacturas = this.filterLocal([...this.facturas]);
-          this.loading = false;
-        },
-        error: (error) => {
-          console.error('Error:', error);
-          this.loading = false;
-        }
-      });
+      this.facturasService
+        .getAllPagination("invoice/GetInvoice", params)
+        .subscribe({
+          next: (resp) => {
+            this.facturas = resp.data;
+            if (resp.pagination) {
+              this.pagination = resp.pagination;
+            }
+            this.filteredFacturas = this.filterLocal([...this.facturas]);
+            this.loading = false;
+          },
+          error: (error) => {
+            console.error("Error:", error);
+            this.loading = false;
+          },
+        });
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
       this.loading = false;
     }
   }
@@ -101,20 +116,20 @@ export class FacturasListComponent implements OnInit {
 
     if (this.filtroNcf) {
       const ncf = this.filtroNcf.toLowerCase();
-      filtered = filtered.filter(f =>
-        f.ecf && f.ecf.toLowerCase().includes(ncf)
+      filtered = filtered.filter(
+        (f) => f.ecf && f.ecf.toLowerCase().includes(ncf)
       );
     }
 
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(f =>
-        f.nombreCliente && f.nombreCliente.toLowerCase().includes(term)
+      filtered = filtered.filter(
+        (f) => f.nombreCliente && f.nombreCliente.toLowerCase().includes(term)
       );
     }
 
     if (this.selectedEstado) {
-      filtered = filtered.filter(f => f.tipoVenta === this.selectedEstado);
+      filtered = filtered.filter((f) => f.tipoVenta === this.selectedEstado);
     }
 
     return filtered;
@@ -126,13 +141,13 @@ export class FacturasListComponent implements OnInit {
   }
 
   limpiarFiltros() {
-    this.searchTerm = '';
-    this.filtroNcf = '';
-    this.selectedEstado = '';
-    this.filtroId = '';
-    this.filtroIdCliente = '';
-    this.filtroFechaDesde = '';
-    this.filtroFechaHasta = '';
+    this.searchTerm = "";
+    this.filtroNcf = "";
+    this.selectedEstado = "";
+    this.filtroId = "";
+    this.filtroIdCliente = "";
+    this.filtroFechaDesde = "";
+    this.filtroFechaHasta = "";
     this.pagination.pageNumber = 1;
     this.loadFacturas();
   }
@@ -147,8 +162,8 @@ export class FacturasListComponent implements OnInit {
       this.loadClienteSuggestions(searchValue);
     } else if (searchValue.length === 0) {
       this.selectedCliente = null;
-      this.filtroIdCliente = '';
-      this.loadClienteSuggestions('');
+      this.filtroIdCliente = "";
+      this.loadClienteSuggestions("");
     } else {
       this.clienteSuggestions = [];
       this.showClienteDropdown = false;
@@ -157,7 +172,7 @@ export class FacturasListComponent implements OnInit {
 
   onClienteFocus() {
     if (this.searchTerm.length === 0) {
-      this.loadClienteSuggestions('');
+      this.loadClienteSuggestions("");
     } else if (this.searchTerm.length >= 2) {
       this.loadClienteSuggestions(this.searchTerm);
     }
@@ -177,9 +192,9 @@ export class FacturasListComponent implements OnInit {
         this.showClienteDropdown = this.clienteSuggestions.length > 0;
       },
       error: (error) => {
-        console.error('Error al cargar clientes:', error);
+        console.error("Error al cargar clientes:", error);
         this.clienteSuggestions = [];
-      }
+      },
     });
   }
 
@@ -199,9 +214,9 @@ export class FacturasListComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error al cargar factura:', error);
+        console.error("Error al cargar factura:", error);
         this.loading = false;
-      }
+      },
     });
   }
 
@@ -238,55 +253,69 @@ export class FacturasListComponent implements OnInit {
   }
 
   convertYYYYMMDDtoDDMMYYYY(fecha: string): string {
-    const [year, month, day] = fecha.split('-');
+    const [year, month, day] = fecha.split("-");
     return `${day}-${month}-${year}`;
   }
 
   formatCurrency(value: number): string {
-    return new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'DOP' }).format(value);
+    return new Intl.NumberFormat("es-DO", {
+      style: "currency",
+      currency: "DOP",
+    }).format(value);
   }
 
   formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('es-DO');
+    return new Date(date).toLocaleDateString("es-DO");
   }
 
   getEstadoClass(tipoVenta: string): string {
     const classes: any = {
-      'CO': 'estado-pendiente',
-      'CR': 'estado-pagada',
+      CO: "estado-pendiente",
+      CR: "estado-pagada",
     };
-    return classes[tipoVenta] || 'estado-pendiente';
+    return classes[tipoVenta] || "estado-pendiente";
   }
 
   getEstadoLabel(tipoVenta: string): string {
     const labels: any = {
-      'CO': 'Contado',
-      'CR': 'Crédito',
+      CO: "Contado",
+      CR: "Crédito",
     };
     return labels[tipoVenta] || tipoVenta;
   }
 
   crearNotaCredito(factura: FacturaResponse) {
-    this.router.navigate(['/facturas/crear'], {
+    this.router.navigate(["/facturas/crear"], {
       queryParams: {
         tipo: this.notaCredito,
-        facturaOriginal: factura.id
-      }
+        facturaOriginal: factura.id,
+      },
+    });
+  }
+
+  EditarFactura(factura: FacturaResponse) {
+    this.router.navigate(["/facturas/crear"], {
+      queryParams: {
+        tipo: null,
+        facturaOriginal: factura.id,
+      },
     });
   }
 
   getQrCodeUrl(qrUrl: string): string {
-    return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrUrl)}`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
+      qrUrl
+    )}`;
   }
 
   onQrImageError(event: any) {
-    event.target.style.display = 'none';
+    event.target.style.display = "none";
   }
   printFactura(factura: FacturaResponse) {
     this.facturasService.printFactura(factura.id).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = url;
         link.download = `${factura.rnc}${factura.ecf || factura.id}.pdf`;
         document.body.appendChild(link);
@@ -295,67 +324,67 @@ export class FacturasListComponent implements OnInit {
         window.URL.revokeObjectURL(url);
       },
       error: (error) => {
-        console.error('Error al imprimir factura:', error);
-      }
+        console.error("Error al imprimir factura:", error);
+      },
     });
   }
 
   getSubtotal(factura: any): number {
-  if (!factura.detalles) return 0;
+    if (!factura.detalles) return 0;
 
-  return factura.detalles.reduce((sum: number, d: any) => {
-    const base = d.cantidad * d.precio;
-    return sum + base;
-  }, 0);
-}
+    return factura.detalles.reduce((sum: number, d: any) => {
+      const base = d.cantidad * d.precio;
+      return sum + base;
+    }, 0);
+  }
 
-getTotalRetencion(factura: any): number {
-  if (!factura.detalles) return 0;
+  getTotalRetencion(factura: any): number {
+    if (!factura.detalles) return 0;
 
-  return factura.detalles.reduce((sum: number, d: any) => {
-    return sum + (d.valorItbisRetencion || 0) + (d.valorIsrRetencion || 0);
-  }, 0);
-}
+    return factura.detalles.reduce((sum: number, d: any) => {
+      return sum + (d.valorItbisRetencion || 0) + (d.valorIsrRetencion || 0);
+    }, 0);
+  }
 
+  onDownloadPdf(factura: any) {
+    this.loading = true;
 
-    onDownloadPdf(factura: any) {
     this.facturasService.printFactura(factura.id).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = url;
         link.download = `${factura.rnc}${factura.ecf || factura.id}.pdf`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
+        this.loading = false;
       },
       error: (error) => {
-        console.error('Error al imprimir factura:', error);
-      }
+        console.error("Error al imprimir factura:", error);
+        this.loading = false;
+      },
     });
   }
 
+  onDownloadXml(factura: any) {
+    // TODO
+  }
 
-onDownloadXml(factura: any) {
-  // TODO
-}
+  onDownloadJson(factura: any) {
+    const data = JSON.stringify(factura, null, 2);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
 
-onDownloadJson(factura: any) {
-  const data = JSON.stringify(factura, null, 2);
-  const blob = new Blob([data], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Factura-${factura.ecf || factura.id}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `Factura-${factura.ecf || factura.id}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-onPreviewFactura(factura: any) {
-  // Abrir modal o página con layout de PDF
-}
-
-
+  onPreviewFactura(factura: any) {
+    // Abrir modal o página con layout de PDF
+  }
 }

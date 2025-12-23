@@ -112,7 +112,7 @@
               <th>ITBIS</th>
               <th>Total</th>
               <th>Estado</th>
-              <th>Tipo</th>
+              <!-- <th>Tipo</th> -->
 
               <th>Acciones</th>
             </tr>
@@ -128,10 +128,10 @@
               </td>
               <td>
                 <span [class]="'badge ' + getEstadoClass(factura.tipoVenta)">
-                  {{ getEstadoLabel(factura.tipoVenta) }}
+                  {{ getEstadoLabel(factura.estadoFactura) }}
                 </span>
               </td>
-              <td>{{ factura.descripcionTipoEcf || "N/A" }}</td>
+              <!-- <td>{{ factura.descripcionTipoEcf || "N/A" }}</td> -->
               <td class="actions">
                 <button
                   (click)="viewFactura(factura)"
@@ -148,11 +148,25 @@
                   🖨️
                 </button>
                 <button
+                  *ngIf="
+                    factura.descripcionTipoEcf !==
+                      'Nota de Crédito Electrónica' &&
+                    factura.estadoFactura !== 'Nota Generada'
+                  "
                   (click)="crearNotaCredito(factura)"
                   class="btn-icon btn-credit"
                   title="Crear Nota de Crédito"
                 >
                   📝
+                </button>
+
+                <button
+                  *ngIf="factura.estadoFactura === 'Borrador'"
+                  (click)="EditarFactura(factura)"
+                  class="btn-icon btn-edit"
+                  title="Editar Factura"
+                >
+                  ✏️
                 </button>
               </td>
             </tr>

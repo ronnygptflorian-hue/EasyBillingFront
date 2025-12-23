@@ -31,6 +31,7 @@ export interface ImpuestoAdicionalDetalle {
 export interface FacturaRequest {
   idEmpresa: number;
   idCliente: number;
+  IdNumFactura: number;
   comentario: string;
   tipoVenta: string;
   referencia: string;
@@ -46,6 +47,8 @@ export interface FacturaRequest {
   estadoFactura: string;
   AplicaDescuento: boolean;
   PrecioIncluyeImpuestos: boolean;
+  idMotivoModificacion: number;
+  RazonModificacion: string;
   detail: FacturaDetailRequest[];
 }
 
@@ -246,11 +249,10 @@ export interface Factura {
   qrDgii: string | null;
   codigoSeguridad: string | null;
   fechaFirmaDgii: string | null;
-
 }
 
 export interface Detalle {
- id: number;
+  id: number;
   idEmpresa: number;
   idFactura: number;
   idNumFactura: number | null;
@@ -282,7 +284,6 @@ export interface Detalle {
   valorItbisRetencion: number;
   valorIsrRetencion: number;
   impuestosAdicionales?: ImpuestoAdicionalDetalle[];
-
 }
 
 export interface ImpuestoAdicionalRequest {
@@ -291,11 +292,9 @@ export interface ImpuestoAdicionalRequest {
   valorImpuesto: number;
 }
 
-
 export interface Mensaje {
   code: number;
   msg: string;
   stop: boolean;
   type: string;
 }
-

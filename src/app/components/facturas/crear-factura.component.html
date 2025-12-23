@@ -77,6 +77,23 @@
               </select>
             </div>
 
+            <div class="form-group" *ngIf="mostrarTasaCambio">
+              <label for="tasaCambio">💱 Tasa de Cambio</label>
+              <input
+                type="number"
+                id="tasaCambio"
+                formControlName="tasaCambio"
+                class="modern-input"
+                placeholder="Tasa de cambio..."
+                step="0.01"
+                min="0"
+                [readonly]="cargandoTasaCambio"
+              />
+              <small class="text-muted" *ngIf="cargandoTasaCambio">
+                Obteniendo tasa de cambio...
+              </small>
+            </div>
+
             <div class="form-group">
               <label for="idCondicionPago">💳 Condición de Pago</label>
               <select
@@ -93,7 +110,7 @@
               </select>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" *ngIf="mostrarTipoIngreso">
               <label for="idTipoIngreso">📊 Tipo de Ingreso</label>
               <select
                 id="idTipoIngreso"
@@ -107,6 +124,33 @@
                   {{ i.descripcion }}
                 </option>
               </select>
+            </div>
+
+            <div class="form-group" *ngIf="mostrarMotivoAnulacion">
+              <label for="idMotivoModificacion"
+                >📝 Motivo de Modificación</label
+              >
+              <select
+                id="idMotivoModificacion"
+                formControlName="idMotivoModificacion"
+                class="modern-input"
+              >
+                <option [ngValue]="null" disabled>Selecciona un motivo</option>
+                <option *ngFor="let m of motivoModificacion" [ngValue]="m.id">
+                  {{ m.descripcion }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group" *ngIf="mostrarMotivoAnulacion">
+              <label for="RazonModificacion">✏️ Razón de Modificación</label>
+              <input
+                id="RazonModificacion"
+                type="text"
+                formControlName="RazonModificacion"
+                class="modern-input"
+                placeholder="Describe la razón de la modificación"
+              />
             </div>
           </div>
 
@@ -136,7 +180,7 @@
               </label>
             </div>
 
-            <div class="toggle-item">
+            <div class="toggle-item" *ngIf="permiteRetencion">
               <label class="toggle-label">
                 <input
                   type="checkbox"
@@ -152,9 +196,9 @@
         </div>
 
         <!-- Cliente - Búsqueda -->
-        <div class="client-quick-section">
+        <div class="client-quick-section" *ngIf="mostrarCliente">
           <div class="client-search-container">
-            <label>👤 Cliente *</label>
+            <label>👤 Cliente {{ clienteObligatorio ? "*" : "" }}</label>
             <div class="search-with-add">
               <div class="search-input-wrapper">
                 <input
@@ -168,7 +212,7 @@
                   (keydown.enter)="$event.preventDefault()"
                   [readOnly]="clientLocked"
                   autocomplete="off"
-                  required
+                  [required]="clienteObligatorio"
                 />
 
                 <div

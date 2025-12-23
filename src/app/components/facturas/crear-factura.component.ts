@@ -14,6 +14,7 @@ import {
   TipoIngreso,
   CondicionPago,
   TipoImpuesto,
+  MotivoModificacion,
 } from "../../models/common-data.model";
 import {
   FacturaRequest,
@@ -77,11 +78,19 @@ export class CrearFacturaComponent implements OnInit {
   tiposImpuesto: TipoImpuesto[] = [];
   impuestosAdicionales: TipoImpuesto[] = [];
   additionalTaxes: TipoImpuesto[] = [];
+  motivoModificacion: MotivoModificacion[] = [];
   discountError?: string;
 
   aplicaDescuento = false;
   tieneRetencion = false;
+  permiteRetencion = false;
   precioIncluyeImpuestos = false;
+  mostrarTasaCambio = false;
+  cargandoTasaCambio = false;
+  mostrarCliente = true;
+  mostrarTipoIngreso = true;
+  clienteObligatorio = true;
+  mostrarMotivoAnulacion = false;
 
   clientResults: Customer[] = [];
   showClientDropdown = false;
@@ -131,16 +140,26 @@ export class CrearFacturaComponent implements OnInit {
       fechaEmisionEcf: [this.fechaEmisionEcf, Validators.required],
       idTipoIngreso: [1, Validators.required],
       idCondicionPago: [1, Validators.required],
+      idMotivoModificacion: [null],
+      RazonModificacion: [""],
+      IdNumFactura: [],
     });
 
     this.form.get("idTipoEcf")!.valueChanges.subscribe(() => {
       this.aplicarReglasPorTipoEcf();
     });
 
+    this.form.get("idMoneda")!.valueChanges.subscribe((idMoneda) => {
+      this.onMonedaChange(idMoneda);
+    });
+
     this.route.queryParams.subscribe((params) => {
       if (params["tipo"] === "34" && params["facturaOriginal"]) {
         this.isNotaCredito = true;
-        this.facturaOriginalId = +params["facturaOriginal"];
+      }
+
+      this.facturaOriginalId = +params["facturaOriginal"];
+      if (this.facturaOriginalId) {
         this.loadFacturaOriginal(this.facturaOriginalId);
       }
     });
@@ -151,66 +170,129 @@ export class CrearFacturaComponent implements OnInit {
     this.referenciaCode = `FCT-${random3}`;
   }
 
+  onMonedaChange(idMoneda: number | null) {
+    if (!idMoneda) return;
+
+    const moneda = this.monedas.find((m) => m.id === idMoneda);
+    if (!moneda) return;
+
+    const codigoMoneda = moneda.codigoIso || moneda.descripcion;
+
+    if (codigoMoneda === "DOP" || codigoMoneda === "Peso Dominicano") {
+      this.mostrarTasaCambio = false;
+      this.form.patchValue({ tasaCambio: 1.0 });
+    } else {
+      this.mostrarTasaCambio = true;
+      this.obtenerTasaCambio(codigoMoneda);
+    }
+  }
+
+  obtenerTasaCambio(codigoMoneda: string) {
+    this.cargandoTasaCambio = true;
+    const url = `https://api.exchangerate-api.com/v4/latest/${codigoMoneda}`;
+
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        const tasaDOP = data.rates?.DOP;
+        if (tasaDOP) {
+          this.form.patchValue({ tasaCambio: tasaDOP });
+        } else {
+          this.notificationService.error(
+            "No se pudo obtener la tasa de cambio"
+          );
+        }
+        this.cargandoTasaCambio = false;
+      })
+      .catch((error) => {
+        console.error("Error al obtener tasa de cambio:", error);
+        this.notificationService.error("Error al obtener la tasa de cambio");
+        this.cargandoTasaCambio = false;
+      });
+  }
+
   aplicarReglasPorTipoEcf() {
-    const tipo = this.form.value.idTipoEcf;
+    //const tipo = this.form.value.idTipoEcf;
+    const tipo = this.form.get("idTipoEcf")?.value;
+
     const sec = this.tiposEcf.find((x) => x.idTipoEcf === tipo);
-    if (!sec) return;
 
-    const codigo = sec.codigoTipoEcf;
+    if (!sec) {
+      console.log("No se encontró secuencia para tipo:", tipo);
+      return;
+    }
 
-    // Reset básicos antes de aplicar reglas
+    const codigo = String(sec.codigoTipoEcf).trim();
+    console.log(
+      "Aplicando reglas para tipo de comprobante:",
+      codigo,
+      "ID:",
+      tipo,
+      "Secuencia:",
+      sec
+    );
+
     this.form.get("clientSearch")?.clearValidators();
+    this.form.get("idTipoIngreso")?.clearValidators();
     this.tieneRetencion = false;
+    this.permiteRetencion = false;
+    this.clientLocked = false;
+    this.mostrarCliente = true;
+    this.mostrarTipoIngreso = true;
+    this.clienteObligatorio = true;
 
-    // REGLAS POR CÓDIGO
     switch (codigo) {
-      // ------------------------------
-      // 32 → FACTURA DE CONSUMO
-      // ------------------------------
-      case "32":
-        // Cliente opcional
-        this.form.get("clientSearch")?.setValidators([]);
-        break;
-
-      // ------------------------------
-      // 31 → CRÉDITO FISCAL
-      // Cliente siempre obligatorio
-      // ------------------------------
       case "31":
+        console.log("→ Tipo 31: Factura de Crédito Fiscal");
         this.form.get("clientSearch")?.setValidators([Validators.required]);
+        this.form.get("idTipoIngreso")?.setValidators([Validators.required]);
+        this.clienteObligatorio = true;
+        this.mostrarCliente = true;
+        this.mostrarTipoIngreso = true;
         break;
 
-      // ------------------------------
-      // 34 → NOTA DE CRÉDITO
-      // ------------------------------
-      case "34":
-        this.form.get("clientSearch")?.setValidators([Validators.required]);
-        this.tieneRetencion = false;
+      case "32":
+        console.log("→ Tipo 32: Factura de Consumo");
+        this.form.get("idTipoIngreso")?.setValidators([Validators.required]);
+        this.clienteObligatorio = false;
+        this.mostrarCliente = true;
+        this.mostrarTipoIngreso = true;
         break;
 
-      // ------------------------------
-      // 33 → NOTA DE DÉBITO
-      // ------------------------------
       case "33":
+      case "34":
+        console.log("→ Tipo 33/34: Nota de Crédito/Débito");
         this.form.get("clientSearch")?.setValidators([Validators.required]);
+        this.form.get("idTipoIngreso")?.setValidators([Validators.required]);
+        this.clienteObligatorio = false;
+        this.mostrarCliente = true;
+        this.mostrarTipoIngreso = true;
+        this.mostrarMotivoAnulacion = true;
         break;
 
-      // ------------------------------
-      // 43 → GASTOS MENORES
-      // ------------------------------
-      case "43":
-        this.form.get("clientSearch")?.clearValidators();
-        this.form.patchValue({ selectedClient: null, clientSearch: "" });
-        this.clientLocked = true; // para que no permitan digitar cliente
-
-        // No retenciones
-        this.tieneRetencion = false;
-
-        // No requiere tipo de ingreso
+      case "41":
+        console.log("→ Tipo 41: Gastos Menores");
+        this.form.get("clientSearch")?.setValidators([Validators.required]);
+        this.permiteRetencion = true;
+        this.tieneRetencion = true;
         this.form.get("idTipoIngreso")?.clearValidators();
         this.form.patchValue({ idTipoIngreso: null });
+        this.clienteObligatorio = true;
+        this.mostrarCliente = true;
+        this.mostrarTipoIngreso = false;
+        break;
 
-        // Tipo de ITBIS obligatorio = EXENTO (idTipoImpuesto = 4)
+      case "43":
+        console.log("→ Tipo 43: Regímenes Especiales");
+        this.form.get("clientSearch")?.clearValidators();
+        this.form.patchValue({ selectedClient: null, clientSearch: "" });
+        this.clientLocked = true;
+        this.tieneRetencion = false;
+        this.form.get("idTipoIngreso")?.clearValidators();
+        this.form.patchValue({ idTipoIngreso: null });
+        this.mostrarCliente = false;
+        this.mostrarTipoIngreso = false;
+
         this.items.forEach((it, idx) => {
           it.idTipoImpuesto = 4;
           it.itbisPct = 0;
@@ -218,34 +300,75 @@ export class CrearFacturaComponent implements OnInit {
         });
         break;
 
-      // ------------------------------
-      // 41 → COMPRAS ELECTRÓNICO
-      // RNC obligatorio
-      // ------------------------------
-      case "41":
-        this.form.get("clientSearch")?.setValidators([Validators.required]);
-        this.tieneRetencion = true;
+      case "44":
+        console.log("→ Tipo 44: Gubernamental");
+        this.tieneRetencion = false;
+        this.mostrarCliente = true;
+        this.mostrarTipoIngreso = true;
+        this.items.forEach((it, idx) => {
+          it.idTipoImpuesto = 4;
+          it.itbisPct = 0;
+          this.calculateItem(idx);
+        });
         break;
 
-      // ------------------------------
-      // 46 → EXPORTACIONES
-      // Cliente obligatorio y ITBIS = 0
-      // ------------------------------
-      case "46":
-        this.form.get("clientSearch")?.setValidators([Validators.required]);
+      case "45":
+        console.log("→ Tipo 45: Gubernamental Proveedores");
+        this.tieneRetencion = false;
+        this.mostrarCliente = true;
+        this.mostrarTipoIngreso = true;
+        break;
 
-        // ITBIS siempre 0
-        this.items.forEach((it) => {
+      case "46":
+        console.log("→ Tipo 46: Exportaciones");
+        this.form.get("clientSearch")?.setValidators([Validators.required]);
+        this.tieneRetencion = false;
+        this.clienteObligatorio = true;
+        this.mostrarCliente = true;
+        this.mostrarTipoIngreso = true;
+
+        this.items.forEach((it, idx) => {
+          const tipoImpuesto = this.tiposImpuesto.find(
+            (t) => t.impuestoP === 0
+          );
+          if (tipoImpuesto) {
+            it.idTipoImpuesto = tipoImpuesto.id;
+            it.itbisPct = 0;
+          }
+          this.calculateItem(idx);
+        });
+        break;
+
+      case "47":
+        console.log("→ Tipo 47: Pagos al Exterior");
+        this.permiteRetencion = true;
+        this.tieneRetencion = true;
+        this.clienteObligatorio = false;
+        this.mostrarCliente = true;
+        this.mostrarTipoIngreso = true;
+        this.items.forEach((it, idx) => {
+          it.idTipoImpuesto = 4;
           it.itbisPct = 0;
-          this.calculateItem(this.items.indexOf(it));
+          this.calculateItem(idx);
         });
         break;
 
       default:
+        console.log("→ Tipo no reconocido:", codigo);
         break;
     }
 
     this.form.get("clientSearch")?.updateValueAndValidity();
+    this.form.get("idTipoIngreso")?.updateValueAndValidity();
+
+    console.log("Estado después de aplicar reglas:", {
+      permiteRetencion: this.permiteRetencion,
+      tieneRetencion: this.tieneRetencion,
+      mostrarCliente: this.mostrarCliente,
+      mostrarTipoIngreso: this.mostrarTipoIngreso,
+      clienteObligatorio: this.clienteObligatorio,
+      clientLocked: this.clientLocked,
+    });
   }
 
   loadCommonData() {
@@ -259,6 +382,7 @@ export class CrearFacturaComponent implements OnInit {
         this.condicionesPago = resp.data.condicionesPago;
         this.tiposIngreso = resp.data.tiposIngreso;
         this.tiposImpuesto = resp.data.tiposImpuestos;
+        this.motivoModificacion = resp.data.motivosModificaciones;
         this.tiposImpuestoPrincipales = this.tiposImpuesto.filter(
           (t) => !t.adicional
         );
@@ -329,6 +453,7 @@ export class CrearFacturaComponent implements OnInit {
 
         this.form.patchValue({
           referencia: `NC-${factura.ecf || factura.id}`,
+          IdNumFactura: factura.id,
           idMoneda: factura.idMoneda || 1,
           tasaCambio: factura.tasaCambio || 1.0,
           idTipoIngreso: factura.idTipoIngreso || 1,
@@ -821,9 +946,9 @@ export class CrearFacturaComponent implements OnInit {
     const formValue = this.form.value;
     const selectedClient = formValue.selectedClient as Customer;
 
-    if (!selectedClient || !formValue.idTipoEcf || this.items.length === 0) {
-      return null;
-    }
+    // if (!selectedClient || !formValue.idTipoEcf || this.items.length === 0) {
+    //   return null;
+    // }
 
     const detail: FacturaDetailRequest[] = this.items.map((item) => ({
       idProducto: item.id,
@@ -863,8 +988,9 @@ export class CrearFacturaComponent implements OnInit {
     }));
 
     const request: FacturaRequest = {
+      IdNumFactura: formValue?.IdNumFactura,
       idEmpresa: this.facturasService.EMPRESA?.userCompanies[0].id || 0,
-      idCliente: selectedClient.id,
+      idCliente: selectedClient?.id,
       comentario: formValue.comentario || "",
       tipoVenta: "CO",
       referencia: formValue.referencia || "",
@@ -880,6 +1006,8 @@ export class CrearFacturaComponent implements OnInit {
       estadoFactura: "Borrador",
       AplicaDescuento: this.aplicaDescuento,
       PrecioIncluyeImpuestos: this.precioIncluyeImpuestos,
+      idMotivoModificacion: formValue?.idMotivoModificacion,
+      RazonModificacion: formValue?.RazonModificacion,
       detail,
     };
     return request;
@@ -935,10 +1063,10 @@ export class CrearFacturaComponent implements OnInit {
       return;
     }
 
-    if (this.form.invalid || this.items.length === 0) {
-      this.loading = false;
-      return;
-    }
+    // if (this.form.invalid || this.items.length === 0) {
+    //   this.loading = false;
+    //   return;
+    // }
 
     const facturaRequest = this.buildFacturaRequest();
     if (!facturaRequest) {
