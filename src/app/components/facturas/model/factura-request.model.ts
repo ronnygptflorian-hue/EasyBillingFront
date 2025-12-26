@@ -29,6 +29,7 @@ export interface ImpuestoAdicionalDetalle {
 // Modelo para enviar factura
 // ------------------------------
 export interface FacturaRequest {
+  id: number;
   idEmpresa: number;
   idCliente: number;
   IdNumFactura: number;
@@ -249,6 +250,14 @@ export interface Factura {
   qrDgii: string | null;
   codigoSeguridad: string | null;
   fechaFirmaDgii: string | null;
+  informacionReferencia: InformacionReferencia;
+}
+
+export interface InformacionReferencia {
+  ecfModificado: string;
+  motivoAnulacion: string;
+  fechaReferencia: string | null;
+  razonModificacion: string;
 }
 
 export interface Detalle {

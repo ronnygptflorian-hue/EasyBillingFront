@@ -1,28 +1,33 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { CustomerService } from './service/customer.service';
-import { LoadingComponent } from '../shared/loading.component/loading.component'
-import { Customer } from './model/customer.model';
-import { NotificationService } from '../../services/notification.service';
+import { Component, OnInit } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
+import { CustomerService } from "./service/customer.service";
+import { LoadingComponent } from "../shared/loading.component/loading.component";
+import { Customer } from "./model/customer.model";
+import { NotificationService } from "../../services/notification.service";
+import { ModalCrearClienteComponent } from "./modal-crear-cliente/modal-crear-cliente.component";
 
 @Component({
-  selector: 'app-clientes',
+  selector: "app-clientes",
   standalone: true,
-  imports: [CommonModule, FormsModule, LoadingComponent],
-  templateUrl: './clientes.component.html',
-  styleUrls: ['./clientes.component.scss']
+  imports: [
+    CommonModule,
+    FormsModule,
+    LoadingComponent,
+    ModalCrearClienteComponent,
+  ],
+  templateUrl: "./clientes.component.html",
+  styleUrls: ["./clientes.component.scss"],
 })
 export class ClientesComponent implements OnInit {
-
   Math = Math;
 
   clientes: Customer[] = [];
   showModal = false;
   isEditing = false;
   loading = true;
-  searchQuery = '';
-  filterTipoId: string = 'all';
+  searchQuery = "";
+  filterTipoId: string = "all";
 
   currentPage = 1;
   pageSize = 10;
@@ -33,43 +38,68 @@ export class ClientesComponent implements OnInit {
   private searchTimeout: any;
 
   currentCliente: Customer = {
-    nombreComercial: '',
-    rnc: '',
-    direccion: '',
-    telefonos: '',
-    eMail: '',
+    nombreComercial: "",
+    rnc: "",
+    direccion: "",
+    telefonos: "",
+    eMail: "",
     bloqueado: false,
-    celular: '',
-    codigo: '',
-    codigoPostal: '',
-    fechaAdd: '',
+    celular: "",
+    codigo: "",
+    codigoPostal: "",
+    fechaAdd: "",
     id: 0,
     idEmpresa: this.customerService.EMPRESA?.userCompanies[0].id || 0,
     idPais: 0,
-    tipoId: '',
-    razonSocial: '',
-    ciudad: '',
-    provincia: ''
+    tipoId: "",
+    razonSocial: "",
+    ciudad: "",
+    provincia: "",
   };
   tipoIdOptions = [
-    { label: 'Cédula', value: 'C' },
-    { label: 'RNC', value: 'R' },
-    { label: 'Pasaporte', value: 'P' }
+    { label: "Cédula", value: "C" },
+    { label: "RNC", value: "R" },
+    { label: "Pasaporte", value: "P" },
   ];
   provincias = [
-    'Azua', 'Baoruco', 'Barahona', 'Dajabón', 'Distrito Nacional', 'Duarte',
-    'Elías Piña', 'El Seibo', 'Espaillat', 'Hato Mayor', 'Hermanas Mirabal',
-    'Independencia', 'La Altagracia', 'La Romana', 'La Vega', 'María Trinidad Sánchez',
-    'Monseñor Nouel', 'Monte Cristi', 'Monte Plata', 'Pedernales', 'Peravia',
-    'Puerto Plata', 'Samaná', 'San Cristóbal', 'San José de Ocoa', 'San Juan',
-    'San Pedro de Macorís', 'Sánchez Ramírez', 'Santiago', 'Santiago Rodríguez',
-    'Santo Domingo', 'Valverde'
+    "Azua",
+    "Baoruco",
+    "Barahona",
+    "Dajabón",
+    "Distrito Nacional",
+    "Duarte",
+    "Elías Piña",
+    "El Seibo",
+    "Espaillat",
+    "Hato Mayor",
+    "Hermanas Mirabal",
+    "Independencia",
+    "La Altagracia",
+    "La Romana",
+    "La Vega",
+    "María Trinidad Sánchez",
+    "Monseñor Nouel",
+    "Monte Cristi",
+    "Monte Plata",
+    "Pedernales",
+    "Peravia",
+    "Puerto Plata",
+    "Samaná",
+    "San Cristóbal",
+    "San José de Ocoa",
+    "San Juan",
+    "San Pedro de Macorís",
+    "Sánchez Ramírez",
+    "Santiago",
+    "Santiago Rodríguez",
+    "Santo Domingo",
+    "Valverde",
   ];
 
   constructor(
     private customerService: CustomerService,
     private notificationService: NotificationService
-  ) { }
+  ) {}
 
   async ngOnInit() {
     await this.loadClientes();
@@ -89,22 +119,26 @@ export class ClientesComponent implements OnInit {
       }
     }
 
-    if (this.filterTipoId !== 'all') {
+    if (this.filterTipoId !== "all") {
       filters.tipoId = this.filterTipoId;
     }
 
-    this.customerService.getClientes(this.currentPage, this.pageSize, filters).subscribe({
-      next: (res) => {
-        this.clientes = res.data;
-        this.totalRecords = res.pagination?.totalCount || 0;
-        this.totalPages = res.pagination?.totalPages || 1;
-        this.loading = false;
-      },
-      error: (err) => {
-        this.loading = false;
-        this.notificationService.error(err.message || 'Error al cargar clientes');
-      }
-    });
+    this.customerService
+      .getClientes(this.currentPage, this.pageSize, filters)
+      .subscribe({
+        next: (res) => {
+          this.clientes = res.data;
+          this.totalRecords = res.pagination?.totalCount || 0;
+          this.totalPages = res.pagination?.totalPages || 1;
+          this.loading = false;
+        },
+        error: (err) => {
+          this.loading = false;
+          this.notificationService.error(
+            err.message || "Error al cargar clientes"
+          );
+        },
+      });
   }
 
   goToPage(page: number) {
@@ -149,12 +183,11 @@ export class ClientesComponent implements OnInit {
   }
 
   clearFilters() {
-    this.searchQuery = '';
-    this.filterTipoId = 'all';
+    this.searchQuery = "";
+    this.filterTipoId = "all";
     this.currentPage = 1;
     this.loadClientes();
   }
-
 
   openModal(cliente?: Customer) {
     if (cliente) {
@@ -163,23 +196,25 @@ export class ClientesComponent implements OnInit {
     } else {
       this.isEditing = false;
       this.currentCliente = {
-        nombreComercial: '',
-        rnc: '',
-        direccion: '',
-        telefonos: '',
-        eMail: '',
+        nombreComercial: "",
+        rnc: "",
+        direccion: "",
+        telefonos: "",
+        eMail: "",
         bloqueado: false,
-        celular: '',
-        codigo: '',
-        codigoPostal: '',
+        celular: "",
+        codigo:
+          "CLT-" + Math.random().toString(36).substring(2, 7).toUpperCase(),
+
+        codigoPostal: "",
         fechaAdd: new Date().toISOString(),
         id: 0,
         idEmpresa: this.customerService.EMPRESA?.userCompanies[0].id || 0,
         idPais: 1,
-        tipoId: '',
-        razonSocial: '',
-        ciudad: '',
-        provincia: ''
+        tipoId: "",
+        razonSocial: "",
+        ciudad: "",
+        provincia: "",
       };
     }
     this.showModal = true;
@@ -191,18 +226,20 @@ export class ClientesComponent implements OnInit {
 
   addClient() {
     const rnc = this.currentCliente.rnc;
-    if (this.currentCliente.tipoId === 'C' && rnc.length !== 11) {
-      this.notificationService.error("La cédula debe tener exactamente 11 dígitos");
+    if (this.currentCliente.tipoId === "C" && rnc.length !== 11) {
+      this.notificationService.error(
+        "La cédula debe tener exactamente 11 dígitos"
+      );
       return;
     }
 
-    if (this.currentCliente.tipoId === 'R' && rnc.length !== 9) {
+    if (this.currentCliente.tipoId === "R" && rnc.length !== 9) {
       this.notificationService.error("El RNC debe tener exactamente 9 dígitos");
       return;
     }
     const request$ = this.isEditing
-      ? this.customerService.update('client/update', this.currentCliente)
-      : this.customerService.post('client/add', this.currentCliente);
+      ? this.customerService.update("client/update", this.currentCliente)
+      : this.customerService.post("client/add", this.currentCliente);
 
     request$.subscribe({
       next: () => {
@@ -210,30 +247,95 @@ export class ClientesComponent implements OnInit {
         this.loadClientes();
 
         const msg = this.isEditing
-          ? 'Cliente actualizado exitosamente'
-          : 'Cliente creado exitosamente';
+          ? "Cliente actualizado exitosamente"
+          : "Cliente creado exitosamente";
         this.notificationService.success(msg);
       },
       error: (err) => {
         this.notificationService.error(
-          err?.message || 'Ocurrió un error al guardar el cliente'
+          err?.message || "Ocurrió un error al guardar el cliente"
         );
-      }
+      },
     });
   }
 
   validarLongitudDocumento() {
     let doc = this.currentCliente.rnc;
 
-    if (this.currentCliente.tipoId === 'C') {
-      doc = doc.replace(/\D/g, '').slice(0, 11);
+    if (this.currentCliente.tipoId === "C") {
+      doc = doc.replace(/\D/g, "").slice(0, 11);
     }
 
-    if (this.currentCliente.tipoId === 'R') {
-      doc = doc.replace(/\D/g, '').slice(0, 9);
+    if (this.currentCliente.tipoId === "R") {
+      doc = doc.replace(/\D/g, "").slice(0, 9);
     }
     this.currentCliente.rnc = doc;
   }
 
-}
+  onSaveCliente(cliente: Customer) {
+    const rnc = cliente.rnc;
 
+    if (cliente.tipoId === "C" && rnc.length !== 11) {
+      this.notificationService.error(
+        "La cédula debe tener exactamente 11 dígitos"
+      );
+      return;
+    }
+
+    if (cliente.tipoId === "R" && rnc.length !== 9) {
+      this.notificationService.error("El RNC debe tener exactamente 9 dígitos");
+      return;
+    }
+
+    const request$ = this.isEditing
+      ? this.customerService.update("client/update", cliente)
+      : this.customerService.post("client/add", cliente);
+
+    request$.subscribe({
+      next: () => {
+        this.showModal = false;
+        this.loadClientes();
+
+        const msg = this.isEditing
+          ? "Cliente actualizado exitosamente"
+          : "Cliente creado exitosamente";
+        this.notificationService.success(msg);
+      },
+      error: (err) => {
+        this.notificationService.error(
+          err?.message || "Ocurrió un error al guardar el cliente"
+        );
+      },
+    });
+  }
+
+  // openModal(cliente?: Customer) {
+  //   if (cliente) {
+  //     this.isEditing = true;
+  //     this.currentCliente = { ...cliente };
+  //   } else {
+  //     this.isEditing = false;
+  //     this.currentCliente = {
+  //       nombreComercial: "",
+  //       rnc: "",
+  //       direccion: "",
+  //       telefonos: "",
+  //       eMail: "",
+  //       bloqueado: false,
+  //       celular: "",
+  //       codigo: "",
+  //       codigoPostal: "",
+  //       fechaAdd: new Date().toISOString(),
+  //       id: 0,
+  //       idEmpresa: this.customerService.EMPRESA?.userCompanies[0].id || 0,
+  //       idPais: 1,
+  //       tipoId: "",
+  //       razonSocial: "",
+  //       ciudad: "",
+  //       provincia: "",
+  //     };
+  //   }
+
+  //   this.showModal = true;
+  // }
+}

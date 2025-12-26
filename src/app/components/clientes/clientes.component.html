@@ -1,4 +1,8 @@
-<app-loading [show]="loading" [fullscreen]="true" message="Cargando clientes"></app-loading>
+<app-loading
+  [show]="loading"
+  [fullscreen]="true"
+  message="Cargando clientes"
+></app-loading>
 
 <div class="page-wrapper" *ngIf="!loading">
   <header class="page-header">
@@ -15,33 +19,52 @@
   <div class="toolbar">
     <div class="search-box-container">
       <div class="search-icon">🔍</div>
-      <input type="text" class="search-input" placeholder="Buscar por nombre o razón social..."
-        [(ngModel)]="searchQuery" (input)="onSearchChange()" />
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Buscar por nombre o razón social..."
+        [(ngModel)]="searchQuery"
+        (input)="onSearchChange()"
+      />
     </div>
 
     <div class="filter-group">
-      <select [(ngModel)]="filterTipoId" (ngModelChange)="onFilterChange()" class="filter-select">
+      <select
+        [(ngModel)]="filterTipoId"
+        (ngModelChange)="onFilterChange()"
+        class="filter-select"
+      >
         <option value="all">Todos los tipos</option>
         <option value="C">Cédula (11 dígitos)</option>
         <option value="R">RNC (9 dígitos)</option>
         <option value="P">Pasaporte</option>
       </select>
 
-      <button *ngIf="searchQuery || filterTipoId !== 'all'"
-        (click)="clearFilters()" class="btn-clear-filters" title="Limpiar filtros">
+      <button
+        *ngIf="searchQuery || filterTipoId !== 'all'"
+        (click)="clearFilters()"
+        class="btn-clear-filters"
+        title="Limpiar filtros"
+      >
         ✕
       </button>
     </div>
 
     <div class="page-size-selector">
       <label>Mostrar:</label>
-      <select [(ngModel)]="pageSize" (ngModelChange)="changePageSize()" class="page-size-select">
-        <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+      <select
+        [(ngModel)]="pageSize"
+        (ngModelChange)="changePageSize()"
+        class="page-size-select"
+      >
+        <option *ngFor="let size of pageSizeOptions" [value]="size">
+          {{ size }}
+        </option>
       </select>
       <span>por página</span>
     </div>
     <div class="results-count">
-      {{ totalRecords }} cliente{{ totalRecords !== 1 ? 's' : '' }}
+      {{ totalRecords }} cliente{{ totalRecords !== 1 ? "s" : "" }}
     </div>
   </div>
 
@@ -49,8 +72,18 @@
     <div class="empty-state" *ngIf="clientes.length === 0">
       <div class="empty-icon">👥</div>
       <h3>No se encontraron clientes</h3>
-      <p>{{ searchQuery ? 'Intenta con otro término de búsqueda' : 'Comienza agregando tu primer cliente' }}</p>
-      <button (click)="openModal()" class="btn btn-primary" *ngIf="!searchQuery">
+      <p>
+        {{
+          searchQuery
+            ? "Intenta con otro término de búsqueda"
+            : "Comienza agregando tu primer cliente"
+        }}
+      </p>
+      <button
+        (click)="openModal()"
+        class="btn btn-primary"
+        *ngIf="!searchQuery"
+      >
         <span>➕</span>
         Crear Primer Cliente
       </button>
@@ -68,16 +101,30 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let cliente of clientes" [class.blocked]="cliente.bloqueado">
+        <tr
+          *ngFor="let cliente of clientes"
+          [class.blocked]="cliente.bloqueado"
+        >
           <td>
             <div class="client-info-cell">
               <div class="client-avatar-small">
-                {{ (cliente.razonSocial || cliente.nombreComercial).substring(0, 2).toUpperCase() }}
+                {{
+                  (cliente.razonSocial || cliente.nombreComercial)
+                    .substring(0, 2)
+                    .toUpperCase()
+                }}
               </div>
               <div class="client-details">
-                <div class="client-name-table">{{ cliente.razonSocial || cliente.nombreComercial }}</div>
-                <div class="client-commercial-table"
-                  *ngIf="cliente.nombreComercial && cliente.nombreComercial !== cliente.razonSocial">
+                <div class="client-name-table">
+                  {{ cliente.razonSocial || cliente.nombreComercial }}
+                </div>
+                <div
+                  class="client-commercial-table"
+                  *ngIf="
+                    cliente.nombreComercial &&
+                    cliente.nombreComercial !== cliente.razonSocial
+                  "
+                >
                   {{ cliente.nombreComercial }}
                 </div>
               </div>
@@ -96,62 +143,99 @@
                 <span class="contact-icon">📧</span>
                 <span>{{ cliente.eMail }}</span>
               </div>
-              <span class="no-data" *ngIf="!cliente.telefonos && !cliente.eMail">Sin contacto</span>
+              <span class="no-data" *ngIf="!cliente.telefonos && !cliente.eMail"
+                >Sin contacto</span
+              >
             </div>
           </td>
           <td>
-            <div class="location-cell" *ngIf="cliente.ciudad || cliente.provincia">
+            <div
+              class="location-cell"
+              *ngIf="cliente.ciudad || cliente.provincia"
+            >
               <span class="location-icon">📍</span>
-              <span>{{ cliente.ciudad }}{{ cliente.ciudad && cliente.provincia ? ', ' : '' }}{{ cliente.provincia
-                }}</span>
+              <span
+                >{{ cliente.ciudad
+                }}{{ cliente.ciudad && cliente.provincia ? ", " : ""
+                }}{{ cliente.provincia }}</span
+              >
             </div>
-            <span class="no-data" *ngIf="!cliente.ciudad && !cliente.provincia">Sin ubicación</span>
+            <span class="no-data" *ngIf="!cliente.ciudad && !cliente.provincia"
+              >Sin ubicación</span
+            >
           </td>
           <td>
-            <span class="status-badge" [class.status-blocked]="cliente.bloqueado"
-              [class.status-active]="!cliente.bloqueado">
-              {{ cliente.bloqueado ? 'Bloqueado' : 'Activo' }}
+            <span
+              class="status-badge"
+              [class.status-blocked]="cliente.bloqueado"
+              [class.status-active]="!cliente.bloqueado"
+            >
+              {{ cliente.bloqueado ? "Bloqueado" : "Activo" }}
             </span>
           </td>
           <td class="actions-cell">
-            <button (click)="openModal(cliente)" class="btn-table-action edit" title="Editar">
+            <button
+              (click)="openModal(cliente)"
+              class="btn-table-action edit"
+              title="Editar"
+            >
               ✏️
             </button>
-            <button class="btn-table-action delete" title="Eliminar">
-              🗑️
-            </button>
+            <button class="btn-table-action delete" title="Eliminar">🗑️</button>
           </td>
         </tr>
       </tbody>
     </table>
     <div class="pagination-container" *ngIf="clientes.length > 0">
       <div class="pagination-info">
-        Mostrando {{ ((currentPage - 1) * pageSize) + 1 }} - {{ Math.min(currentPage * pageSize, clientes.length) }} de
+        Mostrando {{ (currentPage - 1) * pageSize + 1 }} -
+        {{ Math.min(currentPage * pageSize, clientes.length) }} de
         {{ clientes.length }}
       </div>
 
       <div class="pagination-controls">
-        <button class="pagination-btn" [disabled]="currentPage === 1" (click)="goToPage(1)" title="Primera página">
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(1)"
+          title="Primera página"
+        >
           ⏮
         </button>
 
-        <button class="pagination-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)"
-          title="Página anterior">
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)"
+          title="Página anterior"
+        >
           ◀
         </button>
 
-        <button *ngFor="let page of getPageNumbers()" class="pagination-btn" [class.active]="page === currentPage"
-          (click)="goToPage(page)">
+        <button
+          *ngFor="let page of getPageNumbers()"
+          class="pagination-btn"
+          [class.active]="page === currentPage"
+          (click)="goToPage(page)"
+        >
           {{ page }}
         </button>
 
-        <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)"
-          title="Página siguiente">
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === totalPages"
+          (click)="goToPage(currentPage + 1)"
+          title="Página siguiente"
+        >
           ▶
         </button>
 
-        <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="goToPage(totalPages)"
-          title="Última página">
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === totalPages"
+          (click)="goToPage(totalPages)"
+          title="Última página"
+        >
           ⏭
         </button>
       </div>
@@ -160,14 +244,20 @@
 </div>
 
 <!-- Modal Hermoso -->
-<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+<!-- <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
   <div class="modal-beautiful" (click)="$event.stopPropagation()">
     <div class="modal-header-beautiful">
       <div class="modal-title-section">
         <div class="modal-icon">👤</div>
         <div>
-          <h2>{{ isEditing ? 'Editar Cliente' : 'Nuevo Cliente' }}</h2>
-          <p>{{ isEditing ? 'Actualiza la información del cliente' : 'Agrega un nuevo cliente a tu cartera' }}</p>
+          <h2>{{ isEditing ? "Editar Cliente" : "Nuevo Cliente" }}</h2>
+          <p>
+            {{
+              isEditing
+                ? "Actualiza la información del cliente"
+                : "Agrega un nuevo cliente a tu cartera"
+            }}
+          </p>
         </div>
       </div>
       <button (click)="closeModal()" class="btn-close-beautiful">✕</button>
@@ -179,19 +269,35 @@
         <div class="form-grid-2">
           <div class="form-group-beautiful">
             <label>Tipo de Identificación</label>
-            <select class="input-beautiful" [(ngModel)]="currentCliente.tipoId" name="tipoId">
+            <select
+              class="input-beautiful"
+              [(ngModel)]="currentCliente.tipoId"
+              name="tipoId"
+            >
               <option *ngFor="let tipo of tipoIdOptions" [value]="tipo.value">
                 {{ tipo.label }}
               </option>
             </select>
           </div>
 
-
           <div class="form-group-beautiful">
             <label>RNC/Cédula <span class="required">*</span></label>
-            <input type="text" class="input-beautiful" [(ngModel)]="currentCliente.rnc" name="rnc"
-              placeholder="Documento" required (input)="validarLongitudDocumento()"
-              maxlength="{{ currentCliente.tipoId === 'C' ? 11 : currentCliente.tipoId === 'R' ? 9 : 50 }}" />
+            <input
+              type="text"
+              class="input-beautiful"
+              [(ngModel)]="currentCliente.rnc"
+              name="rnc"
+              placeholder="Documento"
+              required
+              (input)="validarLongitudDocumento()"
+              maxlength="{{
+                currentCliente.tipoId === 'C'
+                  ? 11
+                  : currentCliente.tipoId === 'R'
+                  ? 9
+                  : 50
+              }}"
+            />
           </div>
         </div>
       </div>
@@ -200,14 +306,24 @@
         <h3 class="section-title">Información Comercial</h3>
         <div class="form-group-beautiful">
           <label>Razón Social</label>
-          <input type="text" class="input-beautiful" [(ngModel)]="currentCliente.razonSocial" name="razonSocial"
-            placeholder="Nombre legal de la empresa" />
+          <input
+            type="text"
+            class="input-beautiful"
+            [(ngModel)]="currentCliente.razonSocial"
+            name="razonSocial"
+            placeholder="Nombre legal de la empresa"
+          />
         </div>
 
         <div class="form-group-beautiful">
           <label>Nombre Comercial</label>
-          <input type="text" class="input-beautiful" [(ngModel)]="currentCliente.nombreComercial" name="nombreComercial"
-            placeholder="Nombre comercial o marca" />
+          <input
+            type="text"
+            class="input-beautiful"
+            [(ngModel)]="currentCliente.nombreComercial"
+            name="nombreComercial"
+            placeholder="Nombre comercial o marca"
+          />
         </div>
       </div>
 
@@ -215,28 +331,49 @@
         <h3 class="section-title">Ubicación</h3>
         <div class="form-group-beautiful">
           <label>Dirección</label>
-          <textarea class="input-beautiful" [(ngModel)]="currentCliente.direccion" name="direccion" rows="2"
-            placeholder="Calle, número, sector"></textarea>
+          <textarea
+            class="input-beautiful"
+            [(ngModel)]="currentCliente.direccion"
+            name="direccion"
+            rows="2"
+            placeholder="Calle, número, sector"
+          ></textarea>
         </div>
 
         <div class="form-grid-3">
           <div class="form-group-beautiful">
             <label>Ciudad</label>
-            <input type="text" class="input-beautiful" [(ngModel)]="currentCliente.ciudad" name="ciudad"
-              placeholder="Ciudad" />
+            <input
+              type="text"
+              class="input-beautiful"
+              [(ngModel)]="currentCliente.ciudad"
+              name="ciudad"
+              placeholder="Ciudad"
+            />
           </div>
 
           <div class="form-group-beautiful">
             <label>Provincia</label>
-            <select class="input-beautiful" [(ngModel)]="currentCliente.provincia" name="provincia">
-              <option *ngFor="let prov of provincias" [value]="prov">{{ prov }}</option>
+            <select
+              class="input-beautiful"
+              [(ngModel)]="currentCliente.provincia"
+              name="provincia"
+            >
+              <option *ngFor="let prov of provincias" [value]="prov">
+                {{ prov }}
+              </option>
             </select>
           </div>
 
           <div class="form-group-beautiful">
             <label>Código Postal</label>
-            <input type="text" class="input-beautiful" [(ngModel)]="currentCliente.codigoPostal" name="codigoPostal"
-              placeholder="10147" />
+            <input
+              type="text"
+              class="input-beautiful"
+              [(ngModel)]="currentCliente.codigoPostal"
+              name="codigoPostal"
+              placeholder="10147"
+            />
           </div>
         </div>
       </div>
@@ -248,8 +385,13 @@
             <label>Teléfono</label>
             <div class="input-with-icon">
               <span class="input-icon">📞</span>
-              <input type="tel" class="input-beautiful" [(ngModel)]="currentCliente.telefonos" name="telefono"
-                placeholder="809-555-5555" />
+              <input
+                type="tel"
+                class="input-beautiful"
+                [(ngModel)]="currentCliente.telefonos"
+                name="telefono"
+                placeholder="809-555-5555"
+              />
             </div>
           </div>
 
@@ -257,8 +399,13 @@
             <label>Email</label>
             <div class="input-with-icon">
               <span class="input-icon">📧</span>
-              <input type="email" class="input-beautiful" [(ngModel)]="currentCliente.eMail" name="email"
-                placeholder="cliente@email.com" />
+              <input
+                type="email"
+                class="input-beautiful"
+                [(ngModel)]="currentCliente.eMail"
+                name="email"
+                placeholder="cliente@email.com"
+              />
             </div>
           </div>
         </div>
@@ -266,20 +413,40 @@
 
       <div class="form-section">
         <label class="checkbox-beautiful">
-          <input type="checkbox" [(ngModel)]="currentCliente.bloqueado" name="bloqueado" />
-          <span class="checkbox-label">Cliente bloqueado (no permitir transacciones)</span>
+          <input
+            type="checkbox"
+            [(ngModel)]="currentCliente.bloqueado"
+            name="bloqueado"
+          />
+          <span class="checkbox-label"
+            >Cliente bloqueado (no permitir transacciones)</span
+          >
         </label>
       </div>
 
       <div class="modal-footer-beautiful">
-        <button type="button" (click)="closeModal()" class="btn btn-secondary btn-large">
+        <button
+          type="button"
+          (click)="closeModal()"
+          class="btn btn-secondary btn-large"
+        >
           Cancelar
         </button>
         <button type="submit" class="btn btn-primary btn-large">
           <span>💾</span>
-          {{ isEditing ? 'Actualizar' : 'Guardar' }} Cliente
+          {{ isEditing ? "Actualizar" : "Guardar" }} Cliente
         </button>
       </div>
     </form>
   </div>
-</div>
+</div> -->
+
+<modal-crear-cliente
+  [showModal]="showModal"
+  [isEditing]="isEditing"
+  [currentCliente]="currentCliente"
+  [tipoIdOptions]="tipoIdOptions"
+  [provincias]="provincias"
+  (close)="closeModal()"
+  (save)="onSaveCliente($event)"
+></modal-crear-cliente>

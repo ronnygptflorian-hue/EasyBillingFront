@@ -12,6 +12,7 @@ import { LoadingComponent } from "../shared/loading.component/loading.component"
 import { CustomerService } from "../clientes/service/customer.service";
 import { Customer } from "../clientes/model/customer.model";
 import { CustomDatepickerComponent } from "../shared/custom-datepicker/custom-datepicker.component";
+import { NotificationService } from "../../services/notification.service";
 
 @Component({
   selector: "app-facturas-list",
@@ -57,7 +58,8 @@ export class FacturasListComponent implements OnInit {
   constructor(
     private facturasService: FacturaService,
     private router: Router,
-    private customerService: CustomerService
+    private customerService: CustomerService,
+    private notificationService: NotificationService
   ) {}
 
   async ngOnInit() {
@@ -369,7 +371,53 @@ export class FacturasListComponent implements OnInit {
   }
 
   onDownloadXml(factura: any) {
-    // TODO
+    const idFactura = factura.id;
+
+    this.loading = true;
+
+    this.facturasService.getXmlEasyBilling(idFactura).subscribe({
+      next: (xmlString: string) => {
+        // Generar un Blob con el contenido XML
+        const blob = new Blob([xmlString], { type: "application/xml" });
+
+        // Crear un enlace de descarga
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+
+        // Nombre del archivo → factura.ecf.xml
+        const fileName = `${factura.rnc}${factura.ecf || "Factura"}.xml`;
+        link.download = fileName;
+
+        // Descargar
+        link.click();
+
+        this.notificationService.success("XML descargado correctamente.");
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error("Error descargando XML:", err);
+        this.notificationService.error("Error descargando XML.");
+        this.loading = false;
+      },
+    });
+  }
+
+  SignEcf(factura: any) {
+    this.loading = true;
+
+    this.facturasService.SignEcf(factura.id).subscribe({
+      next: (res) => {
+        this.notificationService.success("Factura enviada Correctamente.");
+      },
+      error: (err) => {
+        this.notificationService.error("Error enviando factura a la dgii");
+      },
+      complete: () => {
+        this.loading = false; // 🔥 Se apaga cuando termina de verdad
+        this.showDetailModal = false;
+        this.loadFacturas();
+      },
+    });
   }
 
   onDownloadJson(factura: any) {
@@ -386,5 +434,41 @@ export class FacturasListComponent implements OnInit {
 
   onPreviewFactura(factura: any) {
     // Abrir modal o página con layout de PDF
+  }
+
+  exportarExcel() {
+    this.loading = true;
+
+    this.facturasService.getExcel().subscribe({
+      next: (res: any) => {
+        // Convertir base64 → blob
+        const excelBlob = this.base64ToBlob(res.file, res.contentType);
+
+        // Descargar archivo
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(excelBlob);
+        link.download = res.fileName;
+        link.click();
+
+        this.loading = false;
+        this.notificationService.success(
+          "Archivo Excel generado correctamente."
+        );
+      },
+      error: () => {
+        this.loading = false;
+        this.notificationService.error("Error generando Excel.");
+      },
+    });
+  }
+
+  base64ToBlob(base64: string, contentType: string = ""): Blob {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length)
+      .fill(0)
+      .map((_, i) => byteCharacters.charCodeAt(i));
+    const byteArray = new Uint8Array(byteNumbers);
+
+    return new Blob([byteArray], { type: contentType });
   }
 }

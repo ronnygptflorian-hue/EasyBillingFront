@@ -915,4 +915,39 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
   }
+
+
+
 }
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-excel {
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, #1f8b24, #2dbb32);
+  color: white;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 8px rgba(31, 139, 36, 0.3);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(31, 139, 36, 0.35);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+

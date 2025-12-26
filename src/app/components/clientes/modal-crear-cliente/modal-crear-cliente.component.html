@@ -1,0 +1,191 @@
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-beautiful" (click)="$event.stopPropagation()">
+    <!-- HEADER -->
+    <div class="modal-header-beautiful">
+      <div class="modal-title-section">
+        <div class="modal-icon">👤</div>
+        <div>
+          <h2>{{ isEditing ? "Editar Cliente" : "Nuevo Cliente" }}</h2>
+          <p>
+            {{
+              isEditing
+                ? "Actualiza la información del cliente"
+                : "Agrega un nuevo cliente a tu cartera"
+            }}
+          </p>
+        </div>
+      </div>
+      <button (click)="closeModal()" class="btn-close-beautiful">✕</button>
+    </div>
+
+    <!-- BODY -->
+    <form (ngSubmit)="addClient()" class="modal-body-beautiful">
+      <!-- INFORMACIÓN BÁSICA -->
+      <div class="form-section">
+        <h3 class="section-title">Información Básica</h3>
+
+        <div class="form-grid-2">
+          <div class="form-group-beautiful">
+            <label>Tipo de Identificación</label>
+            <select
+              class="input-beautiful"
+              [(ngModel)]="currentCliente.tipoId"
+              name="tipoId"
+            >
+              <option *ngFor="let tipo of tipoIdOptions" [value]="tipo.value">
+                {{ tipo.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group-beautiful">
+            <label>RNC/Cédula <span class="required">*</span></label>
+            <input
+              type="text"
+              class="input-beautiful"
+              [(ngModel)]="currentCliente.rnc"
+              name="rnc"
+              placeholder="Documento"
+              required
+              (input)="validarLongitudDocumento()"
+              [attr.maxlength]="
+                currentCliente.tipoId === 'C'
+                  ? 11
+                  : currentCliente.tipoId === 'R'
+                  ? 9
+                  : 50
+              "
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- INFORMACIÓN COMERCIAL -->
+      <div class="form-section">
+        <h3 class="section-title">Información Comercial</h3>
+
+        <div class="form-group-beautiful">
+          <label>Razón Social</label>
+          <input
+            class="input-beautiful"
+            [(ngModel)]="currentCliente.razonSocial"
+            name="razonSocial"
+          />
+        </div>
+
+        <div class="form-group-beautiful">
+          <label>Nombre Comercial</label>
+          <input
+            class="input-beautiful"
+            [(ngModel)]="currentCliente.nombreComercial"
+            name="nombreComercial"
+          />
+        </div>
+      </div>
+
+      <!-- UBICACIÓN -->
+      <div class="form-section">
+        <h3 class="section-title">Ubicación</h3>
+
+        <div class="form-group-beautiful">
+          <label>Dirección</label>
+          <textarea
+            class="input-beautiful"
+            [(ngModel)]="currentCliente.direccion"
+            name="direccion"
+            rows="2"
+          ></textarea>
+        </div>
+
+        <div class="form-grid-3">
+          <div class="form-group-beautiful">
+            <label>Ciudad</label>
+            <input
+              class="input-beautiful"
+              [(ngModel)]="currentCliente.ciudad"
+              name="ciudad"
+            />
+          </div>
+
+          <div class="form-group-beautiful">
+            <label>Provincia</label>
+            <select
+              class="input-beautiful"
+              [(ngModel)]="currentCliente.provincia"
+              name="provincia"
+            >
+              <option *ngFor="let prov of provincias" [value]="prov">
+                {{ prov }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group-beautiful">
+            <label>Código Postal</label>
+            <input
+              class="input-beautiful"
+              [(ngModel)]="currentCliente.codigoPostal"
+              name="codigoPostal"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTACTO -->
+      <div class="form-section">
+        <h3 class="section-title">Contacto</h3>
+
+        <div class="form-grid-2">
+          <div class="form-group-beautiful">
+            <label>Teléfono</label>
+            <div class="input-with-icon">
+              <span class="input-icon">📞</span>
+              <input
+                class="input-beautiful"
+                [(ngModel)]="currentCliente.telefonos"
+                name="telefono"
+              />
+            </div>
+          </div>
+
+          <div class="form-group-beautiful">
+            <label>Email</label>
+            <div class="input-with-icon">
+              <span class="input-icon">📧</span>
+              <input
+                type="email"
+                class="input-beautiful"
+                [(ngModel)]="currentCliente.eMail"
+                name="email"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOQUEO -->
+      <div class="form-section">
+        <label class="checkbox-beautiful">
+          <input
+            type="checkbox"
+            [(ngModel)]="currentCliente.bloqueado"
+            name="bloqueado"
+          />
+          <span class="checkbox-label"
+            >Cliente bloqueado (no permitir transacciones)</span
+          >
+        </label>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="modal-footer-beautiful">
+        <button type="button" class="btn-secondary" (click)="closeModal()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-primary">
+          {{ isEditing ? "Actualizar" : "Guardar" }} Cliente
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

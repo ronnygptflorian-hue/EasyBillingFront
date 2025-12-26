@@ -31,14 +31,18 @@ import { LoadingComponent } from "../shared/loading.component/loading.component"
 import { ConfigutionService } from "../configuraciones/service/configuracion.service";
 import { SecuenciaEcf } from "../configuraciones/model/secuencia-ecf.model";
 import { CustomDatepickerComponent } from "../shared/custom-datepicker/custom-datepicker.component";
+import { ClickOutsideDirective } from "./click-outside.directive";
+import { ModalCrearClienteComponent } from "../clientes/modal-crear-cliente/modal-crear-cliente.component";
 
 interface InvoiceItem extends Product {
+  id: number;
   discountError?: string;
   product: Product;
   quantity: number;
   price: number;
   discountStr: string;
   porcientoDescuento: number;
+  idProducto: number;
   porcientoRecargo: number;
   valorDescuento: number;
   valorRecargo: number;
@@ -64,6 +68,8 @@ interface InvoiceItem extends Product {
     RouterModule,
     LoadingComponent,
     CustomDatepickerComponent,
+    ClickOutsideDirective,
+    ModalCrearClienteComponent,
   ],
   templateUrl: "./crear-factura.component.html",
   styleUrls: ["./crear-factura.component.scss"],
@@ -97,6 +103,7 @@ export class CrearFacturaComponent implements OnInit {
   isSearchingClient = false;
   clientError = "";
   clientLocked = false;
+  estadoFacturaControl: string = "Creada";
 
   productResults: Product[] = [];
   showProductDropdown = false;
@@ -114,6 +121,68 @@ export class CrearFacturaComponent implements OnInit {
 
   private clientSearchTimeout: any;
   private productSearchTimeout: any;
+
+  showModalCliente = false;
+  isEditingCliente = false;
+
+  currentCliente: any = {
+    tipoId: "",
+    rnc: "",
+    razonSocial: "",
+    nombreComercial: "",
+    direccion: "",
+    ciudad: "",
+    provincia: "",
+    codigoPostal: "",
+    telefonos: "",
+    eMail: "",
+    bloqueado: false,
+    idEmpresa: this.facturasService.EMPRESA?.userCompanies[0].id || 0,
+  };
+
+  tipoIdOptions = [
+    { label: "Cédula", value: "C" },
+    { label: "RNC", value: "R" },
+    { label: "Pasaporte", value: "P" },
+  ];
+
+  provincias = [
+    "Azua",
+    "Baoruco",
+    "Barahona",
+    "Dajabón",
+    "Distrito Nacional",
+    "Duarte",
+    "Elías Piña",
+    "El Seibo",
+    "Espaillat",
+    "Hato Mayor",
+    "Hermanas Mirabal",
+    "Independencia",
+    "La Altagracia",
+    "La Romana",
+    "La Vega",
+    "María Trinidad Sánchez",
+    "Monseñor Nouel",
+    "Monte Cristi",
+    "Monte Plata",
+    "Pedernales",
+    "Peravia",
+    "Puerto Plata",
+    "Samaná",
+    "San Cristóbal",
+    "San José de Ocoa",
+    "San Juan",
+    "San Pedro de Macorís",
+    "Sánchez Ramírez",
+    "Santiago",
+    "Santiago Rodríguez",
+    "Santo Domingo",
+    "Valverde",
+  ];
+
+  isEditMode = false;
+  facturaIdToEdit: number | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -143,8 +212,10 @@ export class CrearFacturaComponent implements OnInit {
       idMotivoModificacion: [null],
       RazonModificacion: [""],
       IdNumFactura: [],
+      id: [],
     });
 
+    /** 🔹 Listeners del formulario */
     this.form.get("idTipoEcf")!.valueChanges.subscribe(() => {
       this.aplicarReglasPorTipoEcf();
     });
@@ -153,21 +224,251 @@ export class CrearFacturaComponent implements OnInit {
       this.onMonedaChange(idMoneda);
     });
 
+    /** 🔹 Analizar parámetros de la URL */
     this.route.queryParams.subscribe((params) => {
-      if (params["tipo"] === "34" && params["facturaOriginal"]) {
-        this.isNotaCredito = true;
-      }
+      const facturaId = params["facturaOriginal"]; // 👉 edición de factura
+      const tipo = params["tipo"]; // 👉 nota de crédito
+      const facturaOriginal = params["facturaOriginal"]; // 👉 NC basada
 
-      this.facturaOriginalId = +params["facturaOriginal"];
-      if (this.facturaOriginalId) {
+      /** 🟣 MODO NOTA DE CRÉDITO */
+      if (tipo === "34" && facturaOriginal) {
+        this.isNotaCredito = true;
+        this.facturaOriginalId = +facturaOriginal;
         this.loadFacturaOriginal(this.facturaOriginalId);
       }
+
+      /** 🔵 MODO EDICIÓN */
+      if (facturaId) {
+        this.isEditMode = true;
+        this.facturaIdToEdit = Number(facturaId);
+        this.cargarFacturaParaEditar(this.facturaIdToEdit);
+      }
+
+      /** 🔶 Crear referencia única */
+      const random3 = Math.random().toString(36).substring(2, 5).toUpperCase();
+      this.referenciaCode = this.isNotaCredito
+        ? `NC-${random3}`
+        : `FCT-${random3}`;
     });
 
+    /** 🔹 Datos comunes */
     this.loadCommonData();
     this.loadSecuencias();
-    const random3 = Math.random().toString(36).substring(2, 5).toUpperCase();
-    this.referenciaCode = `FCT-${random3}`;
+  }
+
+  // ngOnInit() {
+  //   this.form = this.fb.group({
+  //     idTipoEcf: [null, Validators.required],
+  //     clientSearch: ["", Validators.required],
+  //     selectedClient: [null],
+  //     productSearch: [""],
+  //     referencia: [this.referencia],
+  //     comentario: [""],
+  //     idMoneda: [1, Validators.required],
+  //     tasaCambio: [1.0, Validators.required],
+  //     fechaEmisionEcf: [this.fechaEmisionEcf, Validators.required],
+  //     idTipoIngreso: [1, Validators.required],
+  //     idCondicionPago: [1, Validators.required],
+  //     idMotivoModificacion: [null],
+  //     RazonModificacion: [""],
+  //     IdNumFactura: [],
+  //   });
+
+  //   this.form.get("idTipoEcf")!.valueChanges.subscribe(() => {
+  //     this.aplicarReglasPorTipoEcf();
+  //   });
+
+  //   this.form.get("idMoneda")!.valueChanges.subscribe((idMoneda) => {
+  //     this.onMonedaChange(idMoneda);
+  //   });
+
+  //   this.route.queryParams.subscribe((params) => {
+  //     if (params["tipo"] === "34" && params["facturaOriginal"]) {
+  //       this.isNotaCredito = true;
+  //     }
+
+  //     this.facturaOriginalId = +params["facturaOriginal"];
+  //     if (this.facturaOriginalId) {
+  //       this.loadFacturaOriginal(this.facturaOriginalId);
+  //     }
+  //   });
+
+  //   this.loadCommonData();
+  //   this.loadSecuencias();
+  //   const random3 = Math.random().toString(36).substring(2, 5).toUpperCase();
+  //   this.referenciaCode = `FCT-${random3}`;
+
+  //   if (this.isNotaCredito == true) {
+  //     this.referenciaCode = `NC-${random3}`;
+  //   }
+  // }
+
+  cargarFacturaParaEditar(idFactura: number) {
+    this.loading = true;
+
+    this.facturasService.getById(idFactura).subscribe({
+      next: (factura: any) => {
+        this.isEditMode = true;
+
+        // 🔹 Guardar ID para Update
+        this.form.patchValue({
+          id: factura.id,
+        });
+
+        // 🔹 Pre-cargar cliente
+        if (factura.idCliente) {
+          this.customerService.getClienteById(factura.idCliente).subscribe({
+            next: (client: any) => {
+              this.selectClient(client);
+            },
+            error: () => {
+              this.notificationService.error("No se pudo cargar el cliente.");
+            },
+          });
+        }
+
+        // 🔹 Cargar valores principales
+        this.form.patchValue({
+          idTipoEcf: factura.idTipoEcf,
+          comentario: factura.comentario,
+          idMoneda: factura.idMoneda,
+          tasaCambio: factura.tasaCambio,
+          fechaEmisionEcf: factura.fechaEmisionEcf,
+          idTipoIngreso: factura.idTipoIngreso,
+          idCondicionPago: factura.idCondicionPago,
+          referencia: factura.referencia,
+          idMotivoModificacion: factura.idMotivoModificacion || null,
+          RazonModificacion: factura.razonModificacion || "",
+        });
+
+        // 🔹 Configuración especial según tipo de comprobante
+        this.aplicarReglasPorTipoEcf();
+
+        // 🔹 Cargar Items
+        if (factura.detalles?.length > 0) {
+          this.items = factura.detalles.map((d: any) => {
+            const tipoImp = this.tiposImpuesto.find(
+              (t) => t.id === d.idTipoImpuesto
+            );
+            const pct = tipoImp?.impuestoP ?? 18;
+
+            const productData: Product = {
+              id: d.idProducto,
+              idEmpresa: d.idEmpresa,
+              descripcion: d.descripcionProducto,
+              codigo: d.codigoUnidad || "",
+              precio: d.precio,
+              idTipoImpuesto: d.idTipoImpuesto,
+              idMedida: 0,
+              itbisIncluido: factura.impuestoIncluido,
+              bloqueado: d.bloqueado,
+              aplicaDescuento: true,
+              descripcionUnidad: d.descripcionMedida,
+              descripcionTipoImpuesto: d.descripcionItbi,
+              tipoProducto: 1,
+              fechaAdd: new Date().toISOString(), // ISO date string (e.g. "2025-09-21T16:15:46.443")
+            };
+
+            return <InvoiceItem>{
+              ...productData,
+
+              product: productData,
+              id: d.id,
+              // 🔹 Cantidad y precio
+              quantity: d.cantidad,
+              price: d.precio,
+
+              // 🔹 Descuentos y recargos
+              porcientoDescuento: d.porcientoDescuento || 0,
+              porcientoRecargo: d.porcientoRecargo || 0,
+              discountStr: String(d.porcientoDescuento || "0"),
+              valorDescuento: d.valorDescuento || 0,
+              valorRecargo: d.valorRecargo || 0,
+
+              // 🔹 Impuestos principales
+              idTipoImpuesto: d.idTipoImpuesto,
+              itbisPct: pct,
+              valorItbis: d.valorItbis || 0,
+              valorImpuesto: d.valorImpuesto || 0,
+
+              // 🔹 Retenciones
+              tipoRetencion: d.tipoRetencion || 0,
+              valorItbisRetencion: d.valorItbisRetencion || 0,
+              valorIsrRetencion: d.valorIsrRetencion || 0,
+
+              // 🔹 Totales
+              total: d.totalDetalle,
+              totalDetalle: d.totalDetalle,
+
+              // 🔹 Impuestos adicionales
+              additionalTaxesSelected: new Set(
+                (d.impuestosAdicionales || []).map(
+                  (x: any) => x.idImpuestoAdicional
+                )
+              ),
+
+              showAdditionalTaxes: false,
+            };
+          });
+
+          // 🔥 Recalcular los totales con tu método central
+          this.items.forEach((_, i) => this.calculateItem(i));
+        }
+
+        // if (factura.detalles?.length > 0) {
+        //   this.items = factura.detalles.map((d: any) => {
+        //     const tipoImp = this.tiposImpuesto.find(
+        //       (t) => t.id === d.idTipoImpuesto
+        //     );
+        //     const pct = tipoImp?.impuestoP ?? 18;
+
+        //     return {
+        //       product: {
+        //         id: d.idProducto,
+        //         descripcion: d.descripcionProducto,
+        //         codigo: d.codigoUnidad,
+        //         precio: d.precio,
+        //         idTipoImpuesto: d.idTipoImpuesto,
+        //       },
+        //       quantity: d.cantidad,
+        //       price: d.precio,
+        //       porcientoDescuento: d.porcientoDescuento || 0,
+        //       porcientoRecargo: d.porcientoRecargo || 0,
+        //       discountStr: String(d.porcientoDescuento || "0"),
+        //       valorDescuento: d.valorDescuento,
+        //       valorRecargo: d.valorRecargo,
+        //       itbisPct: pct,
+        //       valorItbis: d.valorItbis,
+        //       valorImpuesto: d.valorImpuesto,
+        //       tipoRetencion: d.tipoRetencion || 0,
+        //       valorItbisRetencion: d.valorItbisRetencion || 0,
+        //       valorIsrRetencion: d.valorIsrRetencion || 0,
+        //       total: d.totalDetalle,
+        //       totalDetalle: d.totalDetalle,
+        //       showAdditionalTaxes: false,
+        //       additionalTaxesSelected: new Set(
+        //         (d.impuestosAdicionales || []).map(
+        //           (x: any) => x.idImpuestoAdicional
+        //         )
+        //       ),
+        //     } as InvoiceItem;
+        //   });
+
+        //   // Recalcular totales visuales
+        //   this.items.forEach((_, i) => this.calculateItem(i));
+        // }
+
+        this.notificationService.info("Editando factura #" + factura.id);
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.notificationService.error(
+          "No se pudo cargar la factura para editar."
+        );
+        this.loading = false;
+      },
+    });
   }
 
   onMonedaChange(idMoneda: number | null) {
@@ -249,6 +550,7 @@ export class CrearFacturaComponent implements OnInit {
         this.clienteObligatorio = true;
         this.mostrarCliente = true;
         this.mostrarTipoIngreso = true;
+        this.permiteRetencion = true;
         break;
 
       case "32":
@@ -490,6 +792,7 @@ export class CrearFacturaComponent implements OnInit {
             const item: InvoiceItem = {
               ...productData,
               product: productData,
+              idProducto: productData.id,
               quantity: detalle.cantidad,
               price: detalle.precio,
               discountStr: detalle.porcientoDescuento?.toString() || "0",
@@ -697,6 +1000,8 @@ export class CrearFacturaComponent implements OnInit {
 
     const newItem: InvoiceItem = {
       ...product,
+      id: 0,
+      idProducto: product.id,
       product: product,
       quantity: 1,
       price: product.precio,
@@ -838,6 +1143,11 @@ export class CrearFacturaComponent implements OnInit {
     this.activeTaxDropdownIndex = null;
   }
 
+  guardarBorrador() {
+    this.estadoFacturaControl = "Borrador";
+    this.guardarFactura();
+  }
+
   onToggleTax(itemIndex: number, taxId: number, checked: boolean) {
     const item = this.items[itemIndex];
 
@@ -951,7 +1261,8 @@ export class CrearFacturaComponent implements OnInit {
     // }
 
     const detail: FacturaDetailRequest[] = this.items.map((item) => ({
-      idProducto: item.id,
+      idProducto: item.product.id,
+      id: item.id,
       cantidad: item.quantity,
       precio: item.precio,
       idTipoImpuesto: item.idTipoImpuesto,
@@ -988,6 +1299,7 @@ export class CrearFacturaComponent implements OnInit {
     }));
 
     const request: FacturaRequest = {
+      id: formValue?.id ?? 0,
       IdNumFactura: formValue?.IdNumFactura,
       idEmpresa: this.facturasService.EMPRESA?.userCompanies[0].id || 0,
       idCliente: selectedClient?.id,
@@ -1003,7 +1315,7 @@ export class CrearFacturaComponent implements OnInit {
       tieneRetencion: this.tieneRetencion,
       montoTotal: this.montoTotal,
       totalImpuestos: this.totalImpuestos,
-      estadoFactura: "Borrador",
+      estadoFactura: this.estadoFacturaControl,
       AplicaDescuento: this.aplicaDescuento,
       PrecioIncluyeImpuestos: this.precioIncluyeImpuestos,
       idMotivoModificacion: formValue?.idMotivoModificacion,
@@ -1051,69 +1363,133 @@ export class CrearFacturaComponent implements OnInit {
     return "";
   }
 
+  // async guardarFactura() {
+  //   this.loading = true;
+
+  //   // 💡 REGLA ESPECIAL PARA FACTURA 32
+  //   if (this.esFacturaConsumoMontoAlto() && !this.form.value.selectedClient) {
+  //     this.notificationService.info(
+  //       "Para Factura de Consumo (32) igual o mayor a RD$250,000 el cliente es obligatorio."
+  //     );
+  //     this.loading = false;
+  //     return;
+  //   }
+
+  //   // if (this.form.invalid || this.items.length === 0) {
+  //   //   this.loading = false;
+  //   //   return;
+  //   // }
+
+  //   const facturaRequest = this.buildFacturaRequest();
+  //   if (!facturaRequest) {
+  //     this.loading = false;
+  //     return;
+  //   }
+
+  //   this.facturasService.post("Invoice/Add", facturaRequest).subscribe({
+  //     next: (resp) => {
+  //       this.loading = false;
+  //       const mensaje = this.isNotaCredito
+  //         ? "Nota de crédito creada exitosamente"
+  //         : "Factura creada exitosamente";
+  //       this.notificationService.success(mensaje);
+  //       this.router.navigate(["/facturas"]);
+  //     },
+  //     error: (error) => {
+  //       this.loading = false;
+
+  //       const mensaje = this.isNotaCredito
+  //         ? "Error al crear la nota de crédito"
+  //         : "Error al crear la factura";
+
+  //       const backend = error?.error;
+
+  //       // 1️⃣ Si existe backend.messages (lista)
+  //       if (backend?.messages && Array.isArray(backend.messages)) {
+  //         backend.messages.forEach((m: any) => {
+  //           this.notificationService.error(
+  //             m.msg || m.message || JSON.stringify(m)
+  //           );
+  //         });
+  //       }
+
+  //       // 2️⃣ Si backend trae solo un message
+  //       else if (backend?.message) {
+  //         this.notificationService.error(backend.message);
+  //       }
+
+  //       // 3️⃣ Si no se reconoce la estructura → imprimir error general
+  //       else {
+  //         this.notificationService.error("Ocurrió un error inesperado.");
+  //         console.error("Error no reconocido del backend:", error);
+  //       }
+
+  //       // 4️⃣ Mensaje final del proceso
+  //       this.notificationService.error(mensaje);
+  //     },
+  //   });
+  // }
+
   async guardarFactura() {
     this.loading = true;
 
-    // 💡 REGLA ESPECIAL PARA FACTURA 32
+    // Validación especial de factura 32
     if (this.esFacturaConsumoMontoAlto() && !this.form.value.selectedClient) {
-      this.notificationService.error(
+      this.notificationService.info(
         "Para Factura de Consumo (32) igual o mayor a RD$250,000 el cliente es obligatorio."
       );
       this.loading = false;
       return;
     }
 
-    // if (this.form.invalid || this.items.length === 0) {
-    //   this.loading = false;
-    //   return;
-    // }
-
     const facturaRequest = this.buildFacturaRequest();
     if (!facturaRequest) {
       this.loading = false;
+      this.notificationService.error("Formulario incompleto.");
       return;
     }
 
-    this.facturasService.post("Invoice/Add", facturaRequest).subscribe({
-      next: (resp) => {
+    // 🔹 DECIDIR ENTRE CREATE O UPDATE
+    const apiUrl = this.isEditMode ? "Invoice/Update" : "Invoice/Add";
+
+    this.facturasService.post(apiUrl, facturaRequest).subscribe({
+      next: () => {
         this.loading = false;
-        const mensaje = this.isNotaCredito
-          ? "Nota de crédito creada exitosamente"
+
+        const mensaje = this.isEditMode
+          ? "Factura actualizada correctamente"
+          : this.isNotaCredito
+          ? "Nota de crédito creada correctamente"
           : "Factura creada exitosamente";
+
         this.notificationService.success(mensaje);
         this.router.navigate(["/facturas"]);
       },
+
       error: (error) => {
         this.loading = false;
 
-        const mensaje = this.isNotaCredito
+        const backend = error?.error;
+        let mensaje = this.isEditMode
+          ? "Error al actualizar la factura"
+          : this.isNotaCredito
           ? "Error al crear la nota de crédito"
           : "Error al crear la factura";
 
-        const backend = error?.error;
-
-        // 1️⃣ Si existe backend.messages (lista)
-        if (backend?.messages && Array.isArray(backend.messages)) {
+        if (backend?.messages) {
           backend.messages.forEach((m: any) => {
-            this.notificationService.error(
-              m.msg || m.message || JSON.stringify(m)
-            );
+            this.notificationService.error(m.msg || m.message);
           });
+          return;
         }
 
-        // 2️⃣ Si backend trae solo un message
-        else if (backend?.message) {
+        if (backend?.message) {
           this.notificationService.error(backend.message);
+          return;
         }
 
-        // 3️⃣ Si no se reconoce la estructura → imprimir error general
-        else {
-          this.notificationService.error("Ocurrió un error inesperado.");
-          console.error("Error no reconocido del backend:", error);
-        }
-
-        // 4️⃣ Mensaje final del proceso
         this.notificationService.error(mensaje);
+        console.error("Error back-end:", error);
       },
     });
   }
@@ -1128,5 +1504,38 @@ export class CrearFacturaComponent implements OnInit {
 
   formatCurrency(amount: number): string {
     return "RD$ " + amount.toFixed(2);
+  }
+  openModalCliente() {
+    this.isEditingCliente = false;
+    this.showModalCliente = true;
+  }
+
+  closeModalCliente() {
+    this.showModalCliente = false;
+  }
+
+  saveCliente(cliente: any) {
+    cliente.idPais = 1;
+    (cliente.codigo =
+      "CLT-" + Math.random().toString(36).substring(2, 7).toUpperCase()),
+      this.customerService.post("client/add", cliente).subscribe({
+        next: (res) => {
+          this.notificationService.success("Cliente creado exitosamente");
+
+          // 🔥 Seleccionar automáticamente el cliente recién creado
+          this.selectClient({
+            id: res.data.id,
+            razonSocial: cliente.razonSocial,
+            rnc: cliente.rnc,
+          } as Customer);
+
+          this.showModalCliente = false;
+        },
+        error: (err) => {
+          this.notificationService.error(
+            err?.message || "Error al crear cliente"
+          );
+        },
+      });
   }
 }

@@ -6,7 +6,14 @@
 <div class="page-container">
   <div class="page-header">
     <h1>Facturas</h1>
-    <a routerLink="/facturas/crear" class="btn-primary">+ Nueva Factura</a>
+
+    <div class="header-actions">
+      <button class="btn-excel" (click)="exportarExcel()">
+        📗 Exportar Excel
+      </button>
+
+      <a routerLink="/facturas/crear" class="btn-primary">+ Nueva Factura</a>
+    </div>
   </div>
 
   <div class="filters-container">
@@ -89,15 +96,15 @@
             ></app-custom-datepicker>
           </div>
         </div>
+      </div>
 
-        <div class="filters-actions">
-          <button (click)="aplicarFiltros()" class="btn-apply-filters">
-            🔍 Consultar
-          </button>
-          <button (click)="limpiarFiltros()" class="btn-clear-filters">
-            ✖ Limpiar
-          </button>
-        </div>
+      <div class="filters-actions">
+        <button (click)="aplicarFiltros()" class="btn-apply-filters">
+          🔍 Consultar
+        </button>
+        <button (click)="limpiarFiltros()" class="btn-clear-filters">
+          ✖ Limpiar
+        </button>
       </div>
     </div>
 
@@ -252,6 +259,16 @@
               >
                 🧾 XML DGII
               </button>
+              <button
+                *ngIf="
+                  selectedFactura?.estadoFactura === 'Borrador' ||
+                  selectedFactura?.estadoFactura === 'ErrorFirmando'
+                "
+                class="btn btn-outline"
+                (click)="SignEcf(selectedFactura)"
+              >
+                🚀 Enviar a Dgii
+              </button>
             </div>
           </div>
 
@@ -270,22 +287,22 @@
                 <label>Tipo ECF:</label>
                 <span>{{ selectedFactura.descripcionTipoEcf || "N/A" }}</span>
               </div>
-              <div class="detail-item">
+              <!-- <div class="detail-item">
                 <label>Cliente:</label>
                 <span>{{ selectedFactura.nombreCliente || "N/A" }}</span>
               </div>
               <div class="detail-item">
                 <label>RNC/Cédula:</label>
                 <span>{{ selectedFactura.rnc || "N/A" }}</span>
-              </div>
+              </div> -->
               <div class="detail-item">
                 <label>Fecha Emisión:</label>
                 <span>{{ formatDate(selectedFactura.fechaAdd) }}</span>
               </div>
-              <div class="detail-item">
+              <!-- <div class="detail-item">
                 <label>Fecha Vencimiento:</label>
                 <span>{{ formatDate(selectedFactura.fechaVencimiento) }}</span>
-              </div>
+              </div> -->
               <div class="detail-item">
                 <label>Tipo Venta:</label>
                 <span
@@ -305,14 +322,17 @@
             </div>
           </div>
 
-          <div class="detail-section" *ngIf="selectedFactura.comentario">
-            <h3>Comentario</h3>
-            <p>{{ selectedFactura.comentario }}</p>
-          </div>
-
           <div class="detail-section">
             <h3>Información del Cliente</h3>
             <div class="detail-grid">
+              <div class="detail-item">
+                <label>Cliente:</label>
+                <span>{{ selectedFactura.nombreCliente || "N/A" }}</span>
+              </div>
+              <div class="detail-item">
+                <label>RNC/Cédula:</label>
+                <span>{{ selectedFactura.rnc || "N/A" }}</span>
+              </div>
               <div class="detail-item">
                 <label>Dirección:</label>
                 <span>{{ selectedFactura.direccion || "N/A" }}</span>
@@ -321,6 +341,64 @@
                 <label>Teléfonos:</label>
                 <span>{{ selectedFactura.telefonos || "N/A" }}</span>
               </div>
+            </div>
+          </div>
+          <div
+            class="detail-section"
+            *ngIf="
+              selectedFactura?.informacionReferencia?.ecfModificado !== null
+            "
+          >
+            <h3>Comentario y Referencia</h3>
+
+            <div
+              class="detail-item"
+              *ngIf="
+                selectedFactura.informacionReferencia?.ecfModificado !== null
+              "
+            >
+              <label>Ecf Modificado:</label>
+              <span>{{
+                selectedFactura?.informacionReferencia?.ecfModificado || "N/A"
+              }}</span>
+            </div>
+
+            <div
+              class="detail-item"
+              *ngIf="
+                selectedFactura.informacionReferencia?.motivoAnulacion !== null
+              "
+            >
+              <label>Motivo de anulacion:</label>
+              <span>{{
+                selectedFactura?.informacionReferencia?.motivoAnulacion || "N/A"
+              }}</span>
+            </div>
+
+            <div
+              class="detail-item"
+              *ngIf="
+                selectedFactura.informacionReferencia?.fechaReferencia !== null
+              "
+            >
+              <label>Fecha Referencia Ecf:</label>
+              <span>{{
+                selectedFactura?.informacionReferencia?.fechaReferencia || "N/A"
+              }}</span>
+            </div>
+
+            <div
+              class="detail-item"
+              *ngIf="
+                selectedFactura.informacionReferencia?.razonModificacion !==
+                null
+              "
+            >
+              <label>Comentario de la anulacion</label>
+              <span>{{
+                selectedFactura?.informacionReferencia?.razonModificacion ||
+                  "N/A"
+              }}</span>
             </div>
           </div>
 
@@ -507,6 +585,8 @@
             </div>
           </div>
         </div>
+
+        <p>{{ selectedFactura?.comentario }}</p>
 
         <div class="modal-actions">
           <button (click)="closeDetailModal()" class="btn-secondary">

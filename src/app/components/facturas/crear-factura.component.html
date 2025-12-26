@@ -5,7 +5,17 @@
 ></app-loading>
 <div class="page-wrapper">
   <div class="page-header">
-    <h1>{{ isNotaCredito ? "Nueva Nota de Crédito" : "Nueva Factura" }}</h1>
+    <h1>
+      {{
+        isNotaCredito
+          ? isEditMode
+            ? "Editar Nota de Crédito"
+            : "Nueva Nota de Crédito"
+          : isEditMode
+          ? "Editar Factura"
+          : "Nueva Factura"
+      }}
+    </h1>
     <!-- <p>{{ isNotaCredito ? 'Crea una nueva nota de crédito electrónica' : 'Crea una nueva factura electrónica' }}</p> -->
   </div>
 
@@ -136,9 +146,12 @@
                 class="modern-input"
               >
                 <option [ngValue]="null" disabled>Selecciona un motivo</option>
-                <option *ngFor="let m of motivoModificacion" [ngValue]="m.id">
-                  {{ m.descripcion }}
+                <option value="motivoModificacion[0]?.id" selected>
+                  {{ motivoModificacion[0]?.descripcion }}
                 </option>
+                <!-- <option *ngFor="let m of motivoModificacion" [ngValue]="m.id">
+                  {{ m.descripcion }}
+                </option> -->
               </select>
             </div>
 
@@ -196,7 +209,11 @@
         </div>
 
         <!-- Cliente - Búsqueda -->
-        <div class="client-quick-section" *ngIf="mostrarCliente">
+        <div
+          class="client-quick-section"
+          *ngIf="mostrarCliente"
+          [class.disabled]="isNotaCredito"
+        >
           <div class="client-search-container">
             <label>👤 Cliente {{ clienteObligatorio ? "*" : "" }}</label>
             <div class="search-with-add">
@@ -244,7 +261,7 @@
               <button
                 type="button"
                 class="btn btn-success"
-                routerLink="/clientes"
+                (click)="openModalCliente()"
               >
                 <span>➕</span>
                 Nuevo
@@ -276,7 +293,7 @@
         </div>
 
         <!-- Productos -->
-        <div class="products-section">
+        <div class="products-section" [class.disabled]="isNotaCredito">
           <div class="products-header">
             <label>📦 Productos y Servicios</label>
 
@@ -625,7 +642,11 @@
             <span>❌</span>
             Cancelar
           </button>
-          <button type="button" class="btn btn-secondary btn-large">
+          <button
+            type="button"
+            (click)="guardarBorrador()"
+            class="btn btn-secondary btn-large"
+          >
             <span>💾</span>
             Guardar Borrador
           </button>
@@ -638,3 +659,13 @@
     </div>
   </main>
 </div>
+
+<modal-crear-cliente
+  [showModal]="showModalCliente"
+  [isEditing]="isEditingCliente"
+  [currentCliente]="currentCliente"
+  [tipoIdOptions]="tipoIdOptions"
+  [provincias]="provincias"
+  (close)="closeModalCliente()"
+  (save)="saveCliente($event)"
+></modal-crear-cliente>

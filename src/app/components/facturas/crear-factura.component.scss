@@ -676,6 +676,11 @@
   min-width: 120px;
 }
 
+.products-section.disabled {
+  pointer-events: none;      /* bloquea toda interacción */
+  opacity: 0.6;              /* se ve deshabilitado */
+  filter: grayscale(30%);    /* look visual de "bloqueado" */
+}
 
 
 @media (max-width: 1024px) {
