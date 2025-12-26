@@ -8,4 +8,16 @@ export class AuthService extends BaseService<AuthResponse> {
     async login(path: string, user: UserLogin){
         return this.postPlain(path,user)
     }
+
+    async forgetPassword(loginName: string){
+        return this.postPlain('Autentication/forget-password', { loginName })
+    }
+
+    async changePassword(loginName: string, oldPassword: string, newPassword: string){
+        return this.postPlain('Autentication/change-password', {
+            loginName,
+            oldPassword,
+            newPassword
+        })
+    }
 }

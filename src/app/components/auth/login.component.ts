@@ -7,13 +7,14 @@ import { UserLogin } from './model/auth.model'
 import { LocalStorageService } from '../../services/storage.service'
 import { NotificationService } from '../../services/notification.service';
 import { ToastNotificationsComponent } from '../shared/toast-notifications.component/toast-notifications.component';
+import { ModalChangePasswordComponent } from './modal-change-password.component';
 
 
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ToastNotificationsComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ToastNotificationsComponent, ModalChangePasswordComponent],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
@@ -22,6 +23,8 @@ export class LoginComponent {
   password = '';
   loading = false;
   error = '';
+  showChangePasswordModal = false;
+  currentLoginName = '';
 
   constructor(
     private authService: AuthService,
@@ -41,7 +44,13 @@ export class LoginComponent {
       next: (resp) => {
         localStorage.setItem('User', JSON.stringify(resp));
         this.loading = false;
-        this.router.navigate(['/dashboard']);
+
+        if (resp.contrasenaCambiada === false) {
+          this.currentLoginName = resp.loginName;
+          this.showChangePasswordModal = true;
+        } else {
+          this.router.navigate(['/dashboard']);
+        }
       },
       error: (resp) => {
         if (resp.status = 422) {
@@ -56,6 +65,19 @@ export class LoginComponent {
         }
       }
     })
+  }
+
+  onPasswordChanged() {
+    this.showChangePasswordModal = false;
+    this.notificationService.success('Contraseña cambiada exitosamente. Redirigiendo...');
+    setTimeout(() => {
+      this.router.navigate(['/dashboard']);
+    }, 1000);
+  }
+
+  onCloseModal() {
+    this.showChangePasswordModal = false;
+    this.logout();
   }
   async onSubmit() {
     if (!this.email || !this.password) {

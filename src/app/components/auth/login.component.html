@@ -33,6 +33,10 @@
         />
       </div>
 
+      <div class="forgot-password-link">
+        <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
+      </div>
+
       <div *ngIf="error" class="error-message">
         {{ error }}
       </div>
@@ -44,3 +48,10 @@
     </form>
   </div>
 </div>
+
+<app-modal-change-password
+  *ngIf="showChangePasswordModal"
+  [loginName]="currentLoginName"
+  (passwordChanged)="onPasswordChanged()"
+  (close)="onCloseModal()"
+></app-modal-change-password>
