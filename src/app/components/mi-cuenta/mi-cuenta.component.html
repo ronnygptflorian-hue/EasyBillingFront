@@ -1,0 +1,117 @@
+<app-loading *ngIf="loading"></app-loading>
+
+<div class="mi-cuenta-container">
+  <div class="page-header">
+    <h1>Mi Cuenta</h1>
+    <p>Gestiona tu información personal y configuración de seguridad</p>
+  </div>
+
+  <div class="account-content">
+    <div class="account-section">
+      <div class="section-header">
+        <h2>Información Personal</h2>
+      </div>
+      <div class="info-card">
+        <div class="info-row">
+          <label>Nombre</label>
+          <span class="info-value">{{ userData?.nombre || 'N/A' }}</span>
+        </div>
+        <div class="info-row">
+          <label>Usuario</label>
+          <span class="info-value">{{ userData?.loginName || 'N/A' }}</span>
+        </div>
+        <div class="info-row">
+          <label>Tipo de Usuario</label>
+          <span class="info-value badge" [ngClass]="{
+            'badge-admin': userData?.tipo === 'A',
+            'badge-user': userData?.tipo === 'U'
+          }">
+            {{ userData?.tipo === 'A' ? 'Administrador' : 'Usuario' }}
+          </span>
+        </div>
+        <div class="info-row">
+          <label>Última Sesión</label>
+          <span class="info-value">{{ userData?.fechaLogin | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="account-section">
+      <div class="section-header">
+        <h2>Cambiar Contraseña</h2>
+        <p class="section-description">Actualiza tu contraseña para mantener tu cuenta segura</p>
+      </div>
+
+      <div class="form-card">
+        <form [formGroup]="changePasswordForm" (ngSubmit)="onSubmitChangePassword()">
+          <div class="form-group">
+            <label for="oldPassword">Contraseña Actual *</label>
+            <div class="password-input-wrapper">
+              <input
+                [type]="showOldPassword ? 'text' : 'password'"
+                id="oldPassword"
+                formControlName="oldPassword"
+                placeholder="Ingresa tu contraseña actual"
+                class="form-input"
+              />
+              <button
+                type="button"
+                class="toggle-password"
+                (click)="togglePasswordVisibility('old')"
+              >
+                {{ showOldPassword ? '👁️' : '👁️‍🗨️' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="newPassword">Nueva Contraseña *</label>
+            <div class="password-input-wrapper">
+              <input
+                [type]="showNewPassword ? 'text' : 'password'"
+                id="newPassword"
+                formControlName="newPassword"
+                placeholder="Mínimo 6 caracteres"
+                class="form-input"
+              />
+              <button
+                type="button"
+                class="toggle-password"
+                (click)="togglePasswordVisibility('new')"
+              >
+                {{ showNewPassword ? '👁️' : '👁️‍🗨️' }}
+              </button>
+            </div>
+            <small class="form-hint">La contraseña debe tener al menos 6 caracteres</small>
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirmar Nueva Contraseña *</label>
+            <div class="password-input-wrapper">
+              <input
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                id="confirmPassword"
+                formControlName="confirmPassword"
+                placeholder="Repite la nueva contraseña"
+                class="form-input"
+              />
+              <button
+                type="button"
+                class="toggle-password"
+                (click)="togglePasswordVisibility('confirm')"
+              >
+                {{ showConfirmPassword ? '👁️' : '👁️‍🗨️' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" [disabled]="loading || changePasswordForm.invalid">
+              {{ loading ? 'Cambiando...' : 'Cambiar Contraseña' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
