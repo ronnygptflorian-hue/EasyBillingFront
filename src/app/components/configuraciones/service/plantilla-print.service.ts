@@ -13,18 +13,18 @@ export class PlantillaPrintService {
   private apiUrl = enviroment.apiBaseUrl;
 
   getPlantillaByEmpresa(idEmpresa: number): Observable<ApiResponse<PlantillaPrint>> {
-    return this.http.get<ApiResponse<PlantillaPrint>>(`${this.apiUrl}/ConfiguracionPlantillaPrint/plantillas-print/by-empresa/${idEmpresa}`);
+    return this.http.get<ApiResponse<PlantillaPrint>>(`${this.apiUrl}ConfiguracionPlantillaPrint/plantillas-print/by-empresa/${idEmpresa}`);
   }
 
   getPrintOptions(): Observable<PrintOption[]> {
-    return this.http.get<PrintOption[]>(`${this.apiUrl}/ConfiguracionPlantillaPrint/print-options`);
+    return this.http.get<PrintOption[]>(`${this.apiUrl}ConfiguracionPlantillaPrint/print-options`);
   }
 
   createPlantilla(request: PlantillaPrintRequest): Observable<ApiResponse<PlantillaPrint>> {
-    return this.http.post<ApiResponse<PlantillaPrint>>(`${this.apiUrl}/ConfiguracionPlantillaPrint/plantillas-print`, request);
+    return this.http.post<ApiResponse<PlantillaPrint>>(`${this.apiUrl}ConfiguracionPlantillaPrint/plantillas-print`, request);
   }
 
   deletePlantilla(idEmpresa: number): Observable<ApiResponse<any>> {
-    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/ConfiguracionPlantillaPrint/plantillas-print?idEmpresa=${idEmpresa}`);
+    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}ConfiguracionPlantillaPrint/plantillas-print?idEmpresa=${idEmpresa}`);
   }
 }
