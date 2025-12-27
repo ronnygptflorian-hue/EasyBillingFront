@@ -48,24 +48,49 @@
         <span class="icon">📄</span>
         <span>Facturas Recibidas</span>
       </a>
-
-      <a
-        routerLink="/mi-cuenta"
-        routerLinkActive="active"
-        class="nav-item"
-      >
-        <span class="icon">👤</span>
-        <span>Mi Cuenta</span>
-      </a>
     </nav>
 
     <div class="sidebar-footer">
-      <div class="user-info">
-        <span class="user-email">{{ user?.email }}</span>
+      <div class="profile-section">
+        <button class="profile-trigger" (click)="toggleProfileMenu()">
+          <div class="profile-avatar">
+            <span class="avatar-icon">👤</span>
+          </div>
+          <div class="profile-info">
+            <span class="profile-name">{{ userData?.nombre || 'Usuario' }}</span>
+            <span class="profile-email">{{ user?.email || userData?.loginName }}</span>
+          </div>
+          <span class="dropdown-icon" [class.open]="showProfileMenu">▼</span>
+        </button>
+
+        <div class="profile-dropdown" *ngIf="showProfileMenu">
+          <div class="dropdown-header">
+            <div class="dropdown-user-info">
+              <strong>{{ userData?.nombre || 'Usuario' }}</strong>
+              <span class="user-type-badge" [ngClass]="{
+                'badge-admin': userData?.tipo === 'A',
+                'badge-user': userData?.tipo === 'U'
+              }">
+                {{ userData?.tipo === 'A' ? 'Administrador' : 'Usuario' }}
+              </span>
+            </div>
+          </div>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" (click)="goToMiCuenta()">
+            <span class="item-icon">👤</span>
+            <span>Mi Cuenta</span>
+          </button>
+          <button class="dropdown-item" (click)="openChangePasswordModal()">
+            <span class="item-icon">🔑</span>
+            <span>Cambiar Contraseña</span>
+          </button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item logout" (click)="logout()">
+            <span class="item-icon">🚪</span>
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
       </div>
-      <button (click)="logout()" class="btn btn-secondary btn-block">
-        Cerrar Sesión
-      </button>
     </div>
   </aside>
 
@@ -73,3 +98,8 @@
     <router-outlet></router-outlet>
   </div>
 </div>
+
+<app-modal-change-password
+  *ngIf="showChangePasswordModal"
+  (close)="closeChangePasswordModal()"
+></app-modal-change-password>
