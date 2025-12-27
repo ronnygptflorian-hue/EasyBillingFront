@@ -13,18 +13,18 @@ export class SmtpService {
   private apiUrl = enviroment.apiBaseUrl;
 
   getSmtpByEmpresa(idEmpresa: number): Observable<ApiResponse<SmtpConfig[]>> {
-    return this.http.get<ApiResponse<SmtpConfig[]>>(`${this.apiUrl}/CoreConfig/smtp/by-empresa/${idEmpresa}`);
+    return this.http.get<ApiResponse<SmtpConfig[]>>(`${this.apiUrl}CoreConfig/smtp/by-empresa/${idEmpresa}`);
   }
 
   createSmtp(request: SmtpConfigRequest): Observable<ApiResponse<SmtpConfig>> {
-    return this.http.post<ApiResponse<SmtpConfig>>(`${this.apiUrl}/CoreConfig/smtp`, request);
+    return this.http.post<ApiResponse<SmtpConfig>>(`${this.apiUrl}CoreConfig/smtp`, request);
   }
 
   deleteSmtp(id: number): Observable<ApiResponse<any>> {
-    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/CoreConfig/smtp/${id}`);
+    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}CoreConfig/smtp/${id}`);
   }
 
   getNotificationActions(): Observable<ApiResponse<NotificationAction[]>> {
-    return this.http.get<ApiResponse<NotificationAction[]>>(`${this.apiUrl}/CoreConfig/noti-accion/all`);
+    return this.http.get<ApiResponse<NotificationAction[]>>(`${this.apiUrl}CoreConfig/noti-accion/all`);
   }
 }
