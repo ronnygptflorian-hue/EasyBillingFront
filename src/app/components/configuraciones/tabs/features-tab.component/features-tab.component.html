@@ -1,0 +1,40 @@
+<app-loading *ngIf="loading"></app-loading>
+
+<div class="features-container">
+  <div class="section-header">
+    <h2>Características del Sistema</h2>
+    <p>Activa o desactiva funcionalidades específicas para tu empresa</p>
+  </div>
+
+  <div class="features-list">
+    <div class="feature-card" *ngFor="let feature of allFeatures">
+      <div class="feature-info">
+        <div class="feature-header">
+          <h3>{{ feature.nombre }}</h3>
+          <label class="toggle-switch">
+            <input
+              type="checkbox"
+              [checked]="isFeatureActive(feature.id)"
+              (change)="toggleFeature(feature)"
+              [disabled]="loading"
+            />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <p class="feature-description">{{ feature.descripcion }}</p>
+        <div class="feature-meta">
+          <span class="feature-code">{{ feature.codigo }}</span>
+          <span class="feature-status" [class.active]="isFeatureActive(feature.id)">
+            {{ isFeatureActive(feature.id) ? 'Activa' : 'Inactiva' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="allFeatures.length === 0 && !loading">
+      <div class="empty-icon">⚙️</div>
+      <h3>No hay características disponibles</h3>
+      <p>No se encontraron características del sistema configuradas</p>
+    </div>
+  </div>
+</div>

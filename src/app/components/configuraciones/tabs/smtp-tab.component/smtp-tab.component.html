@@ -1,0 +1,204 @@
+<app-loading *ngIf="loading"></app-loading>
+
+<div class="smtp-container">
+  <div class="section-header">
+    <div>
+      <h2>Configuración de Correo SMTP</h2>
+      <p>Configura el servidor de correo para enviar facturas y notificaciones</p>
+    </div>
+    <button class="btn-primary" (click)="toggleForm()" *ngIf="!showForm">
+      <span class="btn-icon">+</span>
+      Nueva Configuración
+    </button>
+  </div>
+
+  <div class="smtp-form-card" *ngIf="showForm">
+    <div class="form-header">
+      <h3>Nueva Configuración SMTP</h3>
+      <button class="btn-close" (click)="toggleForm()">✕</button>
+    </div>
+
+    <form [formGroup]="smtpForm" (ngSubmit)="onSubmit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Proveedor de Correo *</label>
+          <select formControlName="proveedor" class="form-input">
+            <option value="">Seleccionar proveedor</option>
+            <option *ngFor="let provider of smtpProviders" [value]="provider.name">
+              {{ provider.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Nombre del Perfil *</label>
+          <input
+            type="text"
+            formControlName="nombrePerfil"
+            placeholder="Ej: Correo Principal"
+            class="form-input"
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Host SMTP *</label>
+          <input
+            type="text"
+            formControlName="host"
+            placeholder="smtp.gmail.com"
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Puerto *</label>
+          <input
+            type="number"
+            formControlName="puerto"
+            placeholder="587"
+            class="form-input"
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Usuario (Email) *</label>
+          <input
+            type="email"
+            formControlName="usuario"
+            placeholder="tu-correo@ejemplo.com"
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Contraseña *</label>
+          <div class="password-input-wrapper">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="passwordEnc"
+              placeholder="Contraseña o App Password"
+              class="form-input"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              (click)="togglePasswordVisibility()"
+            >
+              {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre del Remitente *</label>
+          <input
+            type="text"
+            formControlName="fromName"
+            placeholder="Mi Empresa"
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Email del Remitente *</label>
+          <input
+            type="email"
+            formControlName="fromEmail"
+            placeholder="noreply@miempresa.com"
+            class="form-input"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email de Respuesta *</label>
+        <input
+          type="email"
+          formControlName="replyToEmail"
+          placeholder="respuesta@miempresa.com"
+          class="form-input"
+        />
+      </div>
+
+      <div class="form-checkboxes">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="usarSSL" />
+          <span>Usar SSL/TLS</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="predeterminado" />
+          <span>Configuración predeterminada</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="activo" />
+          <span>Activo</span>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="toggleForm()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="loading || smtpForm.invalid">
+          {{ loading ? 'Guardando...' : 'Guardar Configuración' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="smtp-list">
+    <div class="smtp-card" *ngFor="let config of smtpConfigs">
+      <div class="smtp-header">
+        <div class="smtp-title">
+          <h3>{{ config.nombrePerfil }}</h3>
+          <div class="smtp-badges">
+            <span class="badge badge-provider">{{ config.host }}</span>
+            <span class="badge badge-status" [class.active]="config.activo">
+              {{ config.activo ? 'Activo' : 'Inactivo' }}
+            </span>
+            <span class="badge badge-default" *ngIf="config.predeterminado">
+              Predeterminado
+            </span>
+          </div>
+        </div>
+        <button class="btn-delete" (click)="deleteConfig(config.id)">
+          🗑️
+        </button>
+      </div>
+
+      <div class="smtp-details">
+        <div class="detail-row">
+          <span class="detail-label">Host:</span>
+          <span class="detail-value">{{ config.host }}:{{ config.puerto }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Usuario:</span>
+          <span class="detail-value">{{ config.usuario }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Remitente:</span>
+          <span class="detail-value">{{ config.fromName }} ({{ config.fromEmail }})</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">SSL/TLS:</span>
+          <span class="detail-value">{{ config.usarSSL ? 'Sí' : 'No' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="smtpConfigs.length === 0 && !loading && !showForm">
+      <div class="empty-icon">📧</div>
+      <h3>No hay configuraciones SMTP</h3>
+      <p>Agrega una configuración de correo para enviar facturas automáticamente</p>
+      <button class="btn-primary" (click)="toggleForm()">
+        Agregar Configuración
+      </button>
+    </div>
+  </div>
+</div>

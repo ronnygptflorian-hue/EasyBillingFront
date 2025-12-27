@@ -1,0 +1,101 @@
+<app-loading *ngIf="loading"></app-loading>
+
+<div class="plantillas-container">
+  <div class="section-header">
+    <h2>Plantillas de Impresión</h2>
+    <p>Configura el formato de impresión de tus facturas</p>
+  </div>
+
+  <div class="current-plantilla" *ngIf="currentPlantilla">
+    <div class="plantilla-card">
+      <div class="plantilla-header">
+        <div class="plantilla-info">
+          <h3>Plantilla Actual</h3>
+          <p class="plantilla-name">{{ currentPlantilla.nombrePlantilla }}</p>
+          <span class="plantilla-type">{{ currentPlantilla.tipoPlantilla }}</span>
+        </div>
+        <button class="btn-delete" (click)="deletePlantilla()">
+          🗑️ Eliminar
+        </button>
+      </div>
+      <div class="plantilla-meta">
+        <div class="meta-item">
+          <span class="meta-label">Creado por:</span>
+          <span class="meta-value">{{ currentPlantilla.creadoPor }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Fecha:</span>
+          <span class="meta-value">{{ currentPlantilla.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="selector-section">
+    <div class="selector-card">
+      <h3>{{ currentPlantilla ? 'Cambiar Plantilla' : 'Seleccionar Plantilla' }}</h3>
+      <p class="selector-description">Elige el formato que mejor se adapte a tus necesidades de impresión</p>
+
+      <div class="form-group">
+        <label>Tipo de Plantilla *</label>
+        <select
+          [(ngModel)]="selectedOption"
+          (change)="onOptionChange()"
+          class="form-input"
+        >
+          <option value="">Selecciona un formato</option>
+          <option *ngFor="let option of printOptions" [value]="option.value">
+            {{ option.text }}
+          </option>
+        </select>
+      </div>
+
+      <div class="preview-section" *ngIf="showPreview && selectedOption">
+        <div class="preview-header">
+          <h4>Vista Previa</h4>
+          <p>Así se verá tu factura con esta plantilla</p>
+        </div>
+
+        <div class="preview-container">
+          <div class="preview-frame" [class.ticket-frame]="selectedOption === 'Ticket'">
+            <img [src]="getPreviewImage()" [alt]="'Preview ' + selectedOption" />
+          </div>
+          <div class="preview-info">
+            <h5>{{ getSelectedOptionText() }}</h5>
+            <div class="preview-details">
+              <div class="detail-item" *ngIf="selectedOption === 'A4'">
+                <span class="detail-icon">📄</span>
+                <div>
+                  <p class="detail-title">Formato Estándar A4</p>
+                  <p class="detail-desc">Ideal para impresoras láser y de oficina (8.5 x 11 pulgadas)</p>
+                </div>
+              </div>
+              <div class="detail-item" *ngIf="selectedOption === 'Ticket'">
+                <span class="detail-icon">🎫</span>
+                <div>
+                  <p class="detail-title">Formato Tipo Ticket</p>
+                  <p class="detail-desc">Perfecto para impresoras térmicas de 80mm</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="preview-actions">
+          <button class="btn-secondary" (click)="showPreview = false; selectedOption = currentPlantilla?.tipoPlantilla || ''">
+            Cancelar
+          </button>
+          <button class="btn-primary" (click)="savePlantilla()" [disabled]="loading">
+            {{ loading ? 'Guardando...' : 'Guardar Plantilla' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!currentPlantilla && !showPreview">
+    <div class="empty-icon">🖨️</div>
+    <h3>No hay plantilla configurada</h3>
+    <p>Selecciona una plantilla de impresión para empezar a generar facturas</p>
+  </div>
+</div>

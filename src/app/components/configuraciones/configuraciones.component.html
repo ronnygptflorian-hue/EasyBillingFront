@@ -18,13 +18,17 @@
           <span class="tab-icon">📋</span>
           <span class="tab-text">Comprobantes</span>
         </button>
-        <button class="tab-button" [class.active]="activeTab==='facturacion'" (click)="setTab('facturacion')">
-          <span class="tab-icon">💰</span>
-          <span class="tab-text">Facturación</span>
+        <button class="tab-button" [class.active]="activeTab==='features'" (click)="setTab('features')">
+          <span class="tab-icon">⚙️</span>
+          <span class="tab-text">Características</span>
         </button>
-        <button class="tab-button" [class.active]="activeTab==='correo'" (click)="setTab('correo')">
+        <button class="tab-button" [class.active]="activeTab==='smtp'" (click)="setTab('smtp')">
           <span class="tab-icon">📧</span>
-          <span class="tab-text">Correo Electrónico</span>
+          <span class="tab-text">Correo SMTP</span>
+        </button>
+        <button class="tab-button" [class.active]="activeTab==='plantillas'" (click)="setTab('plantillas')">
+          <span class="tab-icon">🖨️</span>
+          <span class="tab-text">Plantillas</span>
         </button>
       </div>
     </div>
@@ -37,12 +41,16 @@
       <app-invoices-tab></app-invoices-tab>
     </div>
 
-    <!-- <div class="tab-content" [class.active]="activeTab==='facturacion'">
-      <app-billing-tab></app-billing-tab>
-    </div> -->
+    <div class="tab-content" [class.active]="activeTab==='features'">
+      <app-features-tab></app-features-tab>
+    </div>
 
-    <!-- <div class="tab-content" [class.active]="activeTab==='correo'">
-      <app-email-tab></app-email-tab>
-    </div>-->
+    <div class="tab-content" [class.active]="activeTab==='smtp'">
+      <app-smtp-tab></app-smtp-tab>
+    </div>
+
+    <div class="tab-content" [class.active]="activeTab==='plantillas'">
+      <app-plantillas-tab></app-plantillas-tab>
+    </div>
   </div>
 </main>
